@@ -98,8 +98,10 @@ No Flutter imports anywhere in this milestone. Every task lands with its own tes
 | CT-080 | `integration_test` suite driving the real app with real gestures | plays every mode end to end | [x] |
 | CT-081 | Windows desktop build + integration run | 8/8 green | [x] |
 | CT-082 | Android debug + release builds | both build clean | [x] |
-| CT-083 | Galaxy S5 (ARMv7, Lineage 18) verification | installs and starts; **interactive run still pending** | [~] |
-| CT-084 | Xiaomi 24115RA8EG verification | **blocked**: MIUI "Install via USB" is off | [ ] |
+| CT-083 | Galaxy S5 (ARMv7, Lineage 18) verification | release build plays; Impeller opt-out required; debug builds do not present | [x] |
+| CT-084 | Xiaomi 24115RA8EG verification | installs, plays, 8/8 integration tests green | [x] |
+| CT-085 | Per-API-level Impeller opt-out for old Adreno GPUs | S5 no longer segfaults; API 31+ keeps Impeller | [x] |
+| CT-086 | Investigate why debug builds show a blank window on the S5 | root cause found, or documented as a device limitation | [ ] |
 
 ## M7 — Polish and release
 

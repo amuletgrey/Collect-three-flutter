@@ -126,10 +126,23 @@ so existing modes stay unchanged.
   black with `FlutterRenderer: Width is zero` in logcat.
 - **MIUI/HyperOS** phones reject `adb install` with `INSTALL_FAILED_USER_RESTRICTED` until
   "Install via USB" is enabled in Developer options.
-- The **Galaxy S5 has no Vulkan driver** (`vulkan.msm8974.so` missing). Flutter falls back to
-  Impeller on OpenGLES by itself — no flag needed. If that ever regresses, run with
-  `--enable-impeller=false`. Performance mode in Settings is the other lever: it drops the
-  blur mask filters, which are by far the most expensive part of drawing a tile.
+- **Impeller crashes on old Adreno GPUs.** The Galaxy S5 (Adreno 330, Android 11) has no
+  Vulkan driver, so Impeller falls back to OpenGLES and then dies on the first frame:
+  `Fatal signal 11 (SIGSEGV) ... in tid N (1.raster)`, fault address 0x4. It is the backend,
+  not our drawing — disabling every blur mask filter did not help. The fix is
+  `res/values/bools.xml` (`enable_impeller=false`) with `res/values-v31/bools.xml` overriding
+  it to true, wired to the `io.flutter.embedding.android.EnableImpeller` manifest entry, so
+  only pre-Android-12 devices fall back to Skia. Verify a build with
+  `aapt2 dump resources <apk> | grep -A2 enable_impeller` — it should print `() false` and
+  `(v31) true`. **This opt-out is deprecated** and Flutter intends to remove it; when that
+  happens these devices need the upstream GLES fix instead.
+- **Debug builds do not present on the Galaxy S5** — the app starts, logs no error, and shows
+  a blank white window; release builds render fine. Use
+  `flutter run --release -d 18f62439` when testing there. Note that
+  `flutter test integration_test` still passes on that device because it asserts on the widget
+  tree, not on pixels — a green run there is not proof that anything was drawn.
+- Performance mode in Settings drops the blur mask filters, which are the most expensive part
+  of drawing a tile; it is the lever for slow-but-working devices.
 - `GridConfig` asserts `kindCount` is 3–7; skins ship art for 7.
 - Windows + Flutter: use forward slashes in Dart paths; tests read assets via `rootBundle`,
   not `dart:io`.

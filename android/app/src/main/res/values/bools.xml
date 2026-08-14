@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Impeller's OpenGLES backend crashes in the raster thread on old Adreno
+        drivers. Verified on a Galaxy S5 (Adreno 330, LineageOS 18 / Android 11):
+        the device has no Vulkan driver, Impeller falls back to GLES, and the
+        first frame dies with SIGSEGV at address 0x4. Disabling our own blur
+        mask filters did not help, so it is the backend and not what we draw.
+
+        Devices below API 31 therefore render with Skia. Newer devices override
+        this to true in values-v31/, where Impeller works and is the better
+        renderer. Revisit when the upstream GLES crash is fixed — the opt-out is
+        deprecated and Flutter intends to remove it.
+    -->
+    <bool name="enable_impeller">false</bool>
+</resources>
