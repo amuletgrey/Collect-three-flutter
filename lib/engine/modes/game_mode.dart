@@ -91,6 +91,25 @@ abstract class GameMode {
   /// Optional cap on accepted moves.
   int? get moveLimit => null;
 
+  /// Hints the player starts a run with.
+  ///
+  /// Hints are a resource, not a button you can lean on: an endless mode with
+  /// unlimited hints plays itself.
+  int get startingHints => 3;
+
+  /// Score needed to earn one more hint.
+  int get pointsPerHint => 1000;
+
+  /// How many tile kinds are actually in play right now.
+  ///
+  /// Fixed for most modes. Infinite Hunt raises it as the run goes on, which is
+  /// what stops a long run from getting easier as the player gets better.
+  int get activeKindCount => grid.kindCount;
+
+  /// A short line for the HUD to flash after a move, when a rule has just
+  /// changed under the player. Null for the great majority of moves.
+  String? get announcement => null;
+
   /// Whether matches of four or more create powers.
   ///
   /// Off by default, and deliberately off in Clear the Board: its levels ship

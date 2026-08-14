@@ -37,13 +37,21 @@ class GameController extends ChangeNotifier {
     required GameMode mode,
     required RunSnapshot snapshot,
     Motion motion = const Motion(),
-  }) : _engine = GameEngine.restore(mode: mode, snapshot: snapshot) {
+  }) : _engine = GameEngine.restore(mode: mode, snapshot: snapshot),
+       _carriedOver = Duration(seconds: snapshot.elapsedSeconds) {
     _motion = motion;
     _syncFromBoard(_engine.board);
   }
 
   GameEngine _engine;
   Motion _motion = const Motion();
+
+  /// Time from earlier sittings of a resumed run.
+  Duration _carriedOver = Duration.zero;
+
+  /// Runs only while the player is actually playing, so a run left on the
+  /// results screen overnight does not report a twelve-hour game.
+  final Stopwatch _clock = Stopwatch();
   HapticsService _haptics = const HapticsService(enabled: false);
   AudioService? _audio;
 
@@ -56,6 +64,8 @@ class GameController extends ChangeNotifier {
   Pos? _selected;
   Move? _hint;
   Set<Pos> _rejected = const {};
+  List<String> _notices = const [];
+  int _noticeTick = 0;
   Set<Pos> _firing = const {};
   List<CollectBurst> _bursts = const [];
   int _burstTick = 0;
@@ -86,8 +96,56 @@ class GameController extends ChangeNotifier {
   Pos? get selected => _selected;
   Move? get hint => _hint;
 
-  RunSnapshot snapshot({int? levelNumber, String? packId}) =>
-      _engine.snapshot(levelNumber: levelNumber, packId: packId);
+  /// Hints in hand, and whether spending one is currently possible.
+  int get hintsRemaining => _engine.hintsRemaining;
+  bool get canHint => hintsRemaining > 0 && !_busy && !isOver;
+
+  /// Lines the HUD should flash right now — an earned hint, a rule change.
+  /// [noticeTick] changes with each new batch; the text alone would look
+  /// identical for two identical announcements.
+  List<String> get notices => _notices;
+  int get noticeTick => _noticeTick;
+
+  RunSnapshot snapshot({int? levelNumber, String? packId}) {
+    final base = _engine.snapshot(levelNumber: levelNumber, packId: packId);
+    return RunSnapshot(
+      version: base.version,
+      modeId: base.modeId,
+      rows: base.rows,
+      cols: base.cols,
+      cells: base.cells,
+      seed: base.seed,
+      rngState: base.rngState,
+      rngDraws: base.rngDraws,
+      nextTileId: base.nextTileId,
+      score: base.score,
+      movesMade: base.movesMade,
+      tilesCollected: base.tilesCollected,
+      bestChain: base.bestChain,
+      longestLine: base.longestLine,
+      specialsFired: base.specialsFired,
+      elapsedSeconds: elapsed.inSeconds,
+      modeState: base.modeState,
+      levelNumber: base.levelNumber,
+      packId: base.packId,
+    );
+  }
+
+  /// How long this run has been played, across resumes.
+  Duration get elapsed => _carriedOver + _clock.elapsed;
+
+  /// Longest single line of the run, and powers set off — results-screen stats.
+  int get longestLine => _engine.longestLine;
+  int get specialsFired => _engine.specialsFired;
+
+  /// The clock runs between the first move and the end of the run.
+  void _tickClock() {
+    if (isOver) {
+      _clock.stop();
+    } else if (!_clock.isRunning) {
+      _clock.start();
+    }
+  }
 
   /// Cells that just refused a swap. The board wiggles them, which is the only
   /// feedback the player gets for a move the engine threw away outright.
@@ -145,6 +203,7 @@ class GameController extends ChangeNotifier {
     _selected = null;
     _hint = null;
 
+    _tickClock();
     final result = _engine.applyMove(a, b);
     if (!result.hasEvents) {
       // Refused before anything moved — same kind, a hole, or the run is over.
@@ -152,11 +211,28 @@ class GameController extends ChangeNotifier {
       return;
     }
     await _play(result.events);
+    _raiseNotices();
   }
 
   void showHint() {
     if (_busy || isOver) return;
-    _hint = _engine.hint();
+    final move = _engine.useHint();
+    if (move == null) return;
+    _hint = move;
+    notifyListeners();
+  }
+
+  /// Announced once the board has stopped moving: a toast competing with a
+  /// cascade is a toast nobody reads.
+  void _raiseNotices() {
+    final earned = _engine.hintsJustEarned;
+    final notices = <String>[
+      ?_engine.mode.announcement,
+      if (earned > 0) '+$earned hint${earned == 1 ? '' : 's'}',
+    ];
+    if (notices.isEmpty) return;
+    _notices = notices;
+    _noticeTick++;
     notifyListeners();
   }
 
@@ -177,6 +253,11 @@ class GameController extends ChangeNotifier {
     _selected = null;
     _hint = null;
     _busy = false;
+    _notices = const [];
+    _carriedOver = Duration.zero;
+    _clock
+      ..stop()
+      ..reset();
     _syncFromBoard(_engine.board);
     notifyListeners();
   }
@@ -261,6 +342,7 @@ class GameController extends ChangeNotifier {
     }
 
     // The engine is the source of truth; make sure playback left us on it.
+    _tickClock();
     _syncFromBoard(_engine.board);
     _busy = false;
     notifyListeners();

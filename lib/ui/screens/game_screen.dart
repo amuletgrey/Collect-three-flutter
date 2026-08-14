@@ -229,7 +229,11 @@ class _GameScreenState extends State<GameScreen> {
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: board,
+                            child: _WithNotices(
+                              controller: _controller,
+                              skin: skin,
+                              child: board,
+                            ),
                           ),
                         ),
                         _Actions(
@@ -271,7 +275,11 @@ class _GameScreenState extends State<GameScreen> {
                       Expanded(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: board,
+                          child: _WithNotices(
+                            controller: _controller,
+                            skin: skin,
+                            child: board,
+                          ),
                         ),
                       ),
                       SizedBox(
@@ -319,6 +327,132 @@ class _GameScreenState extends State<GameScreen> {
                     : const SizedBox.shrink(),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Flashes the controller's notices over the board — "+1 hint", a new colour.
+///
+/// Driven by one animation rather than a timer, so a widget test that settles
+/// the tree also settles this: a pending timer at the end of a test is a
+/// failure, and this fires on precisely the moves a test is most likely to make.
+class _WithNotices extends StatefulWidget {
+  const _WithNotices({
+    required this.controller,
+    required this.skin,
+    required this.child,
+  });
+
+  final GameController controller;
+  final Skin skin;
+  final Widget child;
+
+  @override
+  State<_WithNotices> createState() => _WithNoticesState();
+}
+
+class _WithNoticesState extends State<_WithNotices>
+    with SingleTickerProviderStateMixin {
+  // Built here rather than in a `late` field: a lazy AnimationController that
+  // is first touched from dispose() reaches for TickerMode on a widget that has
+  // already been deactivated, which is a crash rather than a warning.
+  late final AnimationController _anim;
+  late final Animation<double> _fade;
+
+  int _seenTick = 0;
+  List<String> _showing = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    _anim = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1700),
+    );
+    // In fast, hold, out slowly — a readable beat that never blocks the board.
+    _fade = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0, end: 1), weight: 12),
+      TweenSequenceItem(tween: ConstantTween(1), weight: 58),
+      TweenSequenceItem(tween: Tween(begin: 1, end: 0), weight: 30),
+    ]).animate(_anim);
+    _seenTick = widget.controller.noticeTick;
+    widget.controller.addListener(_onControllerChanged);
+  }
+
+  void _onControllerChanged() {
+    final tick = widget.controller.noticeTick;
+    if (tick == _seenTick) return;
+    _seenTick = tick;
+    setState(() => _showing = widget.controller.notices);
+    _anim.forward(from: 0);
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_onControllerChanged);
+    _anim.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Positioned.fill(child: widget.child),
+        if (_showing.isNotEmpty)
+          Positioned(
+            top: 8,
+            left: 0,
+            right: 0,
+            child: IgnorePointer(
+              child: FadeTransition(
+                opacity: _fade,
+                child: Column(
+                  children: [
+                    for (final notice in _showing)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: _NoticePill(text: notice, skin: widget.skin),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _NoticePill extends StatelessWidget {
+  const _NoticePill({required this.text, required this.skin});
+
+  final String text;
+  final Skin skin;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: skin.palette.boardFrame.withValues(alpha: 0.94),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: skin.palette.hint.withValues(alpha: 0.7),
+          width: 1.4,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        child: Text(
+          text,
+          style: TextStyle(
+            color: skin.palette.hint,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.4,
           ),
         ),
       ),
@@ -462,6 +596,67 @@ class _SideHeader extends StatelessWidget {
 
 /// Stops the clock and gets out of the way. The board keeps its state; this is
 /// only a curtain over it.
+/// What the run amounted to, beyond the score.
+///
+/// Best chain is the headline — it is the thing a player was aiming for — with
+/// the rest as supporting detail. Powers only appear in modes that have them,
+/// rather than showing a permanent "0 powers" in Clear the Board.
+class _RunStats extends StatelessWidget {
+  const _RunStats({required this.controller, required this.skin});
+
+  final GameController controller;
+  final Skin skin;
+
+  static String formatDuration(Duration d) {
+    final minutes = d.inMinutes;
+    final seconds = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return '$minutes:$seconds';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final stats = <({String label, String value})>[
+      (label: 'Best chain', value: 'x${controller.bestChain}'),
+      (label: 'Longest line', value: '${controller.longestLine}'),
+      (label: 'Moves', value: '${controller.movesMade}'),
+      (label: 'Time', value: formatDuration(controller.elapsed)),
+      if (controller.mode.allowsSpecials)
+        (label: 'Powers', value: '${controller.specialsFired}'),
+    ];
+
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 22,
+      runSpacing: 10,
+      children: [
+        for (final stat in stats)
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                stat.value,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: skin.palette.textPrimary,
+                ),
+              ),
+              Text(
+                stat.label.toUpperCase(),
+                style: TextStyle(
+                  fontSize: 10,
+                  letterSpacing: 1.2,
+                  fontWeight: FontWeight.w600,
+                  color: skin.palette.textSecondary,
+                ),
+              ),
+            ],
+          ),
+      ],
+    );
+  }
+}
+
 class _PauseOverlay extends StatelessWidget {
   const _PauseOverlay({
     required this.skin,
@@ -565,9 +760,9 @@ class _Actions extends StatelessWidget {
         final buttons = <Widget>[
           _ActionButton(
             icon: Icons.lightbulb_outline_rounded,
-            label: 'Hint',
+            label: 'Hint ${controller.hintsRemaining}',
             skin: skin,
-            onPressed: controller.busy ? null : controller.showHint,
+            onPressed: controller.canHint ? controller.showHint : null,
           ),
           if (controller.mode.allowsUndo)
             _ActionButton(
@@ -727,14 +922,8 @@ class _ResultOverlay extends StatelessWidget {
                   color: skin.palette.textPrimary,
                 ),
               ),
-              Text(
-                'best chain x${controller.bestChain} · '
-                '${controller.movesMade} moves',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: skin.palette.textSecondary,
-                ),
-              ),
+              const SizedBox(height: 14),
+              _RunStats(controller: controller, skin: skin),
               const SizedBox(height: 26),
               if (onNextLevel != null) ...[
                 _ActionButton(

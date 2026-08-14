@@ -71,6 +71,10 @@ class Resolver {
     /// their finger rather than in the middle of the line.
     Set<Pos> origins = const {},
 
+    /// Overrides how many kinds refills draw from, for a mode whose palette
+    /// grows during a run.
+    int? kindCount,
+
     /// Powers to fire before any matching happens — how a colour bomb goes off
     /// when it is swapped rather than matched.
     Set<Pos> primed = const {},
@@ -90,6 +94,7 @@ class Resolver {
     var fired = 0;
     var step = startStep;
     var pendingPrimed = primed;
+    final kinds = kindCount ?? this.kindCount;
 
     if (settleFirst) {
       final settled = gravity.apply(current);
@@ -101,7 +106,7 @@ class Resolver {
         board: current,
         rng: rng,
         tiles: tiles,
-        kindCount: kindCount,
+        kindCount: kinds,
       );
       current = refilled.board;
       if (refilled.spawnedAnything) events.add(TilesSpawned(refilled.spawned));
@@ -195,7 +200,7 @@ class Resolver {
         board: current,
         rng: rng,
         tiles: tiles,
-        kindCount: kindCount,
+        kindCount: kinds,
       );
       current = refilled.board;
       if (refilled.spawnedAnything) {

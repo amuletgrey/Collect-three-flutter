@@ -36,7 +36,7 @@ void main() {
     final board = tester.getRect(find.byKey(BoardView.gridKey));
     final hud = tester.getRect(find.text('SCORE'));
     expect(hud.bottom, lessThan(board.top), reason: 'readouts sit above');
-    expect(find.text('Hint'), findsOneWidget);
+    expect(find.textContaining('Hint'), findsOneWidget);
   });
 
   testWidgets('a wide screen puts readouts left and controls right', (
@@ -51,7 +51,7 @@ void main() {
 
     final board = tester.getRect(find.byKey(BoardView.gridKey));
     final score = tester.getRect(find.text('SCORE'));
-    final hint = tester.getRect(find.text('Hint'));
+    final hint = tester.getRect(find.textContaining('Hint'));
 
     expect(score.right, lessThanOrEqualTo(board.left));
     expect(hint.left, greaterThanOrEqualTo(board.right));
@@ -73,7 +73,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
-    expect(find.text('Hint'), findsOneWidget);
+    expect(find.textContaining('Hint'), findsOneWidget);
     expect(find.text('SCORE'), findsOneWidget);
   });
 

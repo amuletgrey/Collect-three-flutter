@@ -202,6 +202,27 @@ void main() {
     expect(controller.movesMade, movesBefore);
   });
 
+  testWidgets('hints are spent, and the button says how many are left', (
+    tester,
+  ) async {
+    await _launch(tester);
+    await tester.tap(find.text('Infinite Hunt'));
+    await tester.pumpAndSettle();
+
+    final controller = _controller(tester);
+    final before = controller.hintsRemaining;
+    expect(find.text('Hint $before'), findsOneWidget);
+
+    // Not settled: a shown hint breathes for as long as it is on screen.
+    await tester.tap(find.text('Hint $before'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+
+    expect(controller.hintsRemaining, before - 1);
+    expect(controller.hint, isNotNull);
+    expect(find.text('Hint ${before - 1}'), findsOneWidget);
+  });
+
   testWidgets('pause covers the board and lets go again', (tester) async {
     await _launch(tester);
     await tester.tap(find.text('Infinite Hunt'));
@@ -235,6 +256,27 @@ void main() {
     await tester.tap(find.byIcon(Icons.arrow_back_rounded).first);
     await tester.pumpAndSettle();
     expect(find.text('Infinite Hunt'), findsOneWidget);
+  });
+
+  testWidgets('the results screen reports the run', (tester) async {
+    await _launch(tester);
+    await _openMode(tester, 'Clear the Board');
+
+    final controller = _controller(tester);
+    // Level 1 is a 3x3 cleared in two moves, so the banner is a few taps away.
+    for (var i = 0; i < 6 && !controller.isOver; i++) {
+      if (!await _playHintedMove(tester, controller)) break;
+    }
+    // The banner waits for the board to settle, then half a second more.
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
+
+    expect(find.text('BEST CHAIN'), findsOneWidget);
+    expect(find.text('LONGEST LINE'), findsOneWidget);
+    expect(find.text('TIME'), findsOneWidget);
+    expect(find.text('MOVES'), findsOneWidget);
+    // Clear the Board has no powers, so it must not claim any.
+    expect(find.text('POWERS'), findsNothing);
   });
 
   testWidgets('a run survives leaving the game and coming back', (

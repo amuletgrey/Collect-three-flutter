@@ -70,7 +70,7 @@ void main() {
 
   test('the same seed and the same moves give the same run', () {
     List<String> play(int seed) {
-      final engine = GameEngine(mode: const InfiniteHuntMode(), seed: seed);
+      final engine = GameEngine(mode: InfiniteHuntMode(), seed: seed);
       final log = <String>[];
       for (var i = 0; i < 25 && !engine.isOver; i++) {
         final hint = engine.hint()!;
@@ -114,7 +114,7 @@ void main() {
   });
 
   test('modes without an undo budget never expose undo', () {
-    final engine = GameEngine(mode: const InfiniteHuntMode(), seed: 3);
+    final engine = GameEngine(mode: InfiniteHuntMode(), seed: 3);
     final hint = engine.hint()!;
     engine.applyMove(hint.a, hint.b);
 
@@ -123,7 +123,7 @@ void main() {
   });
 
   test('the hint is always playable while the run is alive', () {
-    final engine = GameEngine(mode: const InfiniteHuntMode(), seed: 11);
+    final engine = GameEngine(mode: InfiniteHuntMode(), seed: 11);
 
     for (var i = 0; i < 20 && !engine.isOver; i++) {
       final hint = engine.hint()!;

@@ -190,7 +190,7 @@ void main() {
   group('Clear the Board is unaffected', () {
     test('the mode keeps powers switched off', () {
       expect(const ClearBoardMode().allowsSpecials, isFalse);
-      expect(const InfiniteHuntMode().allowsSpecials, isTrue);
+      expect(InfiniteHuntMode().allowsSpecials, isTrue);
       expect(RisingTideMode().allowsSpecials, isTrue);
     });
 
