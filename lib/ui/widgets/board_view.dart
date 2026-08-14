@@ -112,6 +112,8 @@ class _BoardViewState extends State<BoardView> {
         hinted: _isHinted(controller, pos),
         clearing: controller.isClearing(id),
         rejected: controller.isRejected(pos),
+        power: tile.power,
+        firing: controller.isFiring(pos),
         showSymbols: widget.showSymbols && widget.skin.supportsSymbols,
         lowSpec: widget.lowSpec,
       ),

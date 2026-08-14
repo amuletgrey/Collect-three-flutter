@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
+import '../engine/models/tile.dart';
 import 'skin.dart';
 import 'tile_shapes.dart';
 
@@ -43,6 +44,16 @@ class TilePainter extends CustomPainter {
         _paintGem(canvas, rect, opacity);
       case TileFamily.candy:
         _paintCandy(canvas, rect, opacity);
+    }
+    if (state.power != TilePower.none) {
+      _paintPower(canvas, rect, opacity);
+    }
+    if (state.firing) {
+      canvas.drawCircle(
+        rect.center,
+        rect.width * 0.62,
+        Paint()..color = const Color(0xFFFFFFFF).withValues(alpha: 0.75),
+      );
     }
     if (state.showSymbols && art.symbol != TileSymbol.none) {
       canvas.drawPath(
@@ -300,6 +311,88 @@ class TilePainter extends CustomPainter {
     }
   }
 
+  /// Markers for the powers. Deliberately drawn in white with a dark rim so
+  /// they read on top of any skin's artwork rather than needing per-skin art.
+  void _paintPower(Canvas canvas, Rect rect, double opacity) {
+    final white = Paint()
+      ..color = const Color(0xFFFFFFFF).withValues(alpha: 0.92 * opacity);
+    final rim = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = rect.width * 0.045
+      ..color = const Color(0xFF101020).withValues(alpha: 0.55 * opacity);
+
+    switch (state.power) {
+      case TilePower.none:
+        return;
+      case TilePower.clearRow:
+      case TilePower.clearColumn:
+        // A bar with arrowheads, pointing the way the blast travels.
+        final horizontal = state.power == TilePower.clearRow;
+        canvas
+          ..save()
+          ..translate(rect.center.dx, rect.center.dy);
+        if (!horizontal) canvas.rotate(math.pi / 2);
+        canvas.translate(-rect.center.dx, -rect.center.dy);
+
+        final bar = RRect.fromRectAndRadius(
+          Rect.fromCenter(
+            center: rect.center,
+            width: rect.width * 0.66,
+            height: rect.height * 0.18,
+          ),
+          Radius.circular(rect.height * 0.1),
+        );
+        canvas
+          ..drawRRect(bar, white)
+          ..drawRRect(bar, rim);
+        for (final sign in [-1.0, 1.0]) {
+          final tip = rect.center.dx + sign * rect.width * 0.38;
+          final base = rect.center.dx + sign * rect.width * 0.24;
+          final head = Path()
+            ..moveTo(tip, rect.center.dy)
+            ..lineTo(base, rect.center.dy - rect.height * 0.17)
+            ..lineTo(base, rect.center.dy + rect.height * 0.17)
+            ..close();
+          canvas
+            ..drawPath(head, white)
+            ..drawPath(head, rim);
+        }
+        canvas.restore();
+      case TilePower.bomb:
+        // A spiked ring: a blast that goes outwards in every direction.
+        final star = Path();
+        for (var i = 0; i < 16; i++) {
+          final radius = rect.width * (i.isEven ? 0.28 : 0.16);
+          final angle = i * math.pi / 8;
+          final point = rect.center.translate(
+            radius * math.cos(angle),
+            radius * math.sin(angle),
+          );
+          i == 0
+              ? star.moveTo(point.dx, point.dy)
+              : star.lineTo(point.dx, point.dy);
+        }
+        star.close();
+        canvas
+          ..drawPath(star, white)
+          ..drawPath(star, rim);
+      case TilePower.colourBomb:
+        // Concentric rings: it takes a whole colour, not a direction.
+        for (var i = 3; i >= 1; i--) {
+          canvas.drawCircle(
+            rect.center,
+            rect.width * 0.11 * i,
+            Paint()
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = rect.width * 0.06
+              ..color =
+                  (i.isOdd ? const Color(0xFFFFFFFF) : const Color(0xFF101020))
+                      .withValues(alpha: 0.9 * opacity),
+          );
+        }
+    }
+  }
+
   void _paintSelection(Canvas canvas, Rect rect) {
     canvas.drawCircle(
       rect.center,
@@ -336,5 +429,7 @@ class TilePainter extends CustomPainter {
       old.state.hinted != state.hinted ||
       old.state.showSymbols != state.showSymbols ||
       old.state.lowSpec != state.lowSpec ||
+      old.state.power != state.power ||
+      old.state.firing != state.firing ||
       old.state.clearProgress != state.clearProgress;
 }

@@ -3,7 +3,9 @@ import 'dart:math' as math;
 
 import 'package:collect_three/engine/engine.dart';
 import 'package:collect_three/game/game_controller.dart';
+import 'package:collect_three/game/motion.dart';
 import 'package:collect_three/main.dart' as app;
+import 'package:collect_three/skins/skin_registry.dart';
 import 'package:collect_three/ui/widgets/board_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart' hide MatchFinder;
@@ -112,6 +114,37 @@ void main() {
     );
   });
 
+  // Powers are luck-dependent in a real run, so this pumps a board that has one
+  // of each. It is the only check that the new artwork survives the device's
+  // actual rasterizer.
+  testWidgets('every power paints on this device', (tester) async {
+    final controller = GameController(
+      mode: const _PowerBench(),
+      seed: 1,
+      motion: const Motion(reduced: true),
+    );
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox(
+            width: 300,
+            height: 180,
+            child: BoardView(
+              controller: controller,
+              skin: SkinRegistry.treasureHunt,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(controller.board.tiles.where((t) => t.isSpecial), hasLength(4));
+  });
+
   testWidgets('a rejected swap costs nothing', (tester) async {
     await _launch(tester);
     await tester.tap(find.text('Infinite Hunt'));
@@ -140,6 +173,47 @@ void main() {
     expect(controller.score, 0);
     expect(controller.movesMade, 0);
   });
+}
+
+/// A fixed board carrying one of every power.
+class _PowerBench extends GameMode {
+  const _PowerBench();
+
+  @override
+  String get id => 'power_bench';
+  @override
+  String get name => 'Power bench';
+  @override
+  String get tagline => 'test fixture';
+  @override
+  GridConfig get grid => const GridConfig(rows: 3, cols: 5, kindCount: 3);
+  @override
+  GravityRule get gravity => GravityRule.down;
+  @override
+  RefillRule get refill => RefillRule.none;
+  @override
+  bool get allowsSpecials => true;
+
+  @override
+  Board createBoard(SeededRandom rng, TileFactory tiles) {
+    var board = Board.parse('01201\n12012\n20120', tiles: tiles);
+    final powers = <Pos, TilePower>{
+      const Pos(0, 0): TilePower.clearRow,
+      const Pos(0, 1): TilePower.clearColumn,
+      const Pos(0, 2): TilePower.bomb,
+      const Pos(0, 3): TilePower.colourBomb,
+    };
+    powers.forEach((pos, power) {
+      board = board.withTile(pos, board.at(pos)!.withPower(power));
+    });
+    return board;
+  }
+
+  @override
+  ModeEvaluation evaluate(ModeContext ctx) => const ModeEvaluation.playing();
+
+  @override
+  GameMode fresh() => this;
 }
 
 Future<void> _launch(WidgetTester tester) async {

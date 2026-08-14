@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:collect_three/engine/models/tile.dart';
 import 'package:collect_three/skins/skin.dart';
 import 'package:collect_three/skins/skin_registry.dart';
 import 'package:collect_three/skins/tile_painter.dart';
@@ -100,6 +101,12 @@ void main() {
               TileVisualState(hinted: true),
               TileVisualState(clearProgress: 0.5, showSymbols: true),
               TileVisualState(clearProgress: 1),
+              TileVisualState(power: TilePower.clearRow),
+              TileVisualState(power: TilePower.clearColumn),
+              TileVisualState(power: TilePower.bomb),
+              TileVisualState(power: TilePower.colourBomb),
+              TileVisualState(power: TilePower.bomb, firing: true),
+              TileVisualState(power: TilePower.colourBomb, lowSpec: true),
             ]) {
               for (final size in const [Size(24, 24), Size(64, 64)]) {
                 final recorder = PictureRecorder();

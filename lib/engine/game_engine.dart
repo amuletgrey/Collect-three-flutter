@@ -141,7 +141,7 @@ class GameEngine {
       board: _board,
       rng: _rng,
       tiles: _tiles,
-      origin: b,
+      origins: {a, b},
       primed: primed,
       primedKinds: primedKinds,
     );

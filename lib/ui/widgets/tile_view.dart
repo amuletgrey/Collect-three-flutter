@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import 'package:collect_three/engine/models/tile.dart';
+
 import 'package:flutter/widgets.dart';
 
 import '../../skins/skin.dart';
@@ -18,6 +20,8 @@ class TileView extends StatelessWidget {
     this.hinted = false,
     this.clearing = false,
     this.rejected = false,
+    this.power = TilePower.none,
+    this.firing = false,
     this.showSymbols = false,
     this.lowSpec = false,
     this.clearDuration = const Duration(milliseconds: 240),
@@ -30,6 +34,8 @@ class TileView extends StatelessWidget {
   final bool hinted;
   final bool clearing;
   final bool rejected;
+  final TilePower power;
+  final bool firing;
   final bool showSymbols;
   final bool lowSpec;
   final Duration clearDuration;
@@ -67,6 +73,8 @@ class TileView extends StatelessWidget {
             clearProgress: progress,
             showSymbols: showSymbols,
             lowSpec: lowSpec,
+            power: power,
+            firing: firing,
           ),
         ),
       ),

@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+import '../engine/models/tile.dart';
+
 /// Which painter family draws a tile. The family decides the lighting and
 /// decoration; [TileShape] decides the silhouette.
 enum TileFamily { sphere, gem, candy }
@@ -81,6 +83,8 @@ class TileVisualState {
     this.clearProgress = 0,
     this.showSymbols = false,
     this.lowSpec = false,
+    this.power = TilePower.none,
+    this.firing = false,
   });
 
   final bool selected;
@@ -96,6 +100,12 @@ class TileVisualState {
   /// are the most expensive thing on the board and the first thing to go on an
   /// older GPU.
   final bool lowSpec;
+
+  /// The power this tile carries, drawn as a marker over the skin's artwork.
+  final TilePower power;
+
+  /// True for the instant a power is going off.
+  final bool firing;
 
   /// Swells briefly, then shrinks away — the collect "pop".
   double get scale {

@@ -11,9 +11,9 @@ Board withPowers(String sketch, Map<Pos, TilePower> powers) {
   return board;
 }
 
-SpecialSpawn? spawnOf(Board board, {Pos? origin}) {
+SpecialSpawn? spawnOf(Board board, {Set<Pos> origins = const {}}) {
   final matches = MatchFinder.find(board);
-  final spawns = SpecialRules.spawnsFor(matches, origin: origin);
+  final spawns = SpecialRules.spawnsFor(matches, origins: origins);
   return spawns.isEmpty ? null : spawns.single;
 }
 
@@ -54,9 +54,9 @@ void main() {
     test('the power lands under the tile the player moved', () {
       final board = Board.parse('11112\n20200\n02020');
 
-      expect(spawnOf(board, origin: const Pos(0, 3))!.at, const Pos(0, 3));
+      expect(spawnOf(board, origins: {const Pos(0, 3)})!.at, const Pos(0, 3));
       expect(
-        spawnOf(board, origin: const Pos(2, 2))!.at,
+        spawnOf(board, origins: {const Pos(2, 2)})!.at,
         isNot(const Pos(2, 2)),
         reason: 'an origin outside the shape is ignored',
       );

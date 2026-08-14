@@ -102,6 +102,24 @@ Bright, soft, friendly. Distinct silhouettes again; the most "casual" of the thr
 | 5 | Chocolate | `#8A5A3C` | `#C08A63` | chocolate square |
 | 6 | Liquorice | `#3D3A46` | `#F0EDF5` | liquorice wheel |
 
+## Power markers
+
+Tiles that earn a power (docs/CONCEPT.md §2) keep their skin artwork and gain a marker drawn
+on top: a double arrow for a row or column clear, a starburst for a bomb, concentric rings for
+a colour bomb. The markers are white with a dark rim rather than per-skin art, so one set reads
+on gemstones, candy and glossy balls alike, and a new skin inherits them for free.
+
+They are kept deliberately small — a full-width marker spills outside narrow silhouettes like
+the marquise gem and the trillion cut.
+
+![Every power on every skin](images/powers.png)
+
+Regenerate that picture with:
+
+```bash
+flutter test --update-goldens --dart-define=preview_art=true   test/skins/power_preview_test.dart
+```
+
 ## Accessibility requirements
 
 Every skin must pass these before it ships:

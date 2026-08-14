@@ -54,7 +54,7 @@ void main() {
         board: Board.parse('11112\n20200\n02020'),
         rng: SeededRandom(1),
         tiles: TileFactory(100),
-        origin: const Pos(0, 3),
+        origins: {const Pos(0, 3)},
       );
 
       final survivor = outcome.board.at(const Pos(0, 3));
@@ -74,7 +74,7 @@ void main() {
         board: Board.parse('11112\n20200\n02020'),
         rng: SeededRandom(1),
         tiles: TileFactory(100),
-        origin: const Pos(0, 3),
+        origins: {const Pos(0, 3)},
       );
 
       expect(outcome.specialsCreated, 0);

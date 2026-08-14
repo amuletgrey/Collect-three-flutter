@@ -67,8 +67,9 @@ class Resolver {
     required TileFactory tiles,
     int startStep = 1,
 
-    /// The cell the player moved, so a new power lands under their finger.
-    Pos? origin,
+    /// The two cells the player's swap touched, so a new power lands under
+    /// their finger rather than in the middle of the line.
+    Set<Pos> origins = const {},
 
     /// Powers to fire before any matching happens — how a colour bomb goes off
     /// when it is swapped rather than matched.
@@ -97,7 +98,7 @@ class Resolver {
       final spawns = allowsSpecials
           ? SpecialRules.spawnsFor(
               matches,
-              origin: step == startStep ? origin : null,
+              origins: step == startStep ? origins : const {},
             )
           : const <SpecialSpawn>[];
       final protected = {for (final spawn in spawns) spawn.at};

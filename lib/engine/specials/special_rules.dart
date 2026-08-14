@@ -28,21 +28,27 @@ class SpecialRules {
 
   /// Decides the power a single match group earns, if any.
   ///
-  /// [origin] is the cell the player moved, so a power lands under the tile
-  /// they were touching whenever that is part of the shape — which is where
-  /// players expect it.
-  static SpecialSpawn? spawnFor(MatchGroup group, {Pos? origin}) {
+  /// [origins] are the two cells the player's swap touched. A power lands on
+  /// whichever of them is part of the shape, which is the tile the player was
+  /// dragging — and the drag can end on either side, so both are offered.
+  static SpecialSpawn? spawnFor(
+    MatchGroup group, {
+    Set<Pos> origins = const {},
+  }) {
     final power = _powerFor(group);
     if (power == TilePower.none) return null;
     return SpecialSpawn(
-      at: _placementFor(group, origin: origin),
+      at: _placementFor(group, origins: origins),
       kind: group.kind,
       power: power,
     );
   }
 
-  static List<SpecialSpawn> spawnsFor(MatchResult matches, {Pos? origin}) => [
-    for (final group in matches.groups) ?spawnFor(group, origin: origin),
+  static List<SpecialSpawn> spawnsFor(
+    MatchResult matches, {
+    Set<Pos> origins = const {},
+  }) => [
+    for (final group in matches.groups) ?spawnFor(group, origins: origins),
   ];
 
   /// Stronger powers win when a shape qualifies for more than one.
@@ -58,8 +64,10 @@ class SpecialRules {
     return TilePower.none;
   }
 
-  static Pos _placementFor(MatchGroup group, {Pos? origin}) {
-    if (origin != null && group.cells.contains(origin)) return origin;
+  static Pos _placementFor(MatchGroup group, {Set<Pos> origins = const {}}) {
+    for (final origin in origins) {
+      if (group.cells.contains(origin)) return origin;
+    }
     final intersection = group.intersection;
     if (intersection != null) return intersection;
     final line = group.lines.reduce((a, b) => b.length > a.length ? b : a);
