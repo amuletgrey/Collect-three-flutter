@@ -7,6 +7,14 @@ import '../engine/engine.dart';
 import '../services/haptics_service.dart';
 import 'motion.dart';
 
+/// One tile going out, so the board can throw sparks in its colour.
+class CollectBurst {
+  const CollectBurst(this.at, this.kind);
+
+  final Pos at;
+  final int kind;
+}
+
 /// Bridges the engine to the screen.
 ///
 /// The engine resolves a whole move synchronously and hands back an ordered
@@ -47,6 +55,8 @@ class GameController extends ChangeNotifier {
   Move? _hint;
   Set<Pos> _rejected = const {};
   Set<Pos> _firing = const {};
+  List<CollectBurst> _bursts = const [];
+  int _burstTick = 0;
   bool _busy = false;
   bool _disposed = false;
   Duration _stepDuration = Duration.zero;
@@ -83,6 +93,12 @@ class GameController extends ChangeNotifier {
 
   /// Cells whose power is going off right now — the board flashes them.
   bool isFiring(Pos pos) => _firing.contains(pos);
+
+  /// The tiles collected in the most recent clear, for the particle layer.
+  /// [burstTick] changes with each new batch, which is what the layer watches;
+  /// the list alone would look identical for two identical clears.
+  List<CollectBurst> get bursts => _bursts;
+  int get burstTick => _burstTick;
 
   Iterable<int> get tileIds => _tiles.keys;
   Tile tileById(int id) => _tiles[id]!;
@@ -185,6 +201,12 @@ class GameController extends ChangeNotifier {
           notifyListeners();
         case TilesCleared(:final cells):
           _stepDuration = _motion.clear;
+          _bursts = [
+            for (final cell in cells)
+              if (_idAt(cell) case final id?)
+                CollectBurst(cell, _tiles[id]!.kind),
+          ];
+          _burstTick++;
           _clearing.addAll(cells.map(_idAt).whereType<int>());
           notifyListeners();
           await _wait(_motion.clear);

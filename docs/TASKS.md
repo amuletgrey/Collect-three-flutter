@@ -81,8 +81,8 @@ No Flutter imports anywhere in this milestone. Every task lands with its own tes
 | CT-054 | Skin switcher with live sample tiles | switching mid-game keeps state | [x] |
 | CT-055 | Result overlay (win/lose variants) | retry and change-mode paths work | [x] |
 | CT-056 | Invalid-swap shake and selection polish | reverted swap reads as a rejection | [ ] |
-| CT-057 | Juice: particles, cascade chime hooks, danger pulse | 60 fps on a mid-range device | [ ] |
-| CT-058 | Pause overlay + dedicated settings screen | toggles currently live on the home screen | [ ] |
+| CT-057 | Juice: particles and danger pulse | done as CT-116/117 | [x] |
+| CT-058 | Pause overlay + dedicated settings screen | done as CT-118/119 | [x] |
 
 ## M6 — Clear-the-Board levels
 
@@ -140,7 +140,7 @@ being handled separately — see that milestone before touching `android/`, `ios
 | Priority | Item | Notes |
 | --- | --- | --- |
 | 1 | **M10 — Special tiles** | 4- and 5-matches create powers. Rules, art and device checks done; CT-107/CT-108 remain. |
-| 2 | M11 — Feel and feedback | Particles on collect, cascade chimes via an `AudioService`, Rising Tide danger pulse, pause/settings screen. Covers the open CT-057/CT-058/CT-074. |
+| 2 | M11 — Feel and feedback | Done except sound: particles, danger flash, pause and settings all shipped. **`AudioService` and a sound pack still need a decision** — it means a new runtime dependency and audio assets, neither of which should be picked unattended. |
 | 3 | M12 — Relic Dig, a fourth mode | Escort heavy relic tiles to the bottom row. Self-contained: a tile behaviour plus one `GameMode`. |
 | 4 | M13 — Content and progression | More level packs and tiers, daily seeded challenge, level-select polish. **Deliberately last** — not yet decided that we want to go there. |
 

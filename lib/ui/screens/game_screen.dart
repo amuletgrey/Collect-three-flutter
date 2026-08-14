@@ -12,6 +12,7 @@ import '../../skins/skin_background.dart';
 import '../widgets/board_view.dart';
 import '../widgets/hud.dart';
 import '../widgets/skin_switcher.dart';
+import 'settings_screen.dart';
 
 class GameScreen extends StatefulWidget {
   const GameScreen({
@@ -49,6 +50,8 @@ class _GameScreenState extends State<GameScreen> {
 
   /// Resolved after a win so the overlay can offer to carry straight on.
   Level? _nextLevel;
+
+  bool _paused = false;
 
   @override
   void initState() {
@@ -187,7 +190,11 @@ class _GameScreenState extends State<GameScreen> {
             children: [
               Column(
                 children: [
-                  _TopBar(controller: _controller, skin: skin),
+                  _TopBar(
+                    controller: _controller,
+                    skin: skin,
+                    onPause: () => setState(() => _paused = true),
+                  ),
                   Hud(
                     controller: _controller,
                     skin: skin,
@@ -202,6 +209,9 @@ class _GameScreenState extends State<GameScreen> {
                         skin: skin,
                         showSymbols: settings.showSymbols,
                         lowSpec: settings.performanceMode,
+                        particles:
+                            !settings.performanceMode &&
+                            !settings.reducedMotion,
                         dangerRows: _controller.mode is RisingTideMode ? 2 : 0,
                       ),
                     ),
@@ -213,6 +223,16 @@ class _GameScreenState extends State<GameScreen> {
                   ),
                 ],
               ),
+              if (_paused && !_showResult)
+                _PauseOverlay(
+                  skin: skin,
+                  onResume: () => setState(() => _paused = false),
+                  onRestart: () {
+                    setState(() => _paused = false);
+                    _restart();
+                  },
+                  onQuit: () => Navigator.of(context).pop(),
+                ),
               ListenableBuilder(
                 listenable: _controller,
                 builder: (context, _) => _showResult
@@ -235,10 +255,15 @@ class _GameScreenState extends State<GameScreen> {
 }
 
 class _TopBar extends StatelessWidget {
-  const _TopBar({required this.controller, required this.skin});
+  const _TopBar({
+    required this.controller,
+    required this.skin,
+    required this.onPause,
+  });
 
   final GameController controller;
   final Skin skin;
+  final VoidCallback onPause;
 
   @override
   Widget build(BuildContext context) {
@@ -268,6 +293,11 @@ class _TopBar extends StatelessWidget {
             icon: const Icon(Icons.palette_outlined),
             color: skin.palette.textPrimary,
           ),
+          IconButton(
+            onPressed: onPause,
+            icon: const Icon(Icons.pause_rounded),
+            color: skin.palette.textPrimary,
+          ),
         ],
       ),
     );
@@ -282,6 +312,84 @@ class _TopBar extends StatelessWidget {
         child: SkinSwitcher(
           compact: true,
           onSelected: () => Navigator.of(sheetContext).pop(),
+        ),
+      ),
+    );
+  }
+}
+
+/// Stops the clock and gets out of the way. The board keeps its state; this is
+/// only a curtain over it.
+class _PauseOverlay extends StatelessWidget {
+  const _PauseOverlay({
+    required this.skin,
+    required this.onResume,
+    required this.onRestart,
+    required this.onQuit,
+  });
+
+  final Skin skin;
+  final VoidCallback onResume;
+  final VoidCallback onRestart;
+  final VoidCallback onQuit;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      // Tapping the backdrop is the fastest way back to the game.
+      onTap: onResume,
+      child: ColoredBox(
+        color: skin.palette.backgroundTop.withValues(alpha: 0.9),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Paused',
+                style: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w800,
+                  color: skin.palette.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 24),
+              _ActionButton(
+                icon: Icons.play_arrow_rounded,
+                label: 'Resume',
+                skin: skin,
+                onPressed: onResume,
+                emphasised: true,
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _ActionButton(
+                    icon: Icons.tune_rounded,
+                    label: 'Settings',
+                    skin: skin,
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const SettingsScreen(),
+                      ),
+                    ),
+                  ),
+                  _ActionButton(
+                    icon: Icons.replay_rounded,
+                    label: 'Restart',
+                    skin: skin,
+                    onPressed: onRestart,
+                  ),
+                  _ActionButton(
+                    icon: Icons.close_rounded,
+                    label: 'Quit',
+                    skin: skin,
+                    onPressed: onQuit,
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

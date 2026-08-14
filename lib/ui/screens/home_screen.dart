@@ -7,6 +7,7 @@ import '../../skins/skin_background.dart';
 import '../widgets/skin_switcher.dart';
 import 'game_screen.dart';
 import 'level_select_screen.dart';
+import 'settings_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -25,7 +26,19 @@ class HomeScreen extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.only(bottom: 28),
             children: [
-              const SizedBox(height: 28),
+              Align(
+                alignment: Alignment.centerRight,
+                child: IconButton(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const SettingsScreen(),
+                    ),
+                  ),
+                  tooltip: 'Settings',
+                  icon: const Icon(Icons.tune_rounded),
+                  color: skin.palette.textSecondary,
+                ),
+              ),
               Text(
                 'TESSERA',
                 textAlign: TextAlign.center,
@@ -71,8 +84,6 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               const SkinSwitcher(compact: false),
-              const SizedBox(height: 10),
-              _SettingsRow(settings: settings, skin: skin),
             ],
           ),
         ),
@@ -208,87 +219,6 @@ class _ResumeChip extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _SettingsRow extends StatelessWidget {
-  const _SettingsRow({required this.settings, required this.skin});
-
-  final AppSettings settings;
-  final Skin skin;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        children: [
-          if (skin.supportsSymbols)
-            _Toggle(
-              label: 'Symbols on tiles',
-              hint: 'Adds a glyph to each colour',
-              value: settings.showSymbols,
-              skin: skin,
-              onChanged: (value) => settings.setShowSymbols(value: value),
-            ),
-          _Toggle(
-            label: 'Reduced motion',
-            hint: 'Shortens every animation',
-            value: settings.reducedMotion,
-            skin: skin,
-            onChanged: (value) => settings.setReducedMotion(value: value),
-          ),
-          _Toggle(
-            label: 'Performance mode',
-            hint: 'Simpler drawing for older phones',
-            value: settings.performanceMode,
-            skin: skin,
-            onChanged: (value) => settings.setPerformanceMode(value: value),
-          ),
-          _Toggle(
-            label: 'Vibration',
-            hint: 'Buzz on matches and chains',
-            value: settings.haptics,
-            skin: skin,
-            onChanged: (value) => settings.setHaptics(value: value),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Toggle extends StatelessWidget {
-  const _Toggle({
-    required this.label,
-    required this.hint,
-    required this.value,
-    required this.skin,
-    required this.onChanged,
-  });
-
-  final String label;
-  final String hint;
-  final bool value;
-  final Skin skin;
-  final ValueChanged<bool> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return SwitchListTile.adaptive(
-      value: value,
-      onChanged: onChanged,
-      activeThumbColor: skin.palette.accent,
-      contentPadding: EdgeInsets.zero,
-      title: Text(
-        label,
-        style: TextStyle(fontSize: 14, color: skin.palette.textPrimary),
-      ),
-      subtitle: Text(
-        hint,
-        style: TextStyle(fontSize: 12, color: skin.palette.textSecondary),
       ),
     );
   }

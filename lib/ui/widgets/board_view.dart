@@ -1,8 +1,11 @@
+import 'dart:math' as math;
+
 import 'package:flutter/widgets.dart';
 
 import '../../engine/engine.dart';
 import '../../game/game_controller.dart';
 import '../../skins/skin.dart';
+import 'particle_layer.dart';
 import 'tile_view.dart';
 
 /// The playing field.
@@ -16,6 +19,7 @@ class BoardView extends StatefulWidget {
     required this.skin,
     this.showSymbols = false,
     this.lowSpec = false,
+    this.particles = true,
     this.dangerRows = 0,
     super.key,
   });
@@ -27,6 +31,9 @@ class BoardView extends StatefulWidget {
   /// Performance mode: skip the blurred shadows and highlights.
   final bool lowSpec;
 
+  /// Sparks on collect. Off for reduced motion and performance mode.
+  final bool particles;
+
   /// Rising Tide tints this many rows at the top as the drowning warning.
   final int dangerRows;
 
@@ -37,8 +44,7 @@ class BoardView extends StatefulWidget {
   State<BoardView> createState() => _BoardViewState();
 }
 
-class _BoardViewState extends State<BoardView>
-    with SingleTickerProviderStateMixin {
+class _BoardViewState extends State<BoardView> with TickerProviderStateMixin {
   Pos? _dragOrigin;
 
   /// Runs only while a hint is on screen, so an idle board schedules no frames.
@@ -46,6 +52,17 @@ class _BoardViewState extends State<BoardView>
     vsync: this,
     duration: const Duration(milliseconds: 1100),
   );
+
+  /// A single beat when the stack first reaches the danger rows.
+  ///
+  /// Deliberately one-shot rather than a loop: a permanently repeating
+  /// animation keeps scheduling frames for as long as the player is in trouble,
+  /// which costs battery and means the widget tree never settles.
+  late final AnimationController _dangerFlash = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 900),
+  );
+  bool _inDanger = false;
 
   @override
   void initState() {
@@ -58,6 +75,7 @@ class _BoardViewState extends State<BoardView>
   void dispose() {
     widget.controller.removeListener(_syncHintPulse);
     _hintPulse.dispose();
+    _dangerFlash.dispose();
     super.dispose();
   }
 
@@ -70,13 +88,18 @@ class _BoardViewState extends State<BoardView>
         ..stop()
         ..value = 0;
     }
+
+    // Beat once on the way in, and again each time the stack climbs back up.
+    final danger = _dangerReached(widget.controller.board);
+    if (danger && !_inDanger) _dangerFlash.forward(from: 0);
+    _inDanger = danger;
   }
 
   @override
   Widget build(BuildContext context) {
     final controller = widget.controller;
     return ListenableBuilder(
-      listenable: Listenable.merge([controller, _hintPulse]),
+      listenable: Listenable.merge([controller, _hintPulse, _dangerFlash]),
       builder: (context, _) {
         final board = controller.board;
         return LayoutBuilder(
@@ -112,9 +135,20 @@ class _BoardViewState extends State<BoardView>
                         cell: cell,
                         skin: widget.skin,
                         dangerRows: widget.dangerRows,
+                        // A tint that is always on becomes wallpaper; this
+                        // beats once as the stack arrives.
+                        dangerPulse: _dangerFlash.value,
                       ),
                       for (final id in controller.tileIds)
                         _positioned(controller, id, cell),
+                      Positioned.fill(
+                        child: ParticleLayer(
+                          controller: controller,
+                          skin: widget.skin,
+                          cell: cell,
+                          enabled: widget.particles,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -154,6 +188,17 @@ class _BoardViewState extends State<BoardView>
     );
   }
 
+  /// True when a tile occupies one of the rows we tint as the drowning warning.
+  bool _dangerReached(Board board) {
+    if (widget.dangerRows == 0) return false;
+    for (var row = 0; row < widget.dangerRows; row++) {
+      for (var col = 0; col < board.cols; col++) {
+        if (board.atRc(row, col) != null) return true;
+      }
+    }
+    return false;
+  }
+
   bool _isHinted(GameController controller, Pos pos) {
     final hint = controller.hint;
     return hint != null && (hint.a == pos || hint.b == pos);
@@ -186,12 +231,14 @@ class _Grid extends StatelessWidget {
     required this.cell,
     required this.skin,
     required this.dangerRows,
+    required this.dangerPulse,
   });
 
   final Board board;
   final double cell;
   final Skin skin;
   final int dangerRows;
+  final double dangerPulse;
 
   @override
   Widget build(BuildContext context) {
@@ -203,6 +250,7 @@ class _Grid extends StatelessWidget {
         cell: cell,
         skin: skin,
         dangerRows: dangerRows,
+        dangerPulse: dangerPulse,
       ),
     );
   }
@@ -215,6 +263,7 @@ class _GridPainter extends CustomPainter {
     required this.cell,
     required this.skin,
     required this.dangerRows,
+    required this.dangerPulse,
   });
 
   final int rows;
@@ -222,12 +271,14 @@ class _GridPainter extends CustomPainter {
   final double cell;
   final Skin skin;
   final int dangerRows;
+  final double dangerPulse;
 
   @override
   void paint(Canvas canvas, Size size) {
     final cellPaint = Paint()..color = skin.palette.boardCell;
+    final beat = math.sin(dangerPulse * math.pi).abs();
     final dangerPaint = Paint()
-      ..color = skin.palette.danger.withValues(alpha: 0.16);
+      ..color = skin.palette.danger.withValues(alpha: 0.16 + 0.26 * beat);
 
     for (var row = 0; row < rows; row++) {
       for (var col = 0; col < cols; col++) {
@@ -247,6 +298,7 @@ class _GridPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_GridPainter old) =>
+      old.dangerPulse != dangerPulse ||
       old.rows != rows ||
       old.cols != cols ||
       old.cell != cell ||

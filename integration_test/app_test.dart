@@ -182,6 +182,41 @@ void main() {
     expect(controller.movesMade, movesBefore);
   });
 
+  testWidgets('pause covers the board and lets go again', (tester) async {
+    await _launch(tester);
+    await tester.tap(find.text('Infinite Hunt'));
+    await tester.pumpAndSettle();
+
+    final controller = _controller(tester);
+    await _playHintedMove(tester, controller);
+    final score = controller.score;
+
+    await tester.tap(find.byIcon(Icons.pause_rounded));
+    await tester.pumpAndSettle();
+    expect(find.text('Paused'), findsOneWidget);
+
+    await tester.tap(find.text('Resume'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Paused'), findsNothing);
+    expect(_controller(tester).score, score, reason: 'the run is untouched');
+  });
+
+  testWidgets('settings live on their own screen', (tester) async {
+    await _launch(tester);
+
+    await tester.tap(find.byIcon(Icons.tune_rounded).first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Reduced motion'), findsOneWidget);
+    expect(find.text('Performance mode'), findsOneWidget);
+    expect(find.text('Vibration'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.arrow_back_rounded).first);
+    await tester.pumpAndSettle();
+    expect(find.text('Infinite Hunt'), findsOneWidget);
+  });
+
   testWidgets('a run survives leaving the game and coming back', (
     tester,
   ) async {
