@@ -136,6 +136,14 @@ so existing modes stay unchanged.
   `aapt2 dump resources <apk> | grep -A2 enable_impeller` — it should print `() false` and
   `(v31) true`. **This opt-out is deprecated** and Flutter intends to remove it; when that
   happens these devices need the upstream GLES fix instead.
+- **`flutter test integration_test -d <id>` rebuilds `app-debug.apk` for that device's ABI
+  only.** After a run against the 32-bit S5, `build/app/outputs/flutter-apk/app-debug.apk`
+  contains just `lib/armeabi-v7a/`, and installing it on the 64-bit phone gives a silent
+  failure: the activity starts, the process dies immediately, and logcat says
+  `dlopen failed: library "libflutter.so" not found`. Rebuild with `flutter build apk --debug`
+  before installing on the other device, and check with
+  `unzip -l build/app/outputs/flutter-apk/app-debug.apk | grep libflutter` — a fat APK lists
+  arm64-v8a, armeabi-v7a and x86_64.
 - **Debug builds do not present on the Galaxy S5** — the app starts, logs no error, and shows
   a blank white window; release builds render fine. Use
   `flutter run --release -d 18f62439` when testing there. Note that
