@@ -27,25 +27,26 @@ class HomeScreen extends StatelessWidget {
             children: [
               const SizedBox(height: 28),
               Text(
-                'COLLECT',
+                'TESSERA',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 34,
-                  height: 1,
-                  letterSpacing: 8,
-                  fontWeight: FontWeight.w300,
-                  color: skin.palette.textSecondary,
-                ),
-              ),
-              Text(
-                'THREE',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 58,
+                  fontSize: 52,
                   height: 1.05,
-                  letterSpacing: 4,
+                  letterSpacing: 6,
                   fontWeight: FontWeight.w900,
                   color: skin.palette.accent,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'LINE UP THE MOSAIC',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12,
+                  height: 1,
+                  letterSpacing: 5,
+                  fontWeight: FontWeight.w300,
+                  color: skin.palette.textSecondary,
                 ),
               ),
               const SizedBox(height: 26),

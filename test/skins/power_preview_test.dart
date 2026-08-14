@@ -1,8 +1,8 @@
-import 'package:collect_three/engine/models/tile.dart';
-import 'package:collect_three/skins/skin_registry.dart';
-import 'package:collect_three/ui/widgets/tile_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tessera/engine/models/tile.dart';
+import 'package:tessera/skins/skin_registry.dart';
+import 'package:tessera/ui/widgets/tile_view.dart';
 
 /// Renders every power on every skin.
 ///

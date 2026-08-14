@@ -4,8 +4,12 @@ Instructions for AI agents (and humans) working in this repository.
 
 ## What this is
 
-`collect_three` — a Flutter match-3 game. Swap adjacent tiles, line up three or more, collect
-them. Three game modes, three procedurally-drawn skins, no backend.
+`tessera` — a Flutter match-3 game shipped as **Tessera** by VibeByteForge. Swap adjacent
+tiles, line up three or more, collect them. Three game modes, three procedurally-drawn skins,
+no backend.
+
+The Dart package, the Android `applicationId`, the iOS bundle id and the Windows binary are all
+`tessera` / `com.vibebyteforge.tessera`. Anything still saying `collect_three` is stale.
 
 Read before touching code:
 

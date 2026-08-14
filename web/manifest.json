@@ -1,11 +1,11 @@
 {
-    "name": "collect_three",
-    "short_name": "collect_three",
+    "name": "Tessera",
+    "short_name": "Tessera",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#0B0E1A",
+    "theme_color": "#0B0E1A",
+    "description": "Line up the mosaic. A match-three game of tiles, with three modes and three skins.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

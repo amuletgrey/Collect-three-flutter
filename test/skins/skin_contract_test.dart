@@ -1,11 +1,11 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
-import 'package:collect_three/engine/models/tile.dart';
-import 'package:collect_three/skins/skin.dart';
-import 'package:collect_three/skins/skin_registry.dart';
-import 'package:collect_three/skins/tile_painter.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tessera/engine/models/tile.dart';
+import 'package:tessera/skins/skin.dart';
+import 'package:tessera/skins/skin_registry.dart';
+import 'package:tessera/skins/tile_painter.dart';
 
 /// Relative luminance, WCAG style.
 double _luminance(Color color) {

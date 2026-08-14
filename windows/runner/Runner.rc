@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.collectthree" "\0"
-            VALUE "FileDescription", "collect_three" "\0"
+            VALUE "CompanyName", "VibeByteForge" "\0"
+            VALUE "FileDescription", "Tessera" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "collect_three" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.collectthree. All rights reserved." "\0"
-            VALUE "OriginalFilename", "collect_three.exe" "\0"
-            VALUE "ProductName", "collect_three" "\0"
+            VALUE "InternalName", "tessera" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 VibeByteForge. All rights reserved." "\0"
+            VALUE "OriginalFilename", "tessera.exe" "\0"
+            VALUE "ProductName", "Tessera" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

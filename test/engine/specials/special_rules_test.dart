@@ -1,6 +1,6 @@
-import 'package:collect_three/engine/engine.dart';
-import 'package:collect_three/engine/specials/special_rules.dart';
 import 'package:flutter_test/flutter_test.dart' hide MatchFinder;
+import 'package:tessera/engine/engine.dart';
+import 'package:tessera/engine/specials/special_rules.dart';
 
 /// Board.parse knows nothing about powers, so tests stamp them on afterwards.
 Board withPowers(String sketch, Map<Pos, TilePower> powers) {

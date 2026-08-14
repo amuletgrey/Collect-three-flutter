@@ -16,7 +16,7 @@ invalid-swap shake, and a dedicated pause/settings screen.
 
 | ID | Task | Acceptance | Status |
 | --- | --- | --- | --- |
-| CT-001 | Flutter scaffold (`collect_three`, android/ios/web/windows) | `flutter analyze` clean, app builds | [x] |
+| CT-001 | Flutter scaffold (`tessera`, android/ios/web/windows) | `flutter analyze` clean, app builds | [x] |
 | CT-002 | Design docs: concept, architecture, skins, tasks, AGENTS.md | reviewed and merged | [x] |
 | CT-003 | Lints tightened, `analysis_options.yaml` project rules | analyzer clean with stricter rules | [x] |
 
