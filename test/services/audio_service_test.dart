@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_test/flutter_test.dart' hide MatchFinder;
 import 'package:tessera/engine/engine.dart';
 import 'package:tessera/services/audio_service.dart';
@@ -130,5 +131,38 @@ void main() {
       byAsset['audio/collect_1.wav'],
       lessThan(byAsset['audio/special_fire.wav']!),
     );
+  });
+
+  // Regression test for the focus thrash described on PooledSoundPlayer.
+  // Building the context touches no plugin, so this runs without a device.
+  group('the pool asks for no audio focus', () {
+    final android = PooledSoundPlayer.gameAudio.android;
+
+    test('so a chime never pauses the music the player had on', () {
+      expect(android.audioFocus, AndroidAudioFocus.none);
+    });
+
+    test('and the voices cannot steal focus from each other', () {
+      // With any `gain` variant, voice N takes focus from voice N-1 and the
+      // platform stops it mid-chime — the pool stops overlapping at all.
+      expect(android.audioFocus, isNot(AndroidAudioFocus.gain));
+      expect(android.audioFocus, isNot(AndroidAudioFocus.gainTransient));
+      expect(android.audioFocus, isNot(AndroidAudioFocus.gainTransientMayDuck));
+    });
+
+    test('and declares itself as game sound, not as music', () {
+      expect(android.contentType, AndroidContentType.sonification);
+      expect(android.usageType, AndroidUsageType.game);
+    });
+
+    test('iOS mixes with other audio via the ambient category', () {
+      // `ambient` implies mixWithOthers; passing that option alongside it
+      // trips an assertion inside the plugin, so it must stay unset.
+      expect(
+        PooledSoundPlayer.gameAudio.iOS.category,
+        AVAudioSessionCategory.ambient,
+      );
+      expect(PooledSoundPlayer.gameAudio.iOS.options, isEmpty);
+    });
   });
 }

@@ -138,6 +138,19 @@ so existing modes stay unchanged.
   black with `FlutterRenderer: Width is zero` in logcat.
 - **MIUI/HyperOS** phones reject `adb install` with `INSTALL_FAILED_USER_RESTRICTED` until
   "Install via USB" is enabled in Developer options.
+- **Game sounds must never take audio focus.** `audioplayers` defaults every player to
+  `usageType: media`, `contentType: music`, `audioFocus: gain` — a music app's profile. Left
+  alone, two things happen, both seen in logcat on the Xiaomi: every chime pauses whatever the
+  player had running in Spotify, and each voice in `PooledSoundPlayer` takes focus from the
+  previous one, which the platform then stops — so the pool that exists to let cascade chimes
+  overlap stops overlapping. `PooledSoundPlayer.gameAudio` sets game sonification with
+  `AndroidAudioFocus.none`, applied **per player** (the pool is built before the global context
+  is set, and the global one only seeds players created after it). On iOS the `ambient` category
+  already implies `mixWithOthers`; passing that option alongside it trips an assertion inside the
+  plugin. `test/services/audio_service_test.dart` locks all of this in — if it fails, fix the
+  context, not the test. To check on a device:
+  `adb logcat | grep requestAudioFocus` while playing a match should print **nothing**, while
+  `adb logcat | grep "AudioTrack: set()"` should still show tracks for our package.
 - **Impeller crashes on old Adreno GPUs.** The Galaxy S5 (Adreno 330, Android 11) has no
   Vulkan driver, so Impeller falls back to OpenGLES and then dies on the first frame:
   `Fatal signal 11 (SIGSEGV) ... in tid N (1.raster)`, fault address 0x4. It is the backend,

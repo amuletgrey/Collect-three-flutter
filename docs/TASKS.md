@@ -128,6 +128,7 @@ Details in [`docs/RELEASE.md`](RELEASE.md).
 | CT-072 | Performance mode: drop blur mask filters and backdrop decoration | the setting old phones need | [x] |
 | CT-073 | App icons, splash, store metadata, release build configs | done in M9; splash and the written store listing remain | [~] |
 | CT-074 | `AudioService` + a sound pack | done as CT-125/126 | [x] |
+| CT-127 | Sounds must not take audio focus | no `requestAudioFocus` in logcat while a match plays | [~] |
 
 ---
 

@@ -20,13 +20,58 @@ class PooledSoundPlayer implements SoundPlayer {
     : _players = List.generate(
         voices,
         (_) => AudioPlayer()..setReleaseMode(ReleaseMode.stop),
-      );
+      ) {
+    _ready = _configure();
+  }
+
+  /// How these sounds present themselves to the platform's audio system.
+  ///
+  /// `audioplayers` defaults every player to `usageType: media`,
+  /// `contentType: music`, `audioFocus: gain` — the profile of a music app.
+  /// Two things follow, both observed in logcat on a real device:
+  ///
+  /// 1. Every chime takes audio focus, so it pauses whatever the player had
+  ///    running in Spotify — once per match, which is unusable.
+  /// 2. Each voice in this pool requests focus of its own, so voice N takes it
+  ///    from voice N-1, which is then told to stop. That is precisely the
+  ///    cut-off the pool exists to prevent.
+  ///
+  /// Game sonification that requests no focus fixes both. On iOS, `ambient`
+  /// already implies `mixWithOthers` — passing that option explicitly with this
+  /// category trips an assertion in the plugin — and is silenced by the ring
+  /// switch, which is what a player expects of game audio.
+  static final AudioContext gameAudio = AudioContext(
+    android: const AudioContextAndroid(
+      contentType: AndroidContentType.sonification,
+      usageType: AndroidUsageType.game,
+      audioFocus: AndroidAudioFocus.none,
+    ),
+    iOS: AudioContextIOS(category: AVAudioSessionCategory.ambient),
+  );
 
   final List<AudioPlayer> _players;
+  late final Future<void> _ready;
   int _next = 0;
+
+  /// Applied per player rather than through `AudioPlayer.global`, because the
+  /// pool is built before this runs and the global context only seeds players
+  /// created after it is set.
+  Future<void> _configure() async {
+    for (final player in _players) {
+      try {
+        await player.setAudioContext(gameAudio);
+      } on Object {
+        // Desktop and web have no audio session to configure, and a platform
+        // that refuses one must not cost us the sound.
+      }
+    }
+  }
 
   @override
   Future<void> play(String asset, {double volume = 1}) async {
+    // The very first chime would otherwise race the session setup and still go
+    // out holding focus.
+    await _ready;
     final player = _players[_next];
     _next = (_next + 1) % _players.length;
     try {
