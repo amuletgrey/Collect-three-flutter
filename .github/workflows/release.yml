@@ -11,9 +11,7 @@ name: Build artifacts
 # key and the build still succeeds. See docs/RELEASE.md.
 on:
   push:
-    # TEMPORARY: feat/m9-release-artifacts is here so this workflow can be proved
-    # before it merges. Remove the branch before merging to main.
-    branches: [main, feat/m9-release-artifacts]
+    branches: [main]
     tags: ['v*']
   workflow_dispatch:
 
