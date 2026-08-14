@@ -1,0 +1,340 @@
+import 'dart:math' as math;
+
+import 'package:flutter/widgets.dart';
+
+import 'skin.dart';
+import 'tile_shapes.dart';
+
+/// Draws one tile for any skin.
+///
+/// A single painter covers all three skins because they differ in silhouette,
+/// palette and lighting, not in structure. Adding a skin is therefore data plus
+/// (at most) a new shape, never a new painter class.
+class TilePainter extends CustomPainter {
+  const TilePainter({required this.art, required this.state});
+
+  final TileArt art;
+  final TileVisualState state;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final side = math.min(size.width, size.height);
+    final rect = Rect.fromCenter(
+      center: Offset(size.width / 2, size.height / 2),
+      width: side,
+      height: side,
+    ).deflate(side * 0.06);
+
+    canvas
+      ..save()
+      ..translate(rect.center.dx, rect.center.dy)
+      ..scale(state.scale)
+      ..translate(-rect.center.dx, -rect.center.dy);
+
+    final opacity = state.opacity.clamp(0.0, 1.0);
+    if (state.selected) _paintSelection(canvas, rect);
+    if (state.hinted && !state.selected) _paintHint(canvas, rect);
+
+    _paintShadow(canvas, rect, opacity);
+    switch (art.family) {
+      case TileFamily.sphere:
+        _paintSphere(canvas, rect, opacity);
+      case TileFamily.gem:
+        _paintGem(canvas, rect, opacity);
+      case TileFamily.candy:
+        _paintCandy(canvas, rect, opacity);
+    }
+    if (state.showSymbols && art.symbol != TileSymbol.none) {
+      canvas.drawPath(
+        TileShapes.symbol(art.symbol, rect),
+        Paint()
+          ..color = const Color(0xFF101020).withValues(alpha: 0.55 * opacity),
+      );
+    }
+
+    canvas.restore();
+  }
+
+  void _paintShadow(Canvas canvas, Rect rect, double opacity) {
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: rect.center.translate(0, rect.height * 0.42),
+        width: rect.width * 0.72,
+        height: rect.height * 0.16,
+      ),
+      Paint()
+        ..color = const Color(
+          0xFF000000,
+        ).withValues(alpha: (state.lowSpec ? 0.14 : 0.22) * opacity)
+        ..maskFilter = state.lowSpec
+            ? null
+            : MaskFilter.blur(BlurStyle.normal, rect.width * 0.06),
+    );
+  }
+
+  void _paintSphere(Canvas canvas, Rect rect, double opacity) {
+    final body = TileShapes.path(art.shape, rect);
+    canvas
+      ..drawPath(
+        body,
+        Paint()
+          ..shader = RadialGradient(
+            center: const Alignment(-0.4, -0.5),
+            radius: 0.95,
+            colors: [
+              art.secondary.withValues(alpha: opacity),
+              art.primary.withValues(alpha: opacity),
+              _darken(art.primary, 0.35).withValues(alpha: opacity),
+            ],
+            stops: const [0, 0.55, 1],
+          ).createShader(rect),
+      )
+      // Specular highlight: the whole reason a ball reads as glossy.
+      ..drawOval(
+        Rect.fromCenter(
+          center: rect.center.translate(-rect.width * 0.17, -rect.height * 0.2),
+          width: rect.width * 0.3,
+          height: rect.height * 0.22,
+        ),
+        Paint()
+          ..color = const Color(0xFFFFFFFF).withValues(alpha: 0.55 * opacity)
+          ..maskFilter = state.lowSpec
+              ? null
+              : MaskFilter.blur(BlurStyle.normal, rect.width * 0.04),
+      )
+      ..drawPath(
+        body,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = rect.width * 0.035
+          ..color = _darken(art.primary, 0.45).withValues(alpha: 0.5 * opacity),
+      );
+  }
+
+  void _paintGem(Canvas canvas, Rect rect, double opacity) {
+    final body = TileShapes.path(art.shape, rect);
+    canvas
+      ..drawPath(
+        body,
+        Paint()
+          ..shader = LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              art.secondary.withValues(alpha: opacity),
+              art.primary.withValues(alpha: opacity),
+              _darken(art.primary, 0.4).withValues(alpha: opacity),
+            ],
+            stops: const [0, 0.5, 1],
+          ).createShader(rect),
+      )
+      // Crown facets: a bright wedge and a dark one give the stone depth.
+      ..save()
+      ..clipPath(body)
+      ..drawPath(
+        Path()
+          ..moveTo(rect.left, rect.top + rect.height * 0.32)
+          ..lineTo(rect.center.dx, rect.top + rect.height * 0.05)
+          ..lineTo(rect.right, rect.top + rect.height * 0.32)
+          ..lineTo(rect.center.dx, rect.center.dy)
+          ..close(),
+        Paint()..color = art.secondary.withValues(alpha: 0.75 * opacity),
+      )
+      ..drawPath(
+        Path()
+          ..moveTo(rect.left, rect.top + rect.height * 0.32)
+          ..lineTo(rect.center.dx, rect.center.dy)
+          ..lineTo(rect.center.dx, rect.bottom)
+          ..close(),
+        Paint()
+          ..color = _darken(art.primary, 0.25).withValues(alpha: 0.8 * opacity),
+      )
+      ..restore()
+      ..drawPath(
+        body,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = rect.width * 0.045
+          ..color = const Color(0xFFC9A227).withValues(alpha: 0.9 * opacity),
+      );
+  }
+
+  void _paintCandy(Canvas canvas, Rect rect, double opacity) {
+    final body = TileShapes.path(art.shape, rect);
+    canvas
+      ..drawPath(
+        body,
+        Paint()
+          ..shader = LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              _lighten(art.primary, 0.25).withValues(alpha: opacity),
+              art.primary.withValues(alpha: opacity),
+              _darken(art.primary, 0.22).withValues(alpha: opacity),
+            ],
+          ).createShader(rect),
+      )
+      ..save()
+      ..clipPath(body);
+
+    switch (art.shape) {
+      case TileShape.lollipop:
+        _paintSwirl(canvas, rect, opacity);
+      case TileShape.peppermint:
+        _paintPinwheel(canvas, rect, opacity);
+      case TileShape.liquorice:
+        _paintRings(canvas, rect, opacity);
+      case TileShape.chocolate:
+        _paintChocolateGrid(canvas, rect, opacity);
+      case TileShape.wrapped:
+        _paintStripes(canvas, rect, opacity);
+      default:
+        break;
+    }
+
+    canvas
+      ..restore()
+      // Soft specular arc sells the sugary coating.
+      ..drawArc(
+        Rect.fromCenter(
+          center: rect.center.translate(0, -rect.height * 0.06),
+          width: rect.width * 0.62,
+          height: rect.height * 0.62,
+        ),
+        math.pi * 1.15,
+        math.pi * 0.5,
+        false,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round
+          ..strokeWidth = rect.width * 0.08
+          ..color = const Color(0xFFFFFFFF).withValues(alpha: 0.6 * opacity),
+      )
+      ..drawPath(
+        body,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = rect.width * 0.03
+          ..color = _darken(art.primary, 0.35).withValues(alpha: 0.4 * opacity),
+      );
+  }
+
+  void _paintSwirl(Canvas canvas, Rect rect, double opacity) {
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = rect.width * 0.11
+      ..strokeCap = StrokeCap.round
+      ..color = art.secondary.withValues(alpha: opacity);
+    final path = Path();
+    for (var i = 0; i <= 60; i++) {
+      final t = i / 60;
+      final angle = t * math.pi * 3.4;
+      final radius = rect.width * 0.44 * t;
+      final point = rect.center.translate(
+        radius * math.cos(angle),
+        radius * math.sin(angle),
+      );
+      i == 0
+          ? path.moveTo(point.dx, point.dy)
+          : path.lineTo(point.dx, point.dy);
+    }
+    canvas.drawPath(path, paint);
+  }
+
+  void _paintPinwheel(Canvas canvas, Rect rect, double opacity) {
+    final paint = Paint()..color = art.secondary.withValues(alpha: opacity);
+    for (var i = 0; i < 6; i++) {
+      final start = i * math.pi / 3;
+      canvas.drawPath(
+        Path()
+          ..moveTo(rect.center.dx, rect.center.dy)
+          ..arcTo(rect, start, math.pi / 6, false)
+          ..close(),
+        paint,
+      );
+    }
+  }
+
+  void _paintRings(Canvas canvas, Rect rect, double opacity) {
+    for (var i = 3; i > 0; i--) {
+      canvas.drawCircle(
+        rect.center,
+        rect.width * 0.14 * i,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = rect.width * 0.07
+          ..color = (i.isEven ? art.secondary : art.primary).withValues(
+            alpha: opacity,
+          ),
+      );
+    }
+  }
+
+  void _paintChocolateGrid(Canvas canvas, Rect rect, double opacity) {
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = rect.width * 0.045
+      ..color = art.secondary.withValues(alpha: 0.8 * opacity);
+    for (var i = 1; i < 3; i++) {
+      final x = rect.left + rect.width * i / 3;
+      final y = rect.top + rect.height * i / 3;
+      canvas
+        ..drawLine(Offset(x, rect.top), Offset(x, rect.bottom), paint)
+        ..drawLine(Offset(rect.left, y), Offset(rect.right, y), paint);
+    }
+  }
+
+  void _paintStripes(Canvas canvas, Rect rect, double opacity) {
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = rect.width * 0.09
+      ..color = art.secondary.withValues(alpha: opacity);
+    for (var i = -2; i <= 2; i++) {
+      final offset = i * rect.width * 0.2;
+      canvas.drawLine(
+        Offset(rect.left + offset, rect.bottom),
+        Offset(rect.left + offset + rect.width * 0.5, rect.top),
+        paint,
+      );
+    }
+  }
+
+  void _paintSelection(Canvas canvas, Rect rect) {
+    canvas.drawCircle(
+      rect.center,
+      rect.width * 0.62,
+      Paint()
+        ..color = const Color(0xFFFFFFFF).withValues(alpha: 0.22)
+        ..maskFilter = state.lowSpec
+            ? null
+            : MaskFilter.blur(BlurStyle.normal, rect.width * 0.12),
+    );
+  }
+
+  void _paintHint(Canvas canvas, Rect rect) {
+    canvas.drawCircle(
+      rect.center,
+      rect.width * 0.55,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = rect.width * 0.04
+        ..color = const Color(0xFFFFFFFF).withValues(alpha: 0.45),
+    );
+  }
+
+  static Color _darken(Color color, double amount) =>
+      Color.lerp(color, const Color(0xFF000000), amount)!;
+
+  static Color _lighten(Color color, double amount) =>
+      Color.lerp(color, const Color(0xFFFFFFFF), amount)!;
+
+  @override
+  bool shouldRepaint(TilePainter old) =>
+      old.art != art ||
+      old.state.selected != state.selected ||
+      old.state.hinted != state.hinted ||
+      old.state.showSymbols != state.showSymbols ||
+      old.state.lowSpec != state.lowSpec ||
+      old.state.clearProgress != state.clearProgress;
+}
