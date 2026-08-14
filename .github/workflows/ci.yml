@@ -1,0 +1,44 @@
+name: CI
+
+# The fast gate: runs on everything, finishes in a couple of minutes.
+# Artifact builds live in release.yml so a pull request does not pay for them.
+on:
+  push:
+    branches: ['**']
+    tags-ignore: ['**']
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: 3.44.6
+
+jobs:
+  verify:
+    name: Analyze and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed lib test integration_test tool
+
+      - name: Analyze
+        run: flutter analyze
+
+      # Includes test/levels/, which re-solves every shipped Clear the Board
+      # level, and test/engine/purity_test.dart, which fails if anything in
+      # lib/engine/ has grown a Flutter import.
+      - name: Test
+        run: flutter test --reporter=expanded

@@ -17,8 +17,11 @@ if (keystorePropertiesFile.exists()) {
     FileInputStream(keystorePropertiesFile).use { keystoreProperties.load(it) }
 }
 
+// Blank counts as absent: CI passes TESSERA_KEYSTORE_PATH="" on unsigned runs, and
+// file("") resolves to the project directory, which exists — so a naive null check
+// would enable release signing with a directory as the keystore.
 fun signingValue(key: String, env: String): String? =
-    keystoreProperties.getProperty(key) ?: System.getenv(env)
+    (keystoreProperties.getProperty(key) ?: System.getenv(env))?.takeIf { it.isNotBlank() }
 
 val storeFilePath = signingValue("storeFile", "TESSERA_KEYSTORE_PATH")
 val hasReleaseSigning = storeFilePath != null && file(storeFilePath).exists()
@@ -63,16 +66,6 @@ android {
                 )
                 signingConfigs.getByName("debug")
             }
-        }
-    }
-
-    // `flutter build apk --split-per-abi` drives the split itself; declaring the ABIs here
-    // keeps the universal APK and the bundle building the same three, and nothing else.
-    splits {
-        abi {
-            isUniversalApk = false
-            reset()
-            include("armeabi-v7a", "arm64-v8a", "x86_64")
         }
     }
 
