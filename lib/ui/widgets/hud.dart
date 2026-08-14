@@ -7,15 +7,20 @@ import '../../skins/skin.dart';
 /// Score, records, and one mode-specific readout.
 ///
 /// Every mode shows the same frame; only the middle slot changes, which keeps
-/// the screen recognisable however you are playing.
+/// the screen recognisable however you are playing. It stacks vertically on a
+/// wide screen, where the readouts belong in a column beside the board rather
+/// than flung across the full width.
 class Hud extends StatelessWidget {
   const Hud({
     required this.controller,
     required this.skin,
     required this.best,
     this.par,
+    this.axis = Axis.horizontal,
     super.key,
   });
+
+  final Axis axis;
 
   final GameController controller;
   final Skin skin;
@@ -29,36 +34,53 @@ class Hud extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListenableBuilder(
       listenable: controller,
-      builder: (context, _) => Padding(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
+      builder: (context, _) {
+        final stats = [
+          _Stat(
+            label: 'Score',
+            value: '${controller.score}',
+            skin: skin,
+            large: true,
+          ),
+          _modeStat(),
+          if (par != null)
             _Stat(
-              label: 'Score',
-              value: '${controller.score}',
+              label: 'Moves / par',
+              value: '${controller.movesMade} / $par',
               skin: skin,
-              large: true,
+              highlight: controller.movesMade > par!,
+            )
+          else
+            _Stat(
+              label: controller.score > best ? 'New best' : 'Best',
+              value: '${controller.score > best ? controller.score : best}',
+              skin: skin,
+              highlight: controller.score > best,
             ),
-            _modeStat(),
-            if (par != null)
-              _Stat(
-                label: 'Moves / par',
-                value: '${controller.movesMade} / $par',
-                skin: skin,
-                highlight: controller.movesMade > par!,
-              )
-            else
-              _Stat(
-                label: controller.score > best ? 'New best' : 'Best',
-                value: '${controller.score > best ? controller.score : best}',
-                skin: skin,
-                highlight: controller.score > best,
-              ),
-          ],
-        ),
-      ),
+        ];
+
+        if (axis == Axis.vertical) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (final stat in stats)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 18),
+                  child: stat,
+                ),
+            ],
+          );
+        }
+
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: stats,
+          ),
+        );
+      },
     );
   }
 

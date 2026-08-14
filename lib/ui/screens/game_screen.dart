@@ -188,40 +188,106 @@ class _GameScreenState extends State<GameScreen> {
         body: SafeArea(
           child: Stack(
             children: [
-              Column(
-                children: [
-                  _TopBar(
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  // The board is a grid that wants to be as big as it can. On a
+                  // wide screen that means everything else belongs beside it —
+                  // readouts on the left, controls on the right — rather than
+                  // stretched across the top and bottom with the board pinched
+                  // into the middle.
+                  final wide = constraints.maxWidth > constraints.maxHeight;
+                  final board = BoardView(
                     controller: _controller,
                     skin: skin,
-                    onPause: () => setState(() => _paused = true),
-                  ),
-                  Hud(
-                    controller: _controller,
-                    skin: skin,
-                    best: settings.bestFor(widget.modeId),
-                    par: widget.level?.parMoves,
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: BoardView(
-                        controller: _controller,
-                        skin: skin,
-                        showSymbols: settings.showSymbols,
-                        lowSpec: settings.performanceMode,
-                        particles:
-                            !settings.performanceMode &&
-                            !settings.reducedMotion,
-                        dangerRows: _controller.mode is RisingTideMode ? 2 : 0,
+                    showSymbols: settings.showSymbols,
+                    lowSpec: settings.performanceMode,
+                    particles:
+                        !settings.performanceMode && !settings.reducedMotion,
+                    dangerRows: _controller.mode is RisingTideMode ? 2 : 0,
+                  );
+
+                  if (!wide) {
+                    return Column(
+                      children: [
+                        _TopBar(
+                          controller: _controller,
+                          skin: skin,
+                          onPause: () => setState(() => _paused = true),
+                        ),
+                        Hud(
+                          controller: _controller,
+                          skin: skin,
+                          best: settings.bestFor(widget.modeId),
+                          par: widget.level?.parMoves,
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: board,
+                          ),
+                        ),
+                        _Actions(
+                          controller: _controller,
+                          skin: skin,
+                          onRestart: _restart,
+                        ),
+                      ],
+                    );
+                  }
+
+                  final sidebar = (constraints.maxWidth * 0.24).clamp(
+                    150.0,
+                    260.0,
+                  );
+                  return Row(
+                    children: [
+                      SizedBox(
+                        width: sidebar,
+                        child: _SidePanel(
+                          skin: skin,
+                          children: [
+                            _SideHeader(
+                              controller: _controller,
+                              skin: skin,
+                              onBack: () => Navigator.of(context).pop(),
+                            ),
+                            const SizedBox(height: 18),
+                            Hud(
+                              controller: _controller,
+                              skin: skin,
+                              best: settings.bestFor(widget.modeId),
+                              par: widget.level?.parMoves,
+                              axis: Axis.vertical,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ),
-                  _Actions(
-                    controller: _controller,
-                    skin: skin,
-                    onRestart: _restart,
-                  ),
-                ],
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: board,
+                        ),
+                      ),
+                      SizedBox(
+                        width: sidebar,
+                        child: _SidePanel(
+                          skin: skin,
+                          alignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _Actions(
+                              controller: _controller,
+                              skin: skin,
+                              onRestart: _restart,
+                              axis: Axis.vertical,
+                              onPause: () => setState(() => _paused = true),
+                              onSkins: () => _showSkinSheet(context, skin),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
               if (_paused && !_showResult)
                 _PauseOverlay(
@@ -289,7 +355,7 @@ class _TopBar extends StatelessWidget {
             ),
           ),
           IconButton(
-            onPressed: () => _showSkins(context),
+            onPressed: () => _showSkinSheet(context, skin),
             icon: const Icon(Icons.palette_outlined),
             color: skin.palette.textPrimary,
           ),
@@ -302,20 +368,79 @@ class _TopBar extends StatelessWidget {
       ),
     );
   }
+}
 
-  void _showSkins(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: skin.palette.backgroundBottom,
-      builder: (sheetContext) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        child: SkinSwitcher(
-          compact: true,
-          onSelected: () => Navigator.of(sheetContext).pop(),
+void _showSkinSheet(BuildContext context, Skin skin) {
+  showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: skin.palette.backgroundBottom,
+    builder: (sheetContext) => Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: SkinSwitcher(
+        compact: true,
+        onSelected: () => Navigator.of(sheetContext).pop(),
+      ),
+    ),
+  );
+}
+
+/// A column of chrome beside the board on a wide screen.
+class _SidePanel extends StatelessWidget {
+  const _SidePanel({
+    required this.skin,
+    required this.children,
+    this.alignment = CrossAxisAlignment.start,
+  });
+
+  final Skin skin;
+  final List<Widget> children;
+  final CrossAxisAlignment alignment;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: alignment,
+      children: children,
+    ),
+  );
+}
+
+/// Back arrow and mode name, stacked for the wide layout.
+class _SideHeader extends StatelessWidget {
+  const _SideHeader({
+    required this.controller,
+    required this.skin,
+    required this.onBack,
+  });
+
+  final GameController controller;
+  final Skin skin;
+  final VoidCallback onBack;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      IconButton(
+        onPressed: onBack,
+        padding: EdgeInsets.zero,
+        alignment: Alignment.centerLeft,
+        icon: const Icon(Icons.arrow_back_rounded),
+        color: skin.palette.textPrimary,
+      ),
+      const SizedBox(height: 4),
+      Text(
+        controller.mode.name,
+        style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w800,
+          color: skin.palette.textPrimary,
         ),
       ),
-    );
-  }
+    ],
+  );
 }
 
 /// Stops the clock and gets out of the way. The board keeps its state; this is
@@ -401,43 +526,82 @@ class _Actions extends StatelessWidget {
     required this.controller,
     required this.skin,
     required this.onRestart,
+    this.axis = Axis.horizontal,
+    this.onPause,
+    this.onSkins,
   });
 
   final GameController controller;
   final Skin skin;
   final VoidCallback onRestart;
+  final Axis axis;
+
+  /// Only supplied by the wide layout, which has no top bar to put them in.
+  final VoidCallback? onPause;
+  final VoidCallback? onSkins;
 
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
       listenable: controller,
-      builder: (context, _) => Padding(
-        padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+      builder: (context, _) {
+        final buttons = <Widget>[
+          _ActionButton(
+            icon: Icons.lightbulb_outline_rounded,
+            label: 'Hint',
+            skin: skin,
+            onPressed: controller.busy ? null : controller.showHint,
+          ),
+          if (controller.mode.allowsUndo)
             _ActionButton(
-              icon: Icons.lightbulb_outline_rounded,
-              label: 'Hint',
+              icon: Icons.undo_rounded,
+              label: 'Undo ${controller.undosRemaining}',
               skin: skin,
-              onPressed: controller.busy ? null : controller.showHint,
+              onPressed: controller.canUndo ? controller.undo : null,
             ),
-            if (controller.mode.allowsUndo)
-              _ActionButton(
-                icon: Icons.undo_rounded,
-                label: 'Undo ${controller.undosRemaining}',
-                skin: skin,
-                onPressed: controller.canUndo ? controller.undo : null,
-              ),
+          _ActionButton(
+            icon: Icons.refresh_rounded,
+            label: 'Restart',
+            skin: skin,
+            onPressed: onRestart,
+          ),
+          if (onSkins case final open?)
             _ActionButton(
-              icon: Icons.refresh_rounded,
-              label: 'Restart',
+              icon: Icons.palette_outlined,
+              label: 'Skin',
               skin: skin,
-              onPressed: onRestart,
+              onPressed: open,
             ),
-          ],
-        ),
-      ),
+          if (onPause case final pause?)
+            _ActionButton(
+              icon: Icons.pause_rounded,
+              label: 'Pause',
+              skin: skin,
+              onPressed: pause,
+            ),
+        ];
+
+        if (axis == Axis.vertical) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (final button in buttons)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: button,
+                ),
+            ],
+          );
+        }
+
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: buttons,
+          ),
+        );
+      },
     );
   }
 }

@@ -6,7 +6,14 @@ A tile-matching puzzle game where you swap neighbouring objects to line up **thr
 of a kind and collect them. One engine, three very different ways to play, and three
 hand-painted skins that change the whole feel of the board without changing the rules.
 
-Target platforms: Android, iOS, Web, Windows. Portrait-first, single-hand play.
+Target platforms: Android, iOS, Web, Windows.
+
+**Orientation.** The game is not locked. A tall screen stacks the chrome above and below the
+board — one-handed play, the board as wide as the screen allows. A wide screen (a rotated
+phone, a tablet, a desktop window) moves the readouts into a column on the left and the
+controls into a column on the right, leaving the board the full height. The board is a square
+grid that wants to be as large as it can, so on a wide screen everything else belongs beside
+it rather than above and below, which is what pinched it into a small square before.
 
 ## 2. Core rules (shared by every mode)
 
