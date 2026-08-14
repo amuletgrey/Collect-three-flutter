@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
 import '../engine/engine.dart';
+import '../services/audio_service.dart';
 import '../services/haptics_service.dart';
 import 'motion.dart';
 
@@ -44,6 +45,7 @@ class GameController extends ChangeNotifier {
   GameEngine _engine;
   Motion _motion = const Motion();
   HapticsService _haptics = const HapticsService(enabled: false);
+  AudioService? _audio;
 
   /// Where each live tile is drawn, by tile id. Diverges from the engine board
   /// only while a move is being animated.
@@ -107,6 +109,7 @@ class GameController extends ChangeNotifier {
 
   set motion(Motion value) => _motion = value;
   set haptics(HapticsService value) => _haptics = value;
+  set audio(AudioService? value) => _audio = value;
 
   /// Tap-to-select input: the second tap on a neighbour plays the move.
   Future<void> tap(Pos pos) async {
@@ -187,6 +190,7 @@ class GameController extends ChangeNotifier {
     for (final event in events) {
       if (_disposed) return;
       _haptics.forEvent(event);
+      _audio?.forEvent(event);
       switch (event) {
         case SwapPerformed(:final a, :final b):
           _stepDuration = _motion.swap;

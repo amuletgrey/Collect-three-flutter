@@ -56,6 +56,10 @@ class SwapReverted extends BoardEvent {
   String toString() => 'SwapReverted($a, $b)';
 }
 
+/// Why a batch of tiles left the board. Everything looks the same to the
+/// animation, but they do not sound the same, and a delivery is not a match.
+enum ClearCause { matched, delivered }
+
 /// One resolution step's worth of collected tiles.
 class TilesCleared extends BoardEvent {
   const TilesCleared({
@@ -64,7 +68,10 @@ class TilesCleared extends BoardEvent {
     required this.scoreDelta,
     required this.cascadeStep,
     required this.multiplier,
+    this.cause = ClearCause.matched,
   });
+
+  final ClearCause cause;
 
   /// Union of every matched line — these are the cells being emptied.
   final List<Pos> cells;

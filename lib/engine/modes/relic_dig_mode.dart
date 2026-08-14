@@ -98,6 +98,7 @@ class RelicDigMode extends GameMode {
         scoreDelta: bonus,
         cascadeStep: 1,
         multiplier: 1,
+        cause: ClearCause.delivered,
       ),
     ];
 

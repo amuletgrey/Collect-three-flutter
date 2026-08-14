@@ -69,6 +69,13 @@ class SettingsScreen extends StatelessWidget {
                             settings.setShowSymbols(value: value),
                       ),
                     _Toggle(
+                      label: 'Sound',
+                      hint: 'Chimes that climb as a chain grows',
+                      value: settings.sound,
+                      skin: skin,
+                      onChanged: (value) => settings.setSound(value: value),
+                    ),
+                    _Toggle(
                       label: 'Vibration',
                       hint: 'Buzz on matches and chains',
                       value: settings.haptics,

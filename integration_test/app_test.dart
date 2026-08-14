@@ -30,9 +30,15 @@ void main() {
     expect(find.text('Rising Tide'), findsOneWidget);
     expect(find.text('Relic Dig'), findsOneWidget);
 
-    expect(find.text('Classic Arcade'), findsOneWidget);
-    expect(find.text('Treasure Hunt'), findsOneWidget);
-    expect(find.text('Candy Shop'), findsOneWidget);
+    // The skins may be below the fold on a short screen.
+    for (final skin in ['Classic Arcade', 'Treasure Hunt', 'Candy Shop']) {
+      await tester.scrollUntilVisible(
+        find.text(skin),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text(skin), findsOneWidget);
+    }
   });
 
   testWidgets('every skin renders the home screen without crashing', (
@@ -41,13 +47,21 @@ void main() {
     await _launch(tester);
 
     for (final skin in ['Treasure Hunt', 'Candy Shop', 'Classic Arcade']) {
+      // On a short screen — a phone on its side — the skin rows are below the
+      // fold, so reach them the way a player would.
+      await tester.scrollUntilVisible(
+        find.text(skin),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
       await tester.tap(find.text(skin));
       await tester.pumpAndSettle();
-      expect(
-        find.text('TESSERA'),
-        findsOneWidget,
-        reason: 'after picking $skin',
-      );
+
+      // The title has scrolled away by now, so check what is actually on
+      // screen: the list is still alive and the skin row survived its repaint.
+      expect(find.text(skin), findsOneWidget, reason: 'after picking $skin');
+      expect(tester.takeException(), isNull, reason: 'after picking $skin');
     }
   });
 

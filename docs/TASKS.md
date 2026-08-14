@@ -127,7 +127,7 @@ Details in [`docs/RELEASE.md`](RELEASE.md).
 | CT-071 | Accessibility pass: semantics labels, symbols, reduced motion | board navigable by screen reader | [ ] |
 | CT-072 | Performance mode: drop blur mask filters and backdrop decoration | the setting old phones need | [x] |
 | CT-073 | App icons, splash, store metadata, release build configs | done in M9; splash and the written store listing remain | [~] |
-| CT-074 | `AudioService` + a sound pack | mute respected everywhere | [ ] |
+| CT-074 | `AudioService` + a sound pack | done as CT-125/126 | [x] |
 
 ---
 
@@ -140,7 +140,7 @@ being handled separately — see that milestone before touching `android/`, `ios
 | Priority | Item | Notes |
 | --- | --- | --- |
 | 1 | **M10 — Special tiles** | 4- and 5-matches create powers. Rules, art and device checks done; CT-107/CT-108 remain. |
-| 2 | M11 — Feel and feedback | Done except sound: particles, danger flash, pause and settings all shipped. **`AudioService` and a sound pack still need a decision** — it means a new runtime dependency and audio assets, neither of which should be picked unattended. |
+| 2 | M11 — Feel and feedback | **Done**, sound included. |
 | 3 | M12 — Relic Dig, a fourth mode | **Done.** Escort relic tiles to the bottom row. |
 | 4 | M13 — Content and progression | More level packs and tiers, daily seeded challenge, level-select polish. **Deliberately last** — not yet decided that we want to go there. |
 

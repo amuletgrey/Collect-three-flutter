@@ -33,6 +33,9 @@ flutter run -d chrome             # or -d windows / -d <device>
 flutter test integration_test -d windows
 flutter test integration_test -d <device-id>      # flutter devices for ids
 
+# Regenerate the sound set (synthesised, no recordings)
+dart run tool/generate_sounds.dart
+
 # Regenerate the Clear the Board pack (only ships layouts the solver beat)
 dart run tool/generate_levels.dart --count 30 --out assets/levels/pack_01.json
 ```
@@ -75,7 +78,9 @@ animation.
 - **Naming.** `Pos(row, col)` — always row first. Kinds are `int` indices into the skin's
   `kinds` list, never colour names.
 - **No new dependencies** without justification in the PR description. Current runtime deps:
-  `shared_preferences` only.
+  `shared_preferences` and `audioplayers` — the latter chosen over `soundpool` (mobile only)
+  and `just_audio` (built for streaming) because it covers Android, iOS, web and Windows and
+  handles short overlapping effects.
 - **Style.** Follow `analysis_options.yaml`; `dart format` before committing. Comments explain
   *why*, not *what* — match the density of surrounding code.
 
@@ -143,6 +148,12 @@ so existing modes stay unchanged.
   `aapt2 dump resources <apk> | grep -A2 enable_impeller` — it should print `() false` and
   `(v31) true`. **This opt-out is deprecated** and Flutter intends to remove it; when that
   happens these devices need the upstream GLES fix instead.
+- **Wireless adb on the Xiaomi.** It drops off USB regularly. With it plugged in once:
+  `adb tcpip 5555`, read the address from `adb shell ip -f inet addr show wlan0`, then
+  `adb connect <ip>:5555` — 192.168.0.109:5555 at the time of writing. It survives unplugging
+  but **not** a reboot, which needs the USB step again. MIUI still gates installs: an
+  `INSTALL_FAILED_USER_RESTRICTED` on the first try often succeeds on a retry once the on-device
+  prompt is cleared.
 - **Put the game back on the phones after a device test run.** `flutter test integration_test`
   uninstalls the app when it finishes, which leaves the user's phones empty. Rebuild a fat APK
   and reinstall both — debug on the Xiaomi, **release** on the S5 (debug builds do not present

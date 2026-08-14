@@ -60,6 +60,23 @@ void main() {
     expect(find.text('Skin'), findsOneWidget);
   });
 
+  testWidgets('a short wide screen scrolls its side panels, never overflows', (
+    tester,
+  ) async {
+    // A phone on its side: very little height for a stack of controls. This
+    // overflowed by 49 pixels on a real device before the panels could scroll.
+    tester.view.physicalSize = const Size(2712, 1220);
+    tester.view.devicePixelRatio = 2.5;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(await _app());
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Hint'), findsOneWidget);
+    expect(find.text('SCORE'), findsOneWidget);
+  });
+
   testWidgets('the board is bigger in landscape than it was before', (
     tester,
   ) async {

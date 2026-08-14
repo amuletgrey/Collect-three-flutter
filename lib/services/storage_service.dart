@@ -20,6 +20,7 @@ class StorageService {
   static const String _reducedMotionKey = '$_prefix.reducedMotion';
   static const String _performanceKey = '$_prefix.performanceMode';
   static const String _hapticsKey = '$_prefix.haptics';
+  static const String _soundKey = '$_prefix.sound';
 
   final SharedPreferences _prefs;
 
@@ -41,6 +42,10 @@ class StorageService {
   bool get haptics => _prefs.getBool(_hapticsKey) ?? true;
   Future<void> setHaptics({required bool value}) =>
       _prefs.setBool(_hapticsKey, value);
+
+  bool get sound => _prefs.getBool(_soundKey) ?? true;
+  Future<void> setSound({required bool value}) =>
+      _prefs.setBool(_soundKey, value);
 
   /// The run in progress for a mode, if there is one.
   ///

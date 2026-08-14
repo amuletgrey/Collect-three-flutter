@@ -219,6 +219,12 @@ Matching has to feel good or nothing else matters.
 - Cascades: each step slightly faster than the previous, with a rising pitch chime.
 - Haptics: light on collect, medium on cascade >= x3, heavy on game over.
 - **Reduced motion** setting collapses all of the above to quick cross-fades.
+- **Sound:** the collect chime climbs a pentatonic scale with the chain — first clear is the
+  root, a x4 chain is four notes up. The sound tells you how good the chain was before the
+  score has finished counting. Powers get a noise burst, a delivered relic a low struck tone,
+  the tide a rising sweep. Everything is synthesised by `tool/generate_sounds.dart` rather than
+  recorded: a match-3's sounds are tones and envelopes, so they belong in code where they can
+  be retuned by editing numbers.
 - **Hint:** a ring in the skin's own hint colour, breathing in and out. It is bracketed by a
   light and a dark edge, because no single colour contrasts with both the lightest and the
   darkest tile in a skin.

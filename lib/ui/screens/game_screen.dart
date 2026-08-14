@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../app_settings.dart';
 import '../../engine/engine.dart';
 import '../../game/game_controller.dart';
+import '../../services/audio_service.dart';
 import '../../services/haptics_service.dart';
 import '../../services/level_repository.dart';
 import '../../skins/skin.dart';
@@ -53,6 +54,9 @@ class _GameScreenState extends State<GameScreen> {
 
   bool _paused = false;
 
+  /// One pool for the whole screen: creating players per sound would stutter.
+  final SoundPlayer _sound = PooledSoundPlayer();
+
   @override
   void initState() {
     super.initState();
@@ -68,6 +72,7 @@ class _GameScreenState extends State<GameScreen> {
 
   @override
   void dispose() {
+    unawaited(_sound.dispose());
     _bannerTimer?.cancel();
     _controller
       ..removeListener(_onChanged)
@@ -178,7 +183,8 @@ class _GameScreenState extends State<GameScreen> {
     final skin = settings.skin;
     _controller
       ..motion = settings.motion
-      ..haptics = HapticsService(enabled: settings.haptics);
+      ..haptics = HapticsService(enabled: settings.haptics)
+      ..audio = AudioService(player: _sound, enabled: settings.sound);
 
     return SkinBackground(
       skin: skin,
@@ -385,6 +391,11 @@ void _showSkinSheet(BuildContext context, Skin skin) {
 }
 
 /// A column of chrome beside the board on a wide screen.
+///
+/// It scrolls rather than overflowing. A phone on its side has very little
+/// height to give — a stack of buttons plus the readouts ran 49 pixels past the
+/// bottom of a 1220x2712 device — and chrome that cannot be reached is worse
+/// than chrome that has to be nudged.
 class _SidePanel extends StatelessWidget {
   const _SidePanel({
     required this.skin,
@@ -397,12 +408,18 @@ class _SidePanel extends StatelessWidget {
   final CrossAxisAlignment alignment;
 
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: alignment,
-      children: children,
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) => SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      child: ConstrainedBox(
+        // Centre the contents when they fit, scroll them when they do not.
+        constraints: BoxConstraints(minHeight: constraints.maxHeight - 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: alignment,
+          children: children,
+        ),
+      ),
     ),
   );
 }

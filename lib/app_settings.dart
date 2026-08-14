@@ -16,7 +16,8 @@ class AppSettings extends ChangeNotifier {
       _showSymbols = _storage.showSymbols,
       _reducedMotion = _storage.reducedMotion,
       _performanceMode = _storage.performanceMode,
-      _haptics = _storage.haptics;
+      _haptics = _storage.haptics,
+      _sound = _storage.sound;
 
   final StorageService _storage;
 
@@ -25,6 +26,7 @@ class AppSettings extends ChangeNotifier {
   bool _reducedMotion;
   bool _performanceMode;
   bool _haptics;
+  bool _sound;
 
   Skin get skin => _skin;
   bool get showSymbols => _showSymbols;
@@ -34,6 +36,7 @@ class AppSettings extends ChangeNotifier {
   /// reach for on an older phone.
   bool get performanceMode => _performanceMode;
   bool get haptics => _haptics;
+  bool get sound => _sound;
   Motion get motion => Motion(reduced: _reducedMotion);
 
   void selectSkin(Skin skin) {
@@ -64,6 +67,12 @@ class AppSettings extends ChangeNotifier {
   void setHaptics({required bool value}) {
     _haptics = value;
     unawaited(_storage.setHaptics(value: value));
+    notifyListeners();
+  }
+
+  void setSound({required bool value}) {
+    _sound = value;
+    unawaited(_storage.setSound(value: value));
     notifyListeners();
   }
 
