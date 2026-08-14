@@ -1,6 +1,11 @@
-# Collect Three
+# Tessera
+
+*Line up the mosaic.*
 
 A Flutter tile-matching game: swap adjacent objects, line up **three or more**, collect them.
+A *tessera* is the single tile a mosaic is built from — which is exactly what the player moves.
+
+Published by **VibeByteForge** as `com.vibebyteforge.tessera`.
 
 Three ways to play the same rules:
 

@@ -1,0 +1,247 @@
+name: Build artifacts
+
+# Produces every shippable artifact for Tessera.
+#
+#   push to main        build everything, keep the artifacts for 30 days
+#   tag  v*             the same, plus a GitHub Release with the files attached
+#   workflow_dispatch   on demand, from the Actions tab
+#
+# Android release signing is optional: with the ANDROID_KEYSTORE_* secrets set
+# the artifacts are upload-ready, without them Gradle falls back to the debug
+# key and the build still succeeds. See docs/RELEASE.md.
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: 3.44.6
+
+jobs:
+  version:
+    name: Resolve version
+    runs-on: ubuntu-latest
+    outputs:
+      name: ${{ steps.v.outputs.name }}
+      build: ${{ steps.v.outputs.build }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: v
+        shell: bash
+        run: |
+          # A tag wins over pubspec so `git tag v1.2.0` is all it takes to cut a
+          # release; otherwise pubspec's version name is used as-is.
+          pubspec_name=$(sed -n 's/^version: *\([^+]*\)+.*/\1/p' pubspec.yaml)
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            name="${GITHUB_REF#refs/tags/v}"
+          else
+            name="${pubspec_name}"
+          fi
+          # The run number is monotonic, which is what Play requires of
+          # versionCode; it never goes backwards across branches.
+          echo "name=${name}" >> "$GITHUB_OUTPUT"
+          echo "build=${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+          echo "Building ${name}+${GITHUB_RUN_NUMBER}"
+
+  android:
+    name: Android
+    needs: version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      # `flutter build appbundle` shells out to cmdline-tools to check the
+      # finished AAB for debug symbols, and reports the miss as "failed to strip
+      # debug symbols from native libraries" — which points at the NDK, not at
+      # the real cause. Fail here instead, where the message is true.
+      - name: Check for cmdline-tools
+        run: |
+          if [ ! -d "${ANDROID_HOME}/cmdline-tools" ]; then
+            echo "::error::${ANDROID_HOME}/cmdline-tools is missing; the appbundle build will fail its debug-symbol check."
+            exit 1
+          fi
+          ls "${ANDROID_HOME}/cmdline-tools"
+
+      - name: Decode the release keystore
+        id: keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "No ANDROID_KEYSTORE_BASE64 secret; Gradle will use the debug key."
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "$KEYSTORE_BASE64" | base64 -d > "${RUNNER_TEMP}/release.jks"
+            echo "signed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build split APKs, universal APK and the bundle
+        env:
+          TESSERA_KEYSTORE_PATH: ${{ steps.keystore.outputs.signed == 'true' && format('{0}/release.jks', runner.temp) || '' }}
+          TESSERA_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          TESSERA_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          TESSERA_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          args="--release --build-name=${{ needs.version.outputs.name }} --build-number=${{ needs.version.outputs.build }}"
+          # One APK per ABI: what you sideload, and the small download.
+          flutter build apk $args --split-per-abi
+          # One fat APK carrying all three ABIs: for anyone who cannot pick.
+          flutter build apk $args
+          # One bundle carrying everything: what Play actually wants.
+          flutter build appbundle $args
+
+      - name: Collect and name the artifacts
+        id: collect
+        run: |
+          v="${{ needs.version.outputs.name }}+${{ needs.version.outputs.build }}"
+          mkdir -p out
+          for abi in armeabi-v7a arm64-v8a x86_64; do
+            cp "build/app/outputs/flutter-apk/app-${abi}-release.apk" \
+               "out/tessera-${v}-${abi}.apk"
+          done
+          cp build/app/outputs/flutter-apk/app-release.apk \
+             "out/tessera-${v}-universal.apk"
+          cp build/app/outputs/bundle/release/app-release.aab \
+             "out/tessera-${v}.aab"
+          ls -la out
+
+      # A fat APK missing an ABI installs and then dies with "libflutter.so not
+      # found", which looks like a crash rather than a packaging bug, so assert
+      # it here where the failure is legible.
+      - name: Verify the universal APK carries every ABI
+        run: |
+          v="${{ needs.version.outputs.name }}+${{ needs.version.outputs.build }}"
+          libs=$(unzip -l "out/tessera-${v}-universal.apk" | grep -o 'lib/[^/]*' | sort -u)
+          echo "$libs"
+          for abi in armeabi-v7a arm64-v8a x86_64; do
+            echo "$libs" | grep -q "lib/${abi}" || { echo "::error::universal APK is missing ${abi}"; exit 1; }
+          done
+
+      - name: Report signing status
+        run: |
+          if [ "${{ steps.keystore.outputs.signed }}" = "true" ]; then
+            echo "### Android: signed with the release keystore" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### Android: DEBUG-SIGNED — not uploadable to Play" >> "$GITHUB_STEP_SUMMARY"
+            echo "Set the ANDROID_KEYSTORE_* secrets, see docs/RELEASE.md." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: out/*
+          retention-days: 30
+
+  web:
+    name: Web
+    needs: version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      - name: Build
+        run: |
+          flutter build web --release \
+            --build-name=${{ needs.version.outputs.name }} \
+            --build-number=${{ needs.version.outputs.build }}
+
+      - name: Package
+        run: |
+          v="${{ needs.version.outputs.name }}+${{ needs.version.outputs.build }}"
+          mkdir -p out
+          (cd build/web && zip -qr "${GITHUB_WORKSPACE}/out/tessera-${v}-web.zip" .)
+          ls -la out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web
+          path: out/*
+          retention-days: 30
+
+  windows:
+    name: Windows
+    needs: version
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      - name: Build
+        run: >
+          flutter build windows --release
+          --build-name=${{ needs.version.outputs.name }}
+          --build-number=${{ needs.version.outputs.build }}
+
+      - name: Package
+        shell: pwsh
+        run: |
+          $v = "${{ needs.version.outputs.name }}+${{ needs.version.outputs.build }}"
+          New-Item -ItemType Directory -Force out | Out-Null
+          # Portable: the whole Release folder, DLLs and data included.
+          Compress-Archive -Path build/windows/x64/runner/Release/* `
+                           -DestinationPath "out/tessera-$v-windows-x64.zip"
+          Get-ChildItem out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: out/*
+          retention-days: 30
+
+  release:
+    name: GitHub Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [version, android, web, windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Attach everything to the tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          find artifacts -type f | sort
+          gh release create "${GITHUB_REF#refs/tags/}" \
+            --title "Tessera ${{ needs.version.outputs.name }}" \
+            --generate-notes \
+            $(find artifacts -type f | sort)

@@ -15,7 +15,7 @@ class CollectThreeApp extends StatelessWidget {
       // Screens paint themselves from the active skin, so the Material theme
       // only has to supply sensible defaults for stock widgets.
       child: MaterialApp(
-        title: 'Collect Three',
+        title: 'Tessera',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           useMaterial3: true,

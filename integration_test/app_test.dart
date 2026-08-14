@@ -1,15 +1,15 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:collect_three/engine/engine.dart';
-import 'package:collect_three/game/game_controller.dart';
-import 'package:collect_three/game/motion.dart';
-import 'package:collect_three/main.dart' as app;
-import 'package:collect_three/skins/skin_registry.dart';
-import 'package:collect_three/ui/widgets/board_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart' hide MatchFinder;
 import 'package:integration_test/integration_test.dart';
+import 'package:tessera/engine/engine.dart';
+import 'package:tessera/game/game_controller.dart';
+import 'package:tessera/game/motion.dart';
+import 'package:tessera/main.dart' as app;
+import 'package:tessera/skins/skin_registry.dart';
+import 'package:tessera/ui/widgets/board_view.dart';
 
 /// End-to-end tests that drive the real app with real gestures.
 ///
@@ -42,7 +42,11 @@ void main() {
     for (final skin in ['Treasure Hunt', 'Candy Shop', 'Classic Arcade']) {
       await tester.tap(find.text(skin));
       await tester.pumpAndSettle();
-      expect(find.text('THREE'), findsOneWidget, reason: 'after picking $skin');
+      expect(
+        find.text('TESSERA'),
+        findsOneWidget,
+        reason: 'after picking $skin',
+      );
     }
   });
 

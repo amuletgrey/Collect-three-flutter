@@ -1,6 +1,6 @@
-import 'package:collect_three/engine/engine.dart';
-import 'package:collect_three/services/level_repository.dart';
 import 'package:flutter_test/flutter_test.dart' hide MatchFinder;
+import 'package:tessera/engine/engine.dart';
+import 'package:tessera/services/level_repository.dart';
 
 /// The promise Clear the Board makes is that every shipped level can actually
 /// be cleared. This re-proves it for the whole pack, so a regenerated or

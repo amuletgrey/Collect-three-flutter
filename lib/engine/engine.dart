@@ -1,4 +1,4 @@
-/// The rules of Collect Three.
+/// The rules of Tessera.
 ///
 /// Pure Dart: nothing in this library imports Flutter, touches the clock, or
 /// draws anything. See AGENTS.md — `test/engine/purity_test.dart` enforces it.

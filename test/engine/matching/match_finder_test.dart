@@ -1,7 +1,7 @@
-import 'package:collect_three/engine/engine.dart';
 // flutter_test exports its own MatchFinder (a widget finder); hide it so the
 // engine's matcher keeps its domain name.
 import 'package:flutter_test/flutter_test.dart' hide MatchFinder;
+import 'package:tessera/engine/engine.dart';
 
 void main() {
   group('MatchFinder.find', () {

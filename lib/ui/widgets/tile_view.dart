@@ -1,8 +1,7 @@
 import 'dart:math' as math;
 
-import 'package:collect_three/engine/models/tile.dart';
-
 import 'package:flutter/widgets.dart';
+import 'package:tessera/engine/models/tile.dart';
 
 import '../../skins/skin.dart';
 import '../../skins/tile_painter.dart';

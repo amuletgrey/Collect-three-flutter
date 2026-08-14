@@ -1,4 +1,4 @@
-# Collect Three — Game Design Document
+# Tessera — Game Design Document
 
 ## 1. Elevator pitch
 

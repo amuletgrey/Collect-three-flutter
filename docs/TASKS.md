@@ -5,10 +5,12 @@ Task IDs are stable — reference them in commits (`CT-012: add match finder`).
 
 Status legend: `[ ]` todo · `[~]` in progress · `[x]` done
 
-Current state: **M0–M6 are done, M7 is in progress.** The game is playable in all three modes
-with all three skins, and Clear the Board now runs on a 30-level pack where every level was
-solved by the generator before shipping. What remains in M7 is audio, particles, the
-invalid-swap shake, and a dedicated pause/settings screen.
+Current state: **M0–M6 and M9 are done, M7 is in progress.** The game is playable in all three
+modes with all three skins, and Clear the Board now runs on a 30-level pack where every level
+was solved by the generator before shipping. It ships as **Tessera** under
+`com.vibebyteforge.tessera` with icons and CI-built artifacts for Android, web and Windows.
+What remains in M7 is audio, particles, the invalid-swap shake, and a dedicated pause/settings
+screen.
 
 ---
 
@@ -16,7 +18,7 @@ invalid-swap shake, and a dedicated pause/settings screen.
 
 | ID | Task | Acceptance | Status |
 | --- | --- | --- | --- |
-| CT-001 | Flutter scaffold (`collect_three`, android/ios/web/windows) | `flutter analyze` clean, app builds | [x] |
+| CT-001 | Flutter scaffold (`tessera`, android/ios/web/windows) | `flutter analyze` clean, app builds | [x] |
 | CT-002 | Design docs: concept, architecture, skins, tasks, AGENTS.md | reviewed and merged | [x] |
 | CT-003 | Lints tightened, `analysis_options.yaml` project rules | analyzer clean with stricter rules | [x] |
 
@@ -103,6 +105,20 @@ No Flutter imports anywhere in this milestone. Every task lands with its own tes
 | CT-085 | Per-API-level Impeller opt-out for old Adreno GPUs | S5 no longer segfaults; API 31+ keeps Impeller | [x] |
 | CT-086 | Investigate why debug builds show a blank window on the S5 | root cause found, or documented as a device limitation | [ ] |
 
+## M9 — Name, icon and release artifacts
+
+Details in [`docs/RELEASE.md`](RELEASE.md).
+
+| ID | Task | Acceptance | Status |
+| --- | --- | --- | --- |
+| CT-090 | Name the app and roll it across every platform namespace | nothing anywhere still says `collect_three` | [x] |
+| CT-091 | App icon: 1024 master, scaled to every platform's slots | adaptive + themed on Android, alpha-free on iOS, multi-size .ico | [x] |
+| CT-092 | Android release signing from key.properties or CI env, with a debug fallback | a fresh clone still builds release | [x] |
+| CT-093 | Artifacts: 3 split APKs, a universal APK, an AAB, web zip, Windows zip | every ABI verified present in the universal APK | [x] |
+| CT-094 | CI: verify on every push, build artifacts on main/tag, release on `v*` | green run on this branch | [x] |
+| CT-095 | Written store listing: descriptions, screenshots, data-safety answers | Play listing can be submitted | [ ] |
+| CT-096 | iOS: Apple account, signing, macOS runner in the matrix | an installable .ipa | [ ] |
+
 ## M7 — Polish and release
 
 | ID | Task | Acceptance | Status |
@@ -110,7 +126,7 @@ No Flutter imports anywhere in this milestone. Every task lands with its own tes
 | CT-070 | `HapticsService` (platform haptics, no plugin) | scales with the moment; respects the setting | [x] |
 | CT-071 | Accessibility pass: semantics labels, symbols, reduced motion | board navigable by screen reader | [ ] |
 | CT-072 | Performance mode: drop blur mask filters and backdrop decoration | the setting old phones need | [x] |
-| CT-073 | App icons, splash, store metadata, release build configs | signed release build for Android | [ ] |
+| CT-073 | App icons, splash, store metadata, release build configs | done in M9; splash and the written store listing remain | [~] |
 | CT-074 | `AudioService` + a sound pack | mute respected everywhere | [ ] |
 
 ---

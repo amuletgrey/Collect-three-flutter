@@ -1,11 +1,11 @@
-import 'package:collect_three/engine/engine.dart';
-import 'package:collect_three/game/game_controller.dart';
-import 'package:collect_three/game/motion.dart';
-import 'package:collect_three/skins/skin_registry.dart';
-import 'package:collect_three/ui/widgets/board_view.dart';
-import 'package:collect_three/ui/widgets/tile_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tessera/engine/engine.dart';
+import 'package:tessera/game/game_controller.dart';
+import 'package:tessera/game/motion.dart';
+import 'package:tessera/skins/skin_registry.dart';
+import 'package:tessera/ui/widgets/board_view.dart';
+import 'package:tessera/ui/widgets/tile_view.dart';
 
 const double _cell = 100;
 

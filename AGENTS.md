@@ -4,8 +4,12 @@ Instructions for AI agents (and humans) working in this repository.
 
 ## What this is
 
-`collect_three` — a Flutter match-3 game. Swap adjacent tiles, line up three or more, collect
-them. Three game modes, three procedurally-drawn skins, no backend.
+`tessera` — a Flutter match-3 game shipped as **Tessera** by VibeByteForge. Swap adjacent
+tiles, line up three or more, collect them. Three game modes, three procedurally-drawn skins,
+no backend.
+
+The Dart package, the Android `applicationId`, the iOS bundle id and the Windows binary are all
+`tessera` / `com.vibebyteforge.tessera`. Anything still saying `collect_three` is stale.
 
 Read before touching code:
 
@@ -151,6 +155,20 @@ so existing modes stay unchanged.
   tree, not on pixels — a green run there is not proof that anything was drawn.
 - Performance mode in Settings drops the blur mask filters, which are the most expensive part
   of drawing a tile; it is the lever for slow-but-working devices.
+- **`flutter build appbundle` needs `cmdline-tools`**, which this machine lacks. It fails with
+  "Release app bundle failed to strip debug symbols from native libraries" — a misleading
+  message; `--verbose` shows the real one, "Failed to find cmdline-tools". The AAB is written
+  correctly *before* that check, so the artifact is fine even though the command exits 1.
+  CI has cmdline-tools and asserts it up front. See `docs/RELEASE.md`.
+- **Release builds mangle resource paths**, so `unzip -l app.apk | grep ic_launcher` finds
+  nothing even when the icons are correct. Use `aapt2 dump badging app.apk` and
+  `aapt2 dump resources app.apk | grep mipmap/` instead.
+- App icons are generated, not hand-drawn: `python tool/icons/generate_icons.py` rewrites every
+  platform's slots from one master. Never edit a single mipmap or `.appiconset` entry by hand.
+- **Changing `BINARY_NAME` in `windows/CMakeLists.txt` needs `build/windows/` deleted.** The
+  cached `CMakeCache.txt` keeps the old target and the next build dies with
+  `No target "collect_three"` while the source is already clean. `flutter clean` also does it.
+  CI never hits this because it starts from an empty tree.
 - `GridConfig` asserts `kindCount` is 3–7; skins ship art for 7.
 - Windows + Flutter: use forward slashes in Dart paths; tests read assets via `rootBundle`,
   not `dart:io`.

@@ -1,5 +1,5 @@
-import 'package:collect_three/engine/engine.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tessera/engine/engine.dart';
 
 /// Six 1s and three 0s: solvable in two moves, and small enough to reason
 /// about by hand.
