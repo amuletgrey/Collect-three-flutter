@@ -143,6 +143,11 @@ so existing modes stay unchanged.
   `aapt2 dump resources <apk> | grep -A2 enable_impeller` — it should print `() false` and
   `(v31) true`. **This opt-out is deprecated** and Flutter intends to remove it; when that
   happens these devices need the upstream GLES fix instead.
+- **Put the game back on the phones after a device test run.** `flutter test integration_test`
+  uninstalls the app when it finishes, which leaves the user's phones empty. Rebuild a fat APK
+  and reinstall both — debug on the Xiaomi, **release** on the S5 (debug builds do not present
+  a frame there). A build made here is `versionCode=1` while a CI/release artifact may be
+  higher, so the S5 needs `adb install -r -d` to accept it.
 - **`flutter test integration_test -d <id>` rebuilds `app-debug.apk` for that device's ABI
   only.** After a run against the 32-bit S5, `build/app/outputs/flutter-apk/app-debug.apk`
   contains just `lib/armeabi-v7a/`, and installing it on the 64-bit phone gives a silent
