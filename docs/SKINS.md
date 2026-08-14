@@ -128,15 +128,18 @@ Every skin must pass these before it ships:
    silhouettes, or symbol support like Classic Arcade).
 2. **Luminance spread** — the lightest and darkest kinds differ by at least 12 % relative
    luminance, so a greyscale screenshot is still playable.
-3. **Contrast against the cell** — tile primary vs the board cell colour composited over the
+3. **A visible hint ring** — `palette.hint` must reach 2:1 against the composited board cell.
+   Candy Shop originally inherited a white ring and it vanished into the pale counter; the
+   ring is now dark plum there, cyan on Classic Arcade, pale gold on Treasure Hunt.
+4. **Contrast against the cell** — tile primary vs the board cell colour composited over the
    background >= 1.5:1. Measuring against the *cell* rather than the raw background is what
    the player actually sees; the Candy Shop palette was retuned after this rule caught its
    lemon washing out on the pale counter.
-4. **Pairwise distinctness** — every pair of kinds is at least 60 apart in RGB distance.
-5. **Reduced motion** — backgrounds are static by construction (painted once, never animated),
+5. **Pairwise distinctness** — every pair of kinds is at least 60 apart in RGB distance.
+6. **Reduced motion** — backgrounds are static by construction (painted once, never animated),
    so the setting only has to shorten board animations.
 
-`test/skins/skin_contract_test.dart` asserts 1–4 mechanically for every registered skin, and
+`test/skins/skin_contract_test.dart` asserts 1–5 mechanically for every registered skin, and
 paints each kind in every visual state at two sizes to catch painter crashes.
 
 ## Adding a new skin

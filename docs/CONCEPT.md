@@ -111,6 +111,10 @@ This is what makes the engine testable and makes daily/shared challenges possibl
   restart. Undo is essential — the mode asks you to plan several moves ahead and it must be
   fair to explore.
 - **Par:** each level ships with a par move count; finishing at or under par awards 3 stars.
+- **Opening levels:** the pack starts on a 3x3 with three colours — nine tiles, cleared in two
+  moves. Those first few levels exist to teach the one rule that makes this mode different
+  (nothing refills, so every tile has to go) before the board is big enough to get lost on.
+- **Next level:** clearing a level offers to go straight on to the next one.
 
 **Solvability.** Random layouts are usually unsolvable, so levels are not generated at
 runtime. A generator under `tool/generate_levels.dart` builds candidate layouts (tile counts
@@ -191,6 +195,22 @@ Matching has to feel good or nothing else matters.
 - Cascades: each step slightly faster than the previous, with a rising pitch chime.
 - Haptics: light on collect, medium on cascade >= x3, heavy on game over.
 - **Reduced motion** setting collapses all of the above to quick cross-fades.
+- **Hint:** a ring in the skin's own hint colour, breathing in and out. It is bracketed by a
+  light and a dark edge, because no single colour contrasts with both the lightest and the
+  darkest tile in a skin.
+- **The end of a run** waits: the board finishes every animation, holds for half a second, and
+  only then does the banner appear. Landing it on top of the last cascade robs the player of
+  watching their own final move. This applies to every mode, win or lose.
+
+### Picking a run back up
+
+A run is saved after every move and offered back on the home screen ("Continue · 1 240 pts,
+move 18"). The whole board goes into the save — tile ids, powers and the random generator's
+state — so resuming deals exactly the tiles the run would have dealt anyway, rather than
+restarting the sequence. A finished run has nothing worth keeping, so its save is dropped.
+
+High scores are banked as a run goes, not only when it ends: walking away from a good Infinite
+Hunt run still keeps the score.
 
 ## 7. Scope
 

@@ -108,4 +108,10 @@ abstract class GameMode {
 
   /// A clean instance for a restart. Stateless modes may return themselves.
   GameMode fresh();
+
+  /// Per-run state that has to survive being saved and reloaded. Stateless
+  /// modes need neither of these; Rising Tide keeps its tide counters here.
+  Map<String, Object?> saveState() => const {};
+
+  void restoreState(Map<String, Object?> state) {}
 }

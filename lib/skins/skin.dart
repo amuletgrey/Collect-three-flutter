@@ -61,6 +61,7 @@ class SkinPalette {
     required this.textPrimary,
     required this.textSecondary,
     required this.danger,
+    required this.hint,
   });
 
   final Color backgroundTop;
@@ -73,6 +74,11 @@ class SkinPalette {
 
   /// Tint for the Rising Tide danger rows and for losing states.
   final Color danger;
+
+  /// The hint ring. Needs its own colour rather than borrowing the accent:
+  /// on a pale skin a white ring vanishes into white tiles, which is exactly
+  /// what happened on Candy Shop.
+  final Color hint;
 }
 
 /// How a tile should be drawn right now.
@@ -85,6 +91,8 @@ class TileVisualState {
     this.lowSpec = false,
     this.power = TilePower.none,
     this.firing = false,
+    this.hintPulse = 0,
+    this.hintColour,
   });
 
   final bool selected;
@@ -106,6 +114,12 @@ class TileVisualState {
 
   /// True for the instant a power is going off.
   final bool firing;
+
+  /// 0..1, cycled by the board so the hint breathes instead of sitting still.
+  final double hintPulse;
+
+  /// Supplied by the skin; the painter has no palette of its own.
+  final Color? hintColour;
 
   /// Swells briefly, then shrinks away — the collect "pop".
   double get scale {

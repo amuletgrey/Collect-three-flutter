@@ -6,6 +6,7 @@ import '../../app_settings.dart';
 import '../../engine/engine.dart';
 import '../../game/game_controller.dart';
 import '../../services/haptics_service.dart';
+import '../../services/level_repository.dart';
 import '../../skins/skin.dart';
 import '../../skins/skin_background.dart';
 import '../widgets/board_view.dart';
@@ -13,9 +14,18 @@ import '../widgets/hud.dart';
 import '../widgets/skin_switcher.dart';
 
 class GameScreen extends StatefulWidget {
-  const GameScreen({required this.modeId, this.level, this.packId, super.key});
+  const GameScreen({
+    required this.modeId,
+    this.level,
+    this.packId,
+    this.resume,
+    super.key,
+  });
 
   final String modeId;
+
+  /// A run to pick up instead of dealing a new board.
+  final RunSnapshot? resume;
 
   /// Set for Clear the Board: the shipped level being played, which decides
   /// the board, the par, and where stars are recorded.
@@ -30,18 +40,32 @@ class _GameScreenState extends State<GameScreen> {
   late GameController _controller;
   bool _scoreRecorded = false;
 
+  /// The banner waits for the board to go quiet, then a beat longer. Landing it
+  /// on top of the last cascade robs the player of seeing their own final move.
+  /// Applies to every mode, win or lose.
+  static const Duration _settlePause = Duration(milliseconds: 500);
+  Timer? _bannerTimer;
+  bool _showResult = false;
+
+  /// Resolved after a win so the overlay can offer to carry straight on.
+  Level? _nextLevel;
+
   @override
   void initState() {
     super.initState();
-    _controller = GameController(
-      mode: _buildMode(),
-      seed: DateTime.now().millisecondsSinceEpoch,
-    );
+    final resume = widget.resume;
+    _controller = resume == null
+        ? GameController(
+            mode: _buildMode(),
+            seed: DateTime.now().millisecondsSinceEpoch,
+          )
+        : GameController.resume(mode: _buildMode(), snapshot: resume);
     _controller.addListener(_onChanged);
   }
 
   @override
   void dispose() {
+    _bannerTimer?.cancel();
     _controller
       ..removeListener(_onChanged)
       ..dispose();
@@ -56,11 +80,19 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void _onChanged() {
+    // Hold the banner until the run is over *and* the board has stopped moving.
+    if (_controller.isOver && !_controller.busy && _bannerTimer == null) {
+      _bannerTimer = Timer(_settlePause, () {
+        if (mounted) setState(() => _showResult = true);
+      });
+    }
+
+    if (!_controller.busy) _persist();
+
     if (!_controller.isOver || _scoreRecorded) return;
     _scoreRecorded = true;
 
     final settings = AppSettings.of(context);
-    unawaited(settings.recordScore(_controller.mode.id, _controller.score));
 
     // Stars are only awarded for actually clearing the level.
     final level = widget.level;
@@ -75,12 +107,64 @@ class _GameScreenState extends State<GameScreen> {
           level.starsFor(_controller.movesMade),
         ),
       );
+      unawaited(_findNextLevel(level.number));
     }
   }
 
+  Future<void> _findNextLevel(int justCleared) async {
+    final pack = await LevelRepository().load();
+    final next = pack.levels
+        .where((level) => level.number == justCleared + 1)
+        .firstOrNull;
+    if (next != null && mounted) setState(() => _nextLevel = next);
+  }
+
+  void _openNextLevel() {
+    final next = _nextLevel;
+    final packId = widget.packId;
+    if (next == null || packId == null) return;
+    // Replace rather than stack, so Back still returns to the level picker
+    // however many levels the player rattles through.
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(
+        builder: (_) =>
+            GameScreen(modeId: widget.modeId, level: next, packId: packId),
+      ),
+    );
+  }
+
+  /// Banks the score and stores the board every time the board goes quiet.
+  ///
+  /// The score is recorded as the run goes rather than only at the end, so
+  /// walking away from a good Infinite Hunt run still keeps the high score;
+  /// `recordScore` ignores anything that is not a new best. A finished run has
+  /// nothing worth resuming, so its save is dropped instead.
+  void _persist() {
+    final settings = AppSettings.of(context);
+    unawaited(settings.recordScore(_controller.mode.id, _controller.score));
+
+    if (_controller.isOver) {
+      unawaited(settings.clearRun(_controller.mode.id));
+      return;
+    }
+    if (_controller.movesMade == 0) return;
+    unawaited(
+      settings.saveRun(
+        _controller.snapshot(
+          levelNumber: widget.level?.number,
+          packId: widget.packId,
+        ),
+      ),
+    );
+  }
+
   void _restart() {
+    _bannerTimer?.cancel();
     setState(() {
+      _bannerTimer = null;
+      _showResult = false;
       _scoreRecorded = false;
+      _nextLevel = null;
       _controller.restart(seed: DateTime.now().millisecondsSinceEpoch);
     });
   }
@@ -131,13 +215,14 @@ class _GameScreenState extends State<GameScreen> {
               ),
               ListenableBuilder(
                 listenable: _controller,
-                builder: (context, _) => _controller.isOver
+                builder: (context, _) => _showResult
                     ? _ResultOverlay(
                         controller: _controller,
                         skin: skin,
                         level: widget.level,
                         onRestart: _restart,
                         onExit: () => Navigator.of(context).pop(),
+                        onNextLevel: _nextLevel == null ? null : _openNextLevel,
                       )
                     : const SizedBox.shrink(),
               ),
@@ -255,12 +340,16 @@ class _ActionButton extends StatelessWidget {
     required this.label,
     required this.skin,
     required this.onPressed,
+    this.emphasised = false,
   });
 
   final IconData icon;
   final String label;
   final Skin skin;
   final VoidCallback? onPressed;
+
+  /// Filled with the skin accent rather than the muted board tint.
+  final bool emphasised;
 
   @override
   Widget build(BuildContext context) {
@@ -272,10 +361,14 @@ class _ActionButton extends StatelessWidget {
         icon: Icon(icon, size: 18),
         label: Text(label),
         style: TextButton.styleFrom(
-          foregroundColor: enabled
+          foregroundColor: emphasised
+              ? skin.palette.backgroundTop
+              : enabled
               ? skin.palette.textPrimary
               : skin.palette.textSecondary.withValues(alpha: 0.4),
-          backgroundColor: skin.palette.boardCell,
+          backgroundColor: emphasised
+              ? skin.palette.accent
+              : skin.palette.boardCell,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
@@ -293,6 +386,7 @@ class _ResultOverlay extends StatelessWidget {
     required this.level,
     required this.onRestart,
     required this.onExit,
+    required this.onNextLevel,
   });
 
   final GameController controller;
@@ -300,6 +394,9 @@ class _ResultOverlay extends StatelessWidget {
   final Level? level;
   final VoidCallback onRestart;
   final VoidCallback onExit;
+
+  /// Null on the last level of a pack, and in the endless modes.
+  final VoidCallback? onNextLevel;
 
   @override
   Widget build(BuildContext context) {
@@ -350,18 +447,28 @@ class _ResultOverlay extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 26),
+              if (onNextLevel != null) ...[
+                _ActionButton(
+                  icon: Icons.arrow_forward_rounded,
+                  label: 'Next level',
+                  skin: skin,
+                  onPressed: onNextLevel,
+                  emphasised: true,
+                ),
+                const SizedBox(height: 10),
+              ],
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _ActionButton(
                     icon: Icons.replay_rounded,
-                    label: 'Play again',
+                    label: won ? 'Replay' : 'Play again',
                     skin: skin,
                     onPressed: onRestart,
                   ),
                   _ActionButton(
                     icon: Icons.grid_view_rounded,
-                    label: 'Modes',
+                    label: level == null ? 'Modes' : 'Levels',
                     skin: skin,
                     onPressed: onExit,
                   ),

@@ -37,14 +37,46 @@ class BoardView extends StatefulWidget {
   State<BoardView> createState() => _BoardViewState();
 }
 
-class _BoardViewState extends State<BoardView> {
+class _BoardViewState extends State<BoardView>
+    with SingleTickerProviderStateMixin {
   Pos? _dragOrigin;
+
+  /// Runs only while a hint is on screen, so an idle board schedules no frames.
+  late final AnimationController _hintPulse = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1100),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(_syncHintPulse);
+    _syncHintPulse();
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_syncHintPulse);
+    _hintPulse.dispose();
+    super.dispose();
+  }
+
+  void _syncHintPulse() {
+    final wanted = widget.controller.hint != null;
+    if (wanted && !_hintPulse.isAnimating) {
+      _hintPulse.repeat();
+    } else if (!wanted && _hintPulse.isAnimating) {
+      _hintPulse
+        ..stop()
+        ..value = 0;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final controller = widget.controller;
     return ListenableBuilder(
-      listenable: controller,
+      listenable: Listenable.merge([controller, _hintPulse]),
       builder: (context, _) {
         final board = controller.board;
         return LayoutBuilder(
@@ -114,6 +146,8 @@ class _BoardViewState extends State<BoardView> {
         rejected: controller.isRejected(pos),
         power: tile.power,
         firing: controller.isFiring(pos),
+        hintPulse: _hintPulse.value,
+        hintColour: widget.skin.palette.hint,
         showSymbols: widget.showSymbols && widget.skin.supportsSymbols,
         lowSpec: widget.lowSpec,
       ),

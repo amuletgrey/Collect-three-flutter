@@ -131,6 +131,20 @@ class RisingTideMode extends GameMode {
     rowsPerSpeedUp: rowsPerSpeedUp,
   );
 
+  @override
+  Map<String, Object?> saveState() => {
+    'movesSinceRise': _movesSinceRise,
+    'rowsRisen': _rowsRisen,
+    'overflowed': _overflowed,
+  };
+
+  @override
+  void restoreState(Map<String, Object?> state) {
+    _movesSinceRise = state['movesSinceRise'] as int? ?? 0;
+    _rowsRisen = state['rowsRisen'] as int? ?? 0;
+    _overflowed = state['overflowed'] as bool? ?? false;
+  }
+
   ModeStepOutcome _rise(ModeContext ctx) {
     final board = ctx.board;
 

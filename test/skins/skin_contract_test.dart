@@ -64,6 +64,21 @@ void main() {
           }
         });
 
+        test('the hint ring stands out from the board', () {
+          // Candy Shop shipped a white hint on a near-white board and the ring
+          // was invisible. The colour has to separate from what it sits on.
+          final cell = Color.alphaBlend(
+            skin.palette.boardCell,
+            skin.palette.backgroundBottom,
+          );
+
+          expect(
+            _contrast(skin.palette.hint, cell),
+            greaterThanOrEqualTo(2),
+            reason: '${skin.name}: the hint ring disappears into the board',
+          );
+        });
+
         test('keeps every pair of kinds visibly different', () {
           for (var a = 0; a < skin.kinds.length; a++) {
             for (var b = a + 1; b < skin.kinds.length; b++) {

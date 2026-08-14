@@ -55,6 +55,7 @@ class HomeScreen extends StatelessWidget {
                   mode: mode,
                   skin: skin,
                   best: settings.bestFor(mode.id),
+                  saved: settings.savedRun(mode.id),
                 ),
               const SizedBox(height: 18),
               Padding(
@@ -81,11 +82,19 @@ class HomeScreen extends StatelessWidget {
 }
 
 class _ModeCard extends StatelessWidget {
-  const _ModeCard({required this.mode, required this.skin, required this.best});
+  const _ModeCard({
+    required this.mode,
+    required this.skin,
+    required this.best,
+    required this.saved,
+  });
 
   final GameMode mode;
   final Skin skin;
   final int best;
+
+  /// A run left unfinished, if there is one.
+  final RunSnapshot? saved;
 
   @override
   Widget build(BuildContext context) {
@@ -97,12 +106,13 @@ class _ModeCard extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(20),
           // Clear the Board runs on hand-verified levels, so it opens the
-          // picker; the endless modes start straight away.
+          // picker; the endless modes start straight away, resuming whatever
+          // was left unfinished.
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute<void>(
               builder: (_) => mode.id == ModeRegistry.clearBoardId
                   ? const LevelSelectScreen()
-                  : GameScreen(modeId: mode.id),
+                  : GameScreen(modeId: mode.id, resume: saved),
             ),
           ),
           child: Padding(
@@ -129,6 +139,10 @@ class _ModeCard extends StatelessWidget {
                           color: skin.palette.textSecondary,
                         ),
                       ),
+                      if (saved != null) ...[
+                        const SizedBox(height: 8),
+                        _ResumeChip(saved: saved!, skin: skin),
+                      ],
                     ],
                   ),
                 ),
@@ -159,6 +173,41 @@ class _ModeCard extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Says a run is waiting, and what state it is in.
+class _ResumeChip extends StatelessWidget {
+  const _ResumeChip({required this.saved, required this.skin});
+
+  final RunSnapshot saved;
+  final Skin skin;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: skin.palette.accent.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: skin.palette.accent.withValues(alpha: 0.6)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.play_arrow_rounded, size: 15, color: skin.palette.accent),
+          const SizedBox(width: 4),
+          Text(
+            'Continue · ${saved.score} pts, move ${saved.movesMade}',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: skin.palette.accent,
+            ),
+          ),
+        ],
       ),
     );
   }

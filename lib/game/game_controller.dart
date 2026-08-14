@@ -23,6 +23,16 @@ class GameController extends ChangeNotifier {
     _syncFromBoard(_engine.board);
   }
 
+  /// Picks up a stored run rather than dealing a new board.
+  GameController.resume({
+    required GameMode mode,
+    required RunSnapshot snapshot,
+    Motion motion = const Motion(),
+  }) : _engine = GameEngine.restore(mode: mode, snapshot: snapshot) {
+    _motion = motion;
+    _syncFromBoard(_engine.board);
+  }
+
   GameEngine _engine;
   Motion _motion = const Motion();
   HapticsService _haptics = const HapticsService(enabled: false);
@@ -63,6 +73,9 @@ class GameController extends ChangeNotifier {
 
   Pos? get selected => _selected;
   Move? get hint => _hint;
+
+  RunSnapshot snapshot({int? levelNumber, String? packId}) =>
+      _engine.snapshot(levelNumber: levelNumber, packId: packId);
 
   /// Cells that just refused a swap. The board wiggles them, which is the only
   /// feedback the player gets for a move the engine threw away outright.

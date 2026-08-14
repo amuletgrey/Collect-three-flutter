@@ -5,6 +5,7 @@ import 'models/move.dart';
 import 'models/position.dart';
 import 'models/tile.dart';
 import 'modes/game_mode.dart';
+import 'persistence/run_snapshot.dart';
 import 'random/seeded_random.dart';
 import 'resolution/board_event.dart';
 import 'resolution/move_result.dart';
@@ -21,16 +22,68 @@ class GameEngine {
     : _mode = mode,
       _rng = SeededRandom(seed),
       _tiles = TileFactory() {
-    _resolver = Resolver(
-      gravity: mode.gravity,
-      refill: mode.refill,
-      kindCount: mode.grid.kindCount,
-      allowsSpecials: mode.allowsSpecials,
-    );
+    _buildResolver();
     _board = mode.createBoard(_rng, _tiles);
     _undosRemaining = mode.undoBudget;
     _applyEvaluation(mode.evaluate(_context));
   }
+
+  /// Picks a saved run back up exactly where it stopped.
+  ///
+  /// [mode] must be a fresh instance of the mode named in the snapshot; its
+  /// own state is restored from [RunSnapshot.modeState].
+  GameEngine.restore({required GameMode mode, required RunSnapshot snapshot})
+    : assert(mode.id == snapshot.modeId, 'snapshot belongs to another mode'),
+      _mode = mode,
+      _rng = SeededRandom(
+        snapshot.seed,
+        state: snapshot.rngState,
+        drawCount: snapshot.rngDraws,
+      ),
+      _tiles = TileFactory(snapshot.nextTileId) {
+    _buildResolver();
+    _board = snapshot.toBoard();
+    _score = snapshot.score;
+    _movesMade = snapshot.movesMade;
+    _tilesCollected = snapshot.tilesCollected;
+    _bestChain = snapshot.bestChain;
+    _longestLine = snapshot.longestLine;
+    _specialsFired = snapshot.specialsFired;
+    _undosRemaining = mode.undoBudget;
+    mode.restoreState(snapshot.modeState);
+    _applyEvaluation(mode.evaluate(_context));
+  }
+
+  void _buildResolver() {
+    _resolver = Resolver(
+      gravity: _mode.gravity,
+      refill: _mode.refill,
+      kindCount: _mode.grid.kindCount,
+      allowsSpecials: _mode.allowsSpecials,
+    );
+  }
+
+  /// Freezes the run so it can be stored and resumed later.
+  RunSnapshot snapshot({int? levelNumber, String? packId}) => RunSnapshot(
+    version: RunSnapshot.currentVersion,
+    modeId: _mode.id,
+    rows: _board.rows,
+    cols: _board.cols,
+    cells: RunSnapshot.cellsOf(_board),
+    seed: _rng.seed,
+    rngState: _rng.state,
+    rngDraws: _rng.drawCount,
+    nextTileId: _tiles.nextId,
+    score: _score,
+    movesMade: _movesMade,
+    tilesCollected: _tilesCollected,
+    bestChain: _bestChain,
+    longestLine: _longestLine,
+    specialsFired: _specialsFired,
+    modeState: _mode.saveState(),
+    levelNumber: levelNumber,
+    packId: packId,
+  );
 
   final GameMode _mode;
   final SeededRandom _rng;

@@ -21,6 +21,8 @@ class TileView extends StatelessWidget {
     this.rejected = false,
     this.power = TilePower.none,
     this.firing = false,
+    this.hintPulse = 0,
+    this.hintColour,
     this.showSymbols = false,
     this.lowSpec = false,
     this.clearDuration = const Duration(milliseconds: 240),
@@ -35,6 +37,8 @@ class TileView extends StatelessWidget {
   final bool rejected;
   final TilePower power;
   final bool firing;
+  final double hintPulse;
+  final Color? hintColour;
   final bool showSymbols;
   final bool lowSpec;
   final Duration clearDuration;
@@ -74,6 +78,8 @@ class TileView extends StatelessWidget {
             lowSpec: lowSpec,
             power: power,
             firing: firing,
+            hintPulse: hintPulse,
+            hintColour: hintColour,
           ),
         ),
       ),

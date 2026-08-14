@@ -405,15 +405,55 @@ class TilePainter extends CustomPainter {
     );
   }
 
+  /// A breathing ring in the skin's hint colour, with a soft glow behind it.
+  ///
+  /// The pulse matters as much as the colour: a static ring reads as decoration,
+  /// a moving one reads as "look here".
   void _paintHint(Canvas canvas, Rect rect) {
-    canvas.drawCircle(
-      rect.center,
-      rect.width * 0.55,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = rect.width * 0.04
-        ..color = const Color(0xFFFFFFFF).withValues(alpha: 0.45),
-    );
+    final colour = state.hintColour ?? const Color(0xFFFFFFFF);
+    // Ease the 0..1 sawtooth into a there-and-back swell.
+    final swell = math.sin(state.hintPulse * math.pi);
+    final radius = rect.width * (0.5 + 0.07 * swell);
+
+    if (!state.lowSpec) {
+      canvas.drawCircle(
+        rect.center,
+        radius,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = rect.width * 0.16
+          ..color = colour.withValues(alpha: 0.16 + 0.22 * swell)
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal, rect.width * 0.09),
+      );
+    }
+    // The ring is bracketed by a light and a dark edge. No single colour can
+    // contrast with both the lightest and the darkest tile in a skin, but one
+    // of these two edges always shows whatever it lands on.
+    canvas
+      ..drawCircle(
+        rect.center,
+        radius + rect.width * 0.04,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = rect.width * 0.022
+          ..color = const Color(0xFFFFFFFF).withValues(alpha: 0.75),
+      )
+      ..drawCircle(
+        rect.center,
+        radius,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = rect.width * 0.06
+          ..color = colour.withValues(alpha: 0.9),
+      )
+      ..drawCircle(
+        rect.center,
+        radius - rect.width * 0.04,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = rect.width * 0.022
+          ..color = const Color(0xFF101020).withValues(alpha: 0.6),
+      );
   }
 
   static Color _darken(Color color, double amount) =>
@@ -427,6 +467,8 @@ class TilePainter extends CustomPainter {
       old.art != art ||
       old.state.selected != state.selected ||
       old.state.hinted != state.hinted ||
+      old.state.hintPulse != state.hintPulse ||
+      old.state.hintColour != state.hintColour ||
       old.state.showSymbols != state.showSymbols ||
       old.state.lowSpec != state.lowSpec ||
       old.state.power != state.power ||

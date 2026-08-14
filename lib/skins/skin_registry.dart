@@ -34,6 +34,7 @@ class SkinRegistry {
       textPrimary: Color(0xFFFFFFFF),
       textSecondary: Color(0xFFA7B0C8),
       danger: Color(0xFFFF4D4D),
+      hint: Color(0xFF7CF9FF),
     ),
     kinds: [
       TileArt(
@@ -110,6 +111,7 @@ class SkinRegistry {
       textPrimary: Color(0xFFF5E8D0),
       textSecondary: Color(0xFFC2A882),
       danger: Color(0xFFE0553C),
+      hint: Color(0xFFFFE9A3),
     ),
     kinds: [
       TileArt(
@@ -179,6 +181,7 @@ class SkinRegistry {
       textPrimary: Color(0xFF4A3346),
       textSecondary: Color(0xFF8C7286),
       danger: Color(0xFFFF5C5C),
+      hint: Color(0xFF6A2B7A),
     ),
     kinds: [
       TileArt(

@@ -76,15 +76,31 @@ void main(List<String> args) {
 }
 
 /// Difficulty ramp: the board grows and gains a colour as the pack goes on.
+///
+/// The first two levels are a 3x3 with three colours — nine tiles, three
+/// triples, over in a few moves. They exist to teach the one idea that makes
+/// this mode different (nothing refills, so every tile has to go) before the
+/// board is big enough to get lost on.
+///
+/// `upTo` is the cumulative fraction of the pack a tier reaches, so the shape
+/// of the ramp survives a different `--count`.
 List<GridConfig> _tiersFor(int count) {
-  const easy = GridConfig(rows: 5, cols: 5, kindCount: 3);
-  const medium = GridConfig(rows: 6, cols: 6, kindCount: 4);
-  const hard = GridConfig(rows: 7, cols: 6, kindCount: 4);
+  const ramp = <({double upTo, GridConfig grid})>[
+    (upTo: 0.10, grid: GridConfig(rows: 3, cols: 3, kindCount: 3)),
+    (upTo: 0.20, grid: GridConfig(rows: 4, cols: 4, kindCount: 3)),
+    (upTo: 0.37, grid: GridConfig(rows: 5, cols: 5, kindCount: 3)),
+    (upTo: 0.67, grid: GridConfig(rows: 6, cols: 6, kindCount: 4)),
+    (upTo: 1.00, grid: GridConfig(rows: 7, cols: 6, kindCount: 4)),
+  ];
 
-  final third = (count / 3).ceil();
   return [
     for (var i = 0; i < count; i++)
-      if (i < third) easy else if (i < third * 2) medium else hard,
+      ramp
+          .firstWhere(
+            (tier) => i < (tier.upTo * count).ceil(),
+            orElse: () => ramp.last,
+          )
+          .grid,
   ];
 }
 

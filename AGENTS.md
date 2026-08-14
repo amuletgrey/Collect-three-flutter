@@ -60,7 +60,10 @@ animation.
 
 ## Conventions
 
-- **Determinism.** Everything random goes through `SeededRandom`. A game is reproducible from
+- **Determinism.** Everything random goes through `SeededRandom`, a 32-bit xorshift whose whole
+  state is one integer. That is deliberate: a half-finished run is saved and resumed by storing
+  that state, and 32-bit arithmetic behaves the same on the VM and on the web. Do not swap it
+  for `dart:math`'s generator. A game is reproducible from
   `(seed, mode, move list)`. Never call `DateTime.now()` inside `engine/`.
 - **Tile identity.** `Tile.id` is stable for the lifetime of a tile and is what the UI animates.
   Never recreate a tile that merely moved.

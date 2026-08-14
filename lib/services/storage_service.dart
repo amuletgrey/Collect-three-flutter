@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../engine/engine.dart';
 
 /// Local persistence: best scores, chosen skin, accessibility settings.
 ///
@@ -37,6 +41,31 @@ class StorageService {
   bool get haptics => _prefs.getBool(_hapticsKey) ?? true;
   Future<void> setHaptics({required bool value}) =>
       _prefs.setBool(_hapticsKey, value);
+
+  /// The run in progress for a mode, if there is one.
+  ///
+  /// A save from an older format is dropped rather than guessed at, and a
+  /// corrupt one is treated the same way — a lost run is annoying, a crash on
+  /// launch is worse.
+  RunSnapshot? savedRun(String modeId) {
+    final raw = _prefs.getString('$_prefix.run.$modeId');
+    if (raw == null) return null;
+    try {
+      final snapshot = RunSnapshot.fromJson(
+        jsonDecode(raw) as Map<String, Object?>,
+      );
+      return snapshot.isCurrent ? snapshot : null;
+    } on Object {
+      return null;
+    }
+  }
+
+  Future<void> saveRun(RunSnapshot snapshot) => _prefs.setString(
+    '$_prefix.run.${snapshot.modeId}',
+    jsonEncode(snapshot.toJson()),
+  );
+
+  Future<void> clearRun(String modeId) => _prefs.remove('$_prefix.run.$modeId');
 
   int bestFor(String modeId) => _prefs.getInt('$_prefix.best.$modeId') ?? 0;
 

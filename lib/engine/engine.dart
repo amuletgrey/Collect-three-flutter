@@ -24,6 +24,7 @@ export 'modes/game_mode.dart';
 export 'modes/infinite_hunt_mode.dart';
 export 'modes/mode_registry.dart';
 export 'modes/rising_tide_mode.dart';
+export 'persistence/run_snapshot.dart';
 export 'random/seeded_random.dart';
 export 'resolution/board_event.dart';
 export 'resolution/move_result.dart';

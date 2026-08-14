@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
+import 'engine/engine.dart';
 import 'game/motion.dart';
 import 'services/storage_service.dart';
 import 'skins/skin.dart';
@@ -67,6 +68,18 @@ class AppSettings extends ChangeNotifier {
   }
 
   int bestFor(String modeId) => _storage.bestFor(modeId);
+
+  RunSnapshot? savedRun(String modeId) => _storage.savedRun(modeId);
+
+  Future<void> saveRun(RunSnapshot snapshot) async {
+    await _storage.saveRun(snapshot);
+    notifyListeners();
+  }
+
+  Future<void> clearRun(String modeId) async {
+    await _storage.clearRun(modeId);
+    notifyListeners();
+  }
 
   int starsFor(String packId, int levelNumber) =>
       _storage.starsFor(packId, levelNumber);

@@ -169,13 +169,49 @@ void main() {
     }
     expect(dud, isNotNull);
 
+    // Not necessarily zero: a saved run may have been resumed.
+    final scoreBefore = controller.score;
+    final movesBefore = controller.movesMade;
+
     await _tapCell(tester, dud!.a);
     await tester.pump(const Duration(milliseconds: 120));
     await _tapCell(tester, dud.b);
     await _waitForIdle(tester, controller);
 
-    expect(controller.score, 0);
-    expect(controller.movesMade, 0);
+    expect(controller.score, scoreBefore);
+    expect(controller.movesMade, movesBefore);
+  });
+
+  testWidgets('a run survives leaving the game and coming back', (
+    tester,
+  ) async {
+    await _launch(tester);
+    await tester.tap(find.text('Infinite Hunt'));
+    await tester.pumpAndSettle();
+
+    final controller = _controller(tester);
+    await _playHintedMove(tester, controller);
+    final score = controller.score;
+    final moves = controller.movesMade;
+    final board = controller.board.toSketch();
+    expect(moves, greaterThan(0));
+
+    // Back to the home screen: the card should offer to carry on.
+    await tester.tap(find.byIcon(Icons.arrow_back_rounded).first);
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Continue'), findsWidgets);
+
+    await tester.tap(find.text('Infinite Hunt'));
+    await tester.pumpAndSettle();
+
+    final resumed = _controller(tester);
+    expect(resumed.score, score);
+    expect(resumed.movesMade, moves);
+    expect(
+      resumed.board.toSketch(),
+      board,
+      reason: 'the same board should come back, tile for tile',
+    );
   });
 }
 
