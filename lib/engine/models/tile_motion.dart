@@ -51,3 +51,25 @@ class SpawnedTile {
   @override
   String toString() => 'SpawnedTile(${tile.id} k${tile.kind} at $at)';
 }
+
+/// A tile that earned a power and stays where it is.
+///
+/// The id is unchanged on purpose: the tile is upgraded in place rather than
+/// replaced, so the board can animate the change instead of popping a new tile
+/// into existence.
+class UpgradedTile {
+  const UpgradedTile(this.tile, this.at);
+
+  final Tile tile;
+  final Pos at;
+
+  @override
+  bool operator ==(Object other) =>
+      other is UpgradedTile && other.tile == tile && other.at == at;
+
+  @override
+  int get hashCode => Object.hash(tile, at);
+
+  @override
+  String toString() => 'UpgradedTile(${tile.power.name} at $at)';
+}

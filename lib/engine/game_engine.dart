@@ -25,6 +25,7 @@ class GameEngine {
       gravity: mode.gravity,
       refill: mode.refill,
       kindCount: mode.grid.kindCount,
+      allowsSpecials: mode.allowsSpecials,
     );
     _board = mode.createBoard(_rng, _tiles);
     _undosRemaining = mode.undoBudget;
@@ -42,6 +43,7 @@ class GameEngine {
   int _tilesCollected = 0;
   int _bestChain = 0;
   int _longestLine = 0;
+  int _specialsFired = 0;
   int _undosRemaining = 0;
   GameStatus _status = GameStatus.playing;
   GameEndReason? _endReason;
@@ -57,6 +59,9 @@ class GameEngine {
   /// Longest cascade of the run so far — the results screen's headline stat.
   int get bestChain => _bestChain;
   int get longestLine => _longestLine;
+
+  /// Powers set off across the whole run — a results-screen stat.
+  int get specialsFired => _specialsFired;
   int get seed => _rng.seed;
   GameStatus get status => _status;
   GameEndReason? get endReason => _endReason;
@@ -71,9 +76,11 @@ class GameEngine {
     return limit == null ? null : (limit - _movesMade).clamp(0, limit);
   }
 
-  List<Move> get legalMoves => MoveFinder.legalMoves(_board);
+  List<Move> get legalMoves =>
+      MoveFinder.legalMoves(_board, specials: _mode.allowsSpecials);
 
-  Move? hint() => MoveFinder.firstLegalMove(_board);
+  Move? hint() =>
+      MoveFinder.firstLegalMove(_board, specials: _mode.allowsSpecials);
 
   ModeContext get _context => ModeContext(
     board: _board,
@@ -95,12 +102,16 @@ class GameEngine {
     if (tileA == null || tileB == null) {
       return MoveResult.rejected(MoveRejection.emptyCell);
     }
-    if (tileA.kind == tileB.kind) {
+    // A colour bomb goes off on contact, so its swap is legal even between two
+    // tiles of the same kind and even though it forms no line.
+    final fires = _mode.allowsSpecials && MoveFinder.firesOnSwap(tileA, tileB);
+    if (!fires && tileA.kind == tileB.kind) {
       return MoveResult.rejected(MoveRejection.sameKind);
     }
 
     final swapped = _board.withSwap(a, b);
-    if (!MatchFinder.hasMatchThrough(swapped, a) &&
+    if (!fires &&
+        !MatchFinder.hasMatchThrough(swapped, a) &&
         !MatchFinder.hasMatchThrough(swapped, b)) {
       // Shown to the player as a swap that snaps back. Costs nothing.
       return MoveResult.reverted([SwapPerformed(a, b), SwapReverted(a, b)]);
@@ -111,10 +122,28 @@ class GameEngine {
     _movesMade++;
 
     final events = <BoardEvent>[SwapPerformed(a, b)];
+    // After the swap the tiles have traded places: what was at `a` is now at `b`.
+    final primed = <Pos>{};
+    final primedKinds = <Pos, int>{};
+    if (fires) {
+      if (tileA.power == TilePower.colourBomb) {
+        primed.add(b);
+        primedKinds[b] = tileB.kind;
+      }
+      if (tileB.power == TilePower.colourBomb) {
+        primed.add(a);
+        primedKinds[a] = tileA.kind;
+      }
+      if (primed.isEmpty) primed.addAll({a, b});
+    }
+
     final resolution = _resolver.resolve(
       board: _board,
       rng: _rng,
       tiles: _tiles,
+      origin: b,
+      primed: primed,
+      primedKinds: primedKinds,
     );
     _board = resolution.board;
     _score += resolution.score;
@@ -126,6 +155,7 @@ class GameEngine {
     if (resolution.longestLine > _longestLine) {
       _longestLine = resolution.longestLine;
     }
+    _specialsFired += resolution.specialsFired;
 
     final step = _mode.afterMove(_context);
     _board = step.board;
@@ -144,6 +174,8 @@ class GameEngine {
       cascadeCount: resolution.cascadeCount,
       tilesCleared: resolution.tilesCleared,
       longestLine: resolution.longestLine,
+      specialsCreated: resolution.specialsCreated,
+      specialsFired: resolution.specialsFired,
     );
   }
 

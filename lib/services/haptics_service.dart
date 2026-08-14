@@ -28,6 +28,10 @@ class HapticsService {
         HapticFeedback.mediumImpact();
       case GameEnded():
         HapticFeedback.heavyImpact();
+      case SpecialsFired():
+        HapticFeedback.heavyImpact();
+      case SpecialsCreated():
+        HapticFeedback.mediumImpact();
       case SwapPerformed():
       case TilesMoved():
       case TilesSpawned():

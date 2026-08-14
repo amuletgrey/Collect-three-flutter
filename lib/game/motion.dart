@@ -20,6 +20,10 @@ class Motion {
   Duration get spawn => _scale(220);
   Duration get rowInsert => _scale(260);
 
+  /// A power going off, and a power appearing on the board.
+  Duration get blast => _scale(180);
+  Duration get specialBirth => _scale(160);
+
   /// Beat between cascade steps so a chain reads as separate hits.
   Duration get cascadeGap => _scale(60);
 

@@ -115,6 +115,37 @@ No Flutter imports anywhere in this milestone. Every task lands with its own tes
 
 ---
 
+## Backlog
+
+Agreed direction, in priority order. M9 is reserved for the CI/release workstream, which is
+being handled separately — see that milestone before touching `android/`, `ios/`, `web/`,
+`windows/` or the workflow files.
+
+| Priority | Item | Notes |
+| --- | --- | --- |
+| 1 | **M10 — Special tiles** | 4- and 5-matches create powers; the biggest mechanic a classic match-3 has that we lack. In progress. |
+| 2 | M11 — Feel and feedback | Particles on collect, cascade chimes via an `AudioService`, Rising Tide danger pulse, pause/settings screen. Covers the open CT-057/CT-058/CT-074. |
+| 3 | M12 — Relic Dig, a fourth mode | Escort heavy relic tiles to the bottom row. Self-contained: a tile behaviour plus one `GameMode`. |
+| 4 | M13 — Content and progression | More level packs and tiers, daily seeded challenge, level-select polish. **Deliberately last** — not yet decided that we want to go there. |
+
+## M10 — Special tiles
+
+Powers are **opt-in per mode**. They stay off in Clear the Board: `ClearBoardSolver` reasons
+about plain matches only, so enabling them there would invalidate every shipped level's par
+and the solvability guarantee behind the pack.
+
+| ID | Task | Acceptance | Status |
+| --- | --- | --- | --- |
+| CT-100 | `TilePower` on `Tile`; creation rules for 4-line, 5-line and L/T | table-driven tests per shape | [ ] |
+| CT-101 | Detonation: line clear, 3x3 bomb, colour bomb, with chain reactions | a detonation that hits another special sets it off; terminates | [ ] |
+| CT-102 | Colour bomb activates on swap, not only when matched | swapping it with a plain tile clears that kind | [ ] |
+| CT-103 | Scoring for powers and combos | documented in CONCEPT §2; deterministic | [ ] |
+| CT-104 | `GameMode.allowsSpecials`; on for Infinite Hunt and Rising Tide, off for Clear the Board | level pack tests still pass unchanged | [ ] |
+| CT-105 | Per-skin artwork for every power | reads at a glance in all three skins | [ ] |
+| CT-106 | Board feedback when a power fires | widget test; verified on device | [ ] |
+
+---
+
 ## Suggested order and parallelism
 
 ```

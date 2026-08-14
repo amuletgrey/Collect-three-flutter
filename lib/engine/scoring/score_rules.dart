@@ -6,6 +6,10 @@ class ScoreRules {
 
   static const int maxCascadeMultiplier = 8;
 
+  /// Per tile removed by a power rather than by a line. Worth more than a tile
+  /// in a plain three, which is what makes firing powers deliberately pay.
+  static const int blastScorePerTile = 20;
+
   /// 3 -> 30, 4 -> 80, 5 -> 150, 6 -> 240. Longer lines are worth
   /// disproportionately more, which is what makes setting them up worthwhile.
   static int lineScore(int length) {
@@ -17,11 +21,17 @@ class ScoreRules {
   /// The multiplier resets at the start of every player move.
   static int cascadeMultiplier(int step) => step.clamp(1, maxCascadeMultiplier);
 
-  static int stepScore(Iterable<MatchLine> lines, int step) {
+  /// [blastTiles] counts tiles removed by a power that were not already part of
+  /// a matched line, so nothing is paid for twice.
+  static int stepScore(
+    Iterable<MatchLine> lines,
+    int step, {
+    int blastTiles = 0,
+  }) {
     final base = lines.fold<int>(
       0,
       (sum, line) => sum + lineScore(line.length),
     );
-    return base * cascadeMultiplier(step);
+    return (base + blastTiles * blastScorePerTile) * cascadeMultiplier(step);
   }
 }

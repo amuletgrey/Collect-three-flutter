@@ -77,6 +77,27 @@ class TilesCleared extends BoardEvent {
       'TilesCleared(${cells.length} tiles, +$scoreDelta, x$multiplier)';
 }
 
+/// Powers going off, in the order they fired. The cells they destroyed are
+/// part of the [TilesCleared] that follows.
+class SpecialsFired extends BoardEvent {
+  const SpecialsFired(this.origins);
+
+  final List<Pos> origins;
+
+  @override
+  String toString() => 'SpecialsFired(${origins.length})';
+}
+
+/// Tiles that survived the clear because they earned a power.
+class SpecialsCreated extends BoardEvent {
+  const SpecialsCreated(this.tiles);
+
+  final List<UpgradedTile> tiles;
+
+  @override
+  String toString() => 'SpecialsCreated(${tiles.length})';
+}
+
 /// Tiles settling — one batch is one animation.
 class TilesMoved extends BoardEvent {
   const TilesMoved(this.moves);

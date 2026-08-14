@@ -31,12 +31,45 @@ what is listed in its own section.
 
 ```
 lineScore(n) = 10 * n * (n - 2)      // 3 -> 30, 4 -> 80, 5 -> 150, 6 -> 240
+blastScore   = 20 per tile removed by a power that was not already in a matched line
 cascadeMultiplier(step) = min(step, 8)   // first resolution = x1, next = x2, ...
-moveScore = sum(lineScore) * cascadeMultiplier
+moveScore = (sum(lineScore) + blastScore) * cascadeMultiplier
 ```
+
+A tile taken out by a blast is worth more than one taken out by a plain three, which is what
+makes setting powers off deliberately worth doing.
 
 Cascade multiplier resets at the start of every player move. This is what makes setting up
 chain reactions the main skill expression in all three modes.
+
+### Special tiles
+
+Matching more than three creates a tile with a **power**. Powers are opt-in per mode: they are
+on in Infinite Hunt and Rising Tide, and **off in Clear the Board**, whose levels are shipped
+with a proven solution that assumes plain matches only.
+
+| Made by | Power | What it does |
+| --- | --- | --- |
+| A line of exactly 4 | **Line clear** | Clears the whole row (from a horizontal match) or column (from a vertical one). |
+| A line of 5 or more | **Colour bomb** | Clears every tile of one kind. |
+| Two intersecting lines (L or T) | **Bomb** | Clears the 3x3 block around itself. |
+
+Only one power is created per match group; if several rules apply, the stronger one wins
+(colour bomb > bomb > line clear). It appears on the cell the player actually moved when that
+cell is part of the group, otherwise on the intersection of an L/T, otherwise in the middle of
+the line.
+
+**Firing.** A power goes off when it is collected — either because it was part of a match, or
+because another power's blast caught it. Blasts therefore chain: one line clear can set off
+every special it sweeps through. Each tile is only ever detonated once, so a chain always ends.
+
+**The colour bomb is different**: it will rarely find itself in a match, so it also fires when
+you *swap* it with anything, clearing every tile of that neighbour's kind. That makes a swap
+involving a colour bomb always legal, even though it forms no line — the engine's move
+validation and its "no moves left" check both account for this.
+
+**Combos.** Swapping two powers sets off both where they stand. A colour bomb swapped with
+another power first clears that power's whole kind, so the two effects compound.
 
 ### Board generation invariants
 
@@ -165,6 +198,6 @@ Matching has to feel good or nothing else matters.
 level pack of 30 Clear-the-Board levels, no accounts, no ads, no IAP, offline only.
 
 **Explicitly out of v1, kept possible by the architecture:**
-power-ups / special tiles from 4- and 5-matches, daily seeded challenge, level editor,
+daily seeded challenge, level editor,
 online leaderboards, sound pack beyond stubs, a 4th "Neon Lab" skin, and a *Relic Dig* mode
 (escort a heavy relic tile to the bottom row) that already fits the mode strategy interface.

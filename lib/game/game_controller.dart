@@ -36,6 +36,7 @@ class GameController extends ChangeNotifier {
   Pos? _selected;
   Move? _hint;
   Set<Pos> _rejected = const {};
+  Set<Pos> _firing = const {};
   bool _busy = false;
   bool _disposed = false;
   Duration _stepDuration = Duration.zero;
@@ -66,6 +67,9 @@ class GameController extends ChangeNotifier {
   /// Cells that just refused a swap. The board wiggles them, which is the only
   /// feedback the player gets for a move the engine threw away outright.
   bool isRejected(Pos pos) => _rejected.contains(pos);
+
+  /// Cells whose power is going off right now — the board flashes them.
+  bool isFiring(Pos pos) => _firing.contains(pos);
 
   Iterable<int> get tileIds => _tiles.keys;
   Tile tileById(int id) => _tiles[id]!;
@@ -196,6 +200,21 @@ class GameController extends ChangeNotifier {
           }
           notifyListeners();
           await _spawn(spawned, _motion.rowInsert);
+        case SpecialsFired(:final origins):
+          _stepDuration = _motion.clear;
+          _firing = origins.toSet();
+          notifyListeners();
+          await _wait(_motion.blast);
+          _firing = const {};
+          notifyListeners();
+        case SpecialsCreated(:final tiles):
+          for (final upgraded in tiles) {
+            _tiles[upgraded.tile.id] = upgraded.tile;
+            _positions[upgraded.tile.id] = upgraded.at;
+          }
+          _stepDuration = _motion.clear;
+          notifyListeners();
+          await _wait(_motion.specialBirth);
         case GameEnded():
           notifyListeners();
       }
@@ -263,6 +282,7 @@ class GameController extends ChangeNotifier {
       ..clear()
       ..addEntries(board.tiles.map((t) => MapEntry(t.id, t)));
     _clearing.clear();
+    _firing = const {};
   }
 
   Future<void> _wait(Duration duration) async {

@@ -91,6 +91,13 @@ abstract class GameMode {
   /// Optional cap on accepted moves.
   int? get moveLimit => null;
 
+  /// Whether matches of four or more create powers.
+  ///
+  /// Off by default, and deliberately off in Clear the Board: its levels ship
+  /// with a solution proven under plain-match rules, and powers would make
+  /// every par meaningless.
+  bool get allowsSpecials => false;
+
   Board createBoard(SeededRandom rng, TileFactory tiles);
 
   /// Runs after the player's cascade has fully settled — the tide rises here.

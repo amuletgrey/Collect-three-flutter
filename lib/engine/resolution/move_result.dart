@@ -32,6 +32,8 @@ class MoveResult {
     this.cascadeCount = 0,
     this.tilesCleared = 0,
     this.longestLine = 0,
+    this.specialsCreated = 0,
+    this.specialsFired = 0,
   });
 
   factory MoveResult.rejected(MoveRejection reason) =>
@@ -50,6 +52,8 @@ class MoveResult {
     required int cascadeCount,
     required int tilesCleared,
     required int longestLine,
+    int specialsCreated = 0,
+    int specialsFired = 0,
   }) => MoveResult._(
     accepted: true,
     events: events,
@@ -57,6 +61,8 @@ class MoveResult {
     cascadeCount: cascadeCount,
     tilesCleared: tilesCleared,
     longestLine: longestLine,
+    specialsCreated: specialsCreated,
+    specialsFired: specialsFired,
   );
 
   /// Whether the move counted against the player's move total.
@@ -72,6 +78,10 @@ class MoveResult {
   final int cascadeCount;
   final int tilesCleared;
   final int longestLine;
+
+  /// Powers earned and powers set off by this move.
+  final int specialsCreated;
+  final int specialsFired;
 
   bool get hasEvents => events.isNotEmpty;
 

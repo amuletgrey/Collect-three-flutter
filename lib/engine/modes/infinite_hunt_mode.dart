@@ -36,11 +36,15 @@ class InfiniteHuntMode extends GameMode {
   RefillRule get refill => RefillRule.fromTop;
 
   @override
+  bool get allowsSpecials => true;
+
+  @override
   Board createBoard(SeededRandom rng, TileFactory tiles) =>
       BoardGenerator.generate(grid: grid, rng: rng, tiles: tiles);
 
   @override
-  ModeEvaluation evaluate(ModeContext ctx) => MoveFinder.hasLegalMove(ctx.board)
+  ModeEvaluation evaluate(ModeContext ctx) =>
+      MoveFinder.hasLegalMove(ctx.board, specials: allowsSpecials)
       ? const ModeEvaluation.playing()
       : const ModeEvaluation.lost(GameEndReason.noMovesLeft);
 

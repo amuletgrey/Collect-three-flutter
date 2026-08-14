@@ -76,6 +76,9 @@ class RisingTideMode extends GameMode {
   RefillRule get refill => RefillRule.none;
 
   @override
+  bool get allowsSpecials => true;
+
+  @override
   Board createBoard(SeededRandom rng, TileFactory tiles) =>
       BoardGenerator.generate(
         grid: grid,
@@ -97,7 +100,7 @@ class RisingTideMode extends GameMode {
     // until it is playable again or it drowns, so the run can never dead-end.
     for (var guard = 0; guard <= grid.rows; guard++) {
       final due = _movesSinceRise >= currentInterval;
-      final stalled = !MoveFinder.hasLegalMove(board);
+      final stalled = !MoveFinder.hasLegalMove(board, specials: allowsSpecials);
       if (!due && !stalled) break;
 
       final risen = _rise(ctx.withBoard(board));
