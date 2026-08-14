@@ -23,6 +23,18 @@ enum TilePower {
   bool get isSpecial => this != none;
 }
 
+/// What a tile *is*, as opposed to what it does when collected.
+enum TileRole {
+  /// An ordinary matchable tile.
+  normal,
+
+  /// Cargo. It falls with gravity like anything else, but it never matches,
+  /// cannot be swapped, and survives every blast — the only way to get rid of
+  /// one is to walk it down to the bottom row. See Relic Dig in
+  /// docs/CONCEPT.md §3.4.
+  relic,
+}
+
 /// A single playing piece.
 ///
 /// [id] is stable for the whole lifetime of the tile: the UI animates tiles by
@@ -30,33 +42,46 @@ enum TilePower {
 /// recreated. [kind] is an index into the active skin's artwork list — the
 /// engine never knows what colour or shape a kind looks like.
 class Tile {
-  const Tile(this.id, this.kind, {this.power = TilePower.none});
+  const Tile(
+    this.id,
+    this.kind, {
+    this.power = TilePower.none,
+    this.role = TileRole.normal,
+  });
 
   final int id;
   final int kind;
   final TilePower power;
+  final TileRole role;
 
   bool get isSpecial => power.isSpecial;
+  bool get isRelic => role == TileRole.relic;
 
-  Tile withKind(int newKind) => Tile(id, newKind, power: power);
+  Tile withKind(int newKind) => Tile(id, newKind, power: power, role: role);
+
+  Tile asRelic() => Tile(id, kind, role: TileRole.relic);
 
   /// Keeps the id: earning a power upgrades a tile in place rather than
   /// swapping in a new one, so the UI can animate the change.
-  Tile withPower(TilePower newPower) => Tile(id, kind, power: newPower);
+  Tile withPower(TilePower newPower) =>
+      Tile(id, kind, power: newPower, role: role);
 
   @override
   bool operator ==(Object other) =>
       other is Tile &&
       other.id == id &&
       other.kind == kind &&
-      other.power == power;
+      other.power == power &&
+      other.role == role;
 
   @override
-  int get hashCode => Object.hash(id, kind, power);
+  int get hashCode => Object.hash(id, kind, power, role);
 
   @override
   String toString() =>
-      'Tile#$id(k$kind${power == TilePower.none ? '' : ', ${power.name}'})';
+      'Tile#$id(k$kind'
+      '${power == TilePower.none ? '' : ', ${power.name}'}'
+      '${role == TileRole.normal ? '' : ', ${role.name}'})';
 }
 
 /// Hands out unique tile ids for one game session.

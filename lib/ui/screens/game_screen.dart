@@ -608,6 +608,7 @@ class _ResultOverlay extends StatelessWidget {
     GameEndReason.boardCleared => 'Every last tile collected.',
     GameEndReason.outOfMoves => 'The move budget ran out.',
     GameEndReason.overflow => 'The stack was pushed past the top row.',
+    GameEndReason.relicsDelivered => 'Every relic is out of the ground.',
     null => '',
   };
 }

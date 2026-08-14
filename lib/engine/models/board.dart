@@ -74,9 +74,15 @@ class Board {
 
   Tile? atRc(int row, int col) => at(Pos(row, col));
 
-  /// Kind at [p], or `null` for an empty or off-board cell. Convenience for
-  /// matching code, which only ever cares about kinds.
-  int? kindAt(Pos p) => at(p)?.kind;
+  /// Kind at [p], or `null` for an empty or off-board cell.
+  ///
+  /// A relic also reports `null`: it is cargo, not a colour, and reporting it
+  /// this way is what keeps every matcher, generator and power from ever
+  /// treating one as part of a line.
+  int? kindAt(Pos p) {
+    final tile = at(p);
+    return tile == null || tile.isRelic ? null : tile.kind;
+  }
 
   bool isEmptyAt(Pos p) => at(p) == null;
 

@@ -37,6 +37,11 @@ class TilePainter extends CustomPainter {
     if (state.hinted && !state.selected) _paintHint(canvas, rect);
 
     _paintShadow(canvas, rect, opacity);
+    if (state.isRelic) {
+      _paintRelic(canvas, rect, opacity);
+      canvas.restore();
+      return;
+    }
     switch (art.family) {
       case TileFamily.sphere:
         _paintSphere(canvas, rect, opacity);
@@ -393,6 +398,62 @@ class TilePainter extends CustomPainter {
     }
   }
 
+  /// A stone-set artefact: heavy, obviously not one of the colours, and the
+  /// same on every skin so a player never has to re-learn what cargo looks like.
+  void _paintRelic(Canvas canvas, Rect rect, double opacity) {
+    const stone = Color(0xFF6B6357);
+    const gold = Color(0xFFE8C36B);
+
+    final block = RRect.fromRectAndRadius(
+      rect.deflate(rect.width * 0.06),
+      Radius.circular(rect.width * 0.16),
+    );
+    canvas
+      ..drawRRect(
+        block,
+        Paint()
+          ..shader = LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              _lighten(stone, 0.22).withValues(alpha: opacity),
+              stone.withValues(alpha: opacity),
+              _darken(stone, 0.3).withValues(alpha: opacity),
+            ],
+          ).createShader(rect),
+      )
+      ..drawRRect(
+        block,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = rect.width * 0.05
+          ..color = gold.withValues(alpha: 0.85 * opacity),
+      );
+
+    // A gem seated in the stone, so it reads as treasure rather than a wall.
+    final gem = Path();
+    final centre = rect.center;
+    final radius = rect.width * 0.2;
+    for (var i = 0; i < 6; i++) {
+      final angle = -math.pi / 2 + i * math.pi / 3;
+      final point = Offset(
+        centre.dx + radius * math.cos(angle),
+        centre.dy + radius * math.sin(angle),
+      );
+      i == 0 ? gem.moveTo(point.dx, point.dy) : gem.lineTo(point.dx, point.dy);
+    }
+    gem.close();
+    canvas
+      ..drawPath(gem, Paint()..color = gold.withValues(alpha: opacity))
+      ..drawPath(
+        gem,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = rect.width * 0.03
+          ..color = _darken(gold, 0.45).withValues(alpha: opacity),
+      );
+  }
+
   void _paintSelection(Canvas canvas, Rect rect) {
     canvas.drawCircle(
       rect.center,
@@ -472,6 +533,7 @@ class TilePainter extends CustomPainter {
       old.state.showSymbols != state.showSymbols ||
       old.state.lowSpec != state.lowSpec ||
       old.state.power != state.power ||
+      old.state.isRelic != state.isRelic ||
       old.state.firing != state.firing ||
       old.state.clearProgress != state.clearProgress;
 }

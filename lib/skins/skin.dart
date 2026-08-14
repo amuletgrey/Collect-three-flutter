@@ -93,6 +93,7 @@ class TileVisualState {
     this.firing = false,
     this.hintPulse = 0,
     this.hintColour,
+    this.isRelic = false,
   });
 
   final bool selected;
@@ -120,6 +121,10 @@ class TileVisualState {
 
   /// Supplied by the skin; the painter has no palette of its own.
   final Color? hintColour;
+
+  /// Cargo in Relic Dig. Drawn as one artefact across every skin, because it is
+  /// a game object rather than a colour the player matches.
+  final bool isRelic;
 
   /// Swells briefly, then shrinks away — the collect "pop".
   double get scale {

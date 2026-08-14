@@ -66,7 +66,9 @@ class RunSnapshot {
   final int rows;
   final int cols;
 
-  /// Row-major; each entry is `null` or `[id, kind, powerIndex]`.
+  /// Row-major; each entry is `null` or `[id, kind, powerIndex, roleIndex]`.
+  /// Saves written before roles existed have three entries and read back as
+  /// ordinary tiles.
   final List<List<int>?> cells;
 
   final int seed;
@@ -95,13 +97,18 @@ class RunSnapshot {
       if (cell == null)
         null
       else
-        Tile(cell[0], cell[1], power: TilePower.values[cell[2]]),
+        Tile(
+          cell[0],
+          cell[1],
+          power: TilePower.values[cell[2]],
+          role: cell.length > 3 ? TileRole.values[cell[3]] : TileRole.normal,
+        ),
   ]);
 
   static List<List<int>?> cellsOf(Board board) => [
     for (final pos in board.positions)
       if (board.at(pos) case final tile?)
-        [tile.id, tile.kind, tile.power.index]
+        [tile.id, tile.kind, tile.power.index, tile.role.index]
       else
         null,
   ];

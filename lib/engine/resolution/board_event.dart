@@ -15,6 +15,9 @@ enum GameEndReason {
 
   /// Rising Tide: the stack was pushed past the top row.
   overflow,
+
+  /// Relic Dig: every relic reached the bottom.
+  relicsDelivered,
 }
 
 /// An ordered, replayable description of everything that happened.

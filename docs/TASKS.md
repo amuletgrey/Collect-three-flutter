@@ -141,7 +141,7 @@ being handled separately — see that milestone before touching `android/`, `ios
 | --- | --- | --- |
 | 1 | **M10 — Special tiles** | 4- and 5-matches create powers. Rules, art and device checks done; CT-107/CT-108 remain. |
 | 2 | M11 — Feel and feedback | Done except sound: particles, danger flash, pause and settings all shipped. **`AudioService` and a sound pack still need a decision** — it means a new runtime dependency and audio assets, neither of which should be picked unattended. |
-| 3 | M12 — Relic Dig, a fourth mode | Escort heavy relic tiles to the bottom row. Self-contained: a tile behaviour plus one `GameMode`. |
+| 3 | M12 — Relic Dig, a fourth mode | **Done.** Escort relic tiles to the bottom row. |
 | 4 | M13 — Content and progression | More level packs and tiers, daily seeded challenge, level-select polish. **Deliberately last** — not yet decided that we want to go there. |
 
 ## M10 — Special tiles

@@ -182,6 +182,7 @@ class _BoardViewState extends State<BoardView> with TickerProviderStateMixin {
         firing: controller.isFiring(pos),
         hintPulse: _hintPulse.value,
         hintColour: widget.skin.palette.hint,
+        isRelic: tile.isRelic,
         showSymbols: widget.showSymbols && widget.skin.supportsSymbols,
         lowSpec: widget.lowSpec,
       ),

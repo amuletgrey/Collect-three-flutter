@@ -141,16 +141,33 @@ The runtime never has to solve anything — it just loads a level that is known 
 - **Skill:** clearing low keeps the stack short; clearing high scores more via cascades but
   buys you nothing. Risk/reward every single move.
 
-### 3.4 Mode comparison
+### 3.4 Relic Dig — escort the cargo
 
-| | Infinite Hunt | Clear the Board | Rising Tide |
-| --- | --- | --- | --- |
-| Refill | from top | none | from bottom (row push) |
-| Gravity | down | down, then left | down |
-| Win | — | board empty | — |
-| Lose | no moves | no moves / out of moves | stack overflows top |
-| Undo | no | yes (3) | no |
-| Session | 3–10 min | 1–4 min per level | 2–8 min |
+> Dig the relics out. Matching is just the shovel.
+
+- **Board:** 8x8, refilling from the top, exactly like Infinite Hunt.
+- **The relics:** three tiles start buried in the top two rows, one per column.
+  A relic falls with gravity like anything else, but it never matches, cannot be
+  swapped, and no blast can take it. The only way to move one is to clear what is
+  underneath it.
+- **Goal:** walk every relic down to the bottom row, where it is collected for 500 points —
+  far more than any match, because it is the actual objective.
+- **Loss:** the board runs out of legal moves.
+- **Skill:** this mode inverts the usual instinct. Clearing greedily near the top scores
+  points and achieves nothing; the board just refills. The tiles worth taking are the ones
+  under the cargo. The engine tests play the same seed both ways to keep that true.
+
+### 3.5 Mode comparison
+
+| | Infinite Hunt | Clear the Board | Rising Tide | Relic Dig |
+| --- | --- | --- | --- | --- |
+| Refill | from top | none | from bottom (row push) | from top |
+| Gravity | down | down, then left | down | down |
+| Win | — | board empty | — | all relics delivered |
+| Lose | no moves | no moves / out of moves | stack overflows top | no moves |
+| Powers | yes | no | yes | yes |
+| Undo | no | yes (3) | no | no |
+| Session | 3–10 min | 1–4 min per level | 2–8 min | 3–8 min |
 
 ## 4. Skins
 

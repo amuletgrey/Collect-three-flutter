@@ -28,6 +28,7 @@ void main() {
     expect(find.text('Infinite Hunt'), findsOneWidget);
     expect(find.text('Clear the Board'), findsOneWidget);
     expect(find.text('Rising Tide'), findsOneWidget);
+    expect(find.text('Relic Dig'), findsOneWidget);
 
     expect(find.text('Classic Arcade'), findsOneWidget);
     expect(find.text('Treasure Hunt'), findsOneWidget);
@@ -50,7 +51,12 @@ void main() {
     }
   });
 
-  for (final mode in ['Infinite Hunt', 'Clear the Board', 'Rising Tide']) {
+  for (final mode in [
+    'Infinite Hunt',
+    'Clear the Board',
+    'Rising Tide',
+    'Relic Dig',
+  ]) {
     testWidgets('$mode plays real moves and scores', (tester) async {
       await _launch(tester);
       await _openMode(tester, mode);

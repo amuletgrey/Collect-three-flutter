@@ -75,6 +75,11 @@ class Resolver {
     /// when it is swapped rather than matched.
     Set<Pos> primed = const {},
     Map<Pos, int> primedKinds = const {},
+
+    /// Drop and refill before looking for matches. Modes that remove tiles
+    /// themselves — Relic Dig delivering cargo — use this to hand the board
+    /// back settled, with the fall and the refill in the event list.
+    bool settleFirst = false,
   }) {
     final events = <BoardEvent>[];
     var current = board;
@@ -85,6 +90,22 @@ class Resolver {
     var fired = 0;
     var step = startStep;
     var pendingPrimed = primed;
+
+    if (settleFirst) {
+      final settled = gravity.apply(current);
+      current = settled.board;
+      for (final batch in settled.steps) {
+        if (batch.isNotEmpty) events.add(TilesMoved(batch));
+      }
+      final refilled = refill.apply(
+        board: current,
+        rng: rng,
+        tiles: tiles,
+        kindCount: kindCount,
+      );
+      current = refilled.board;
+      if (refilled.spawnedAnything) events.add(TilesSpawned(refilled.spawned));
+    }
 
     while (true) {
       final matches = MatchFinder.find(current);
@@ -117,9 +138,12 @@ class Resolver {
       pendingPrimed = const {};
 
       // A power that fired must go with its blast, even if it was protected.
+      // Cargo is never taken by a blast — it only leaves by being delivered.
       final clearCells = {...blast.cells}
         ..removeWhere(
-          (cell) => protected.contains(cell) && !blast.detonated.contains(cell),
+          (cell) =>
+              (current.at(cell)?.isRelic ?? false) ||
+              (protected.contains(cell) && !blast.detonated.contains(cell)),
         );
 
       final blastOnly = clearCells.difference(matches.cells).length;

@@ -23,6 +23,7 @@ export 'modes/clear_board_mode.dart';
 export 'modes/game_mode.dart';
 export 'modes/infinite_hunt_mode.dart';
 export 'modes/mode_registry.dart';
+export 'modes/relic_dig_mode.dart';
 export 'modes/rising_tide_mode.dart';
 export 'persistence/run_snapshot.dart';
 export 'random/seeded_random.dart';

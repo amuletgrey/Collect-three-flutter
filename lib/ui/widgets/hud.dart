@@ -72,6 +72,14 @@ class Hud extends StatelessWidget {
         highlight: mode.movesUntilRise <= 1,
       );
     }
+    if (mode is RelicDigMode) {
+      return _Stat(
+        label: 'Relics left',
+        value: '${mode.remaining}',
+        skin: skin,
+        highlight: mode.remaining == 0,
+      );
+    }
     if (mode is ClearBoardMode) {
       return _Stat(
         label: 'Tiles left',
