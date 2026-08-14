@@ -5,7 +5,7 @@ import 'package:tessera/engine/engine.dart';
 
 void main() {
   test('starts full, playable, and scoreless', () {
-    final engine = GameEngine(mode: const InfiniteHuntMode(), seed: 1);
+    final engine = GameEngine(mode: InfiniteHuntMode(), seed: 1);
 
     expect(engine.status, GameStatus.playing);
     expect(engine.board.isFull, isTrue);
@@ -15,7 +15,7 @@ void main() {
   });
 
   test('the board stays full after every move', () {
-    final engine = GameEngine(mode: const InfiniteHuntMode(), seed: 7);
+    final engine = GameEngine(mode: InfiniteHuntMode(), seed: 7);
 
     for (var i = 0; i < 60 && !engine.isOver; i++) {
       final hint = engine.hint()!;
@@ -30,7 +30,7 @@ void main() {
   });
 
   test('scoring only ever goes up, and moves are counted', () {
-    final engine = GameEngine(mode: const InfiniteHuntMode(), seed: 21);
+    final engine = GameEngine(mode: InfiniteHuntMode(), seed: 21);
     var previous = 0;
 
     for (var i = 0; i < 30 && !engine.isOver; i++) {
@@ -44,7 +44,7 @@ void main() {
 
   test('survives a long seeded run without ever getting stuck', () {
     for (final seed in [1, 2, 3, 99, 12345]) {
-      final engine = GameEngine(mode: const InfiniteHuntMode(), seed: seed);
+      final engine = GameEngine(mode: InfiniteHuntMode(), seed: seed);
       var moves = 0;
 
       while (!engine.isOver && moves < 400) {
@@ -64,7 +64,7 @@ void main() {
     // A cramped board runs out of moves quickly, which is the whole point of
     // the mode; a full-size one can survive for thousands of moves.
     final engine = GameEngine(
-      mode: const InfiniteHuntMode(
+      mode: InfiniteHuntMode(
         grid: GridConfig(rows: 4, cols: 4, kindCount: 6),
       ),
       seed: 0,

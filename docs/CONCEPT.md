@@ -101,6 +101,11 @@ This is what makes the engine testable and makes daily/shared challenges possibl
   rescue — that dead board *is* the ending. Final score is banked to the leaderboard.
 - **Tension:** because refills are random, a well-played board stays alive far longer than a
   greedy one. Clearing everything as fast as possible is *not* optimal play.
+- **Rising difficulty:** the palette starts at six colours and gains one every **12,000
+  points**, up to seven — the most any skin draws. The new colour arrives through refills
+  only; tiles already on the board are never recoloured, which would read as a bug. More
+  colours means fewer accidental lines and a board that dies sooner, and it is a difficulty
+  knob the player understands the instant they see it. The HUD announces each unlock.
 - **Feedback:** a subtle "moves available" pulse when the count of legal moves drops to 1–2.
 
 ### 3.2 Clear the Board — the thinking mode
@@ -174,6 +179,7 @@ The runtime never has to solve anything — it just loads a level that is known 
 | Lose | no moves | no moves / out of moves | stack overflows top | no moves |
 | Powers | yes | no | yes | yes |
 | Undo | no | yes (3) | no | no |
+| Palette | 6 → 7 with score | fixed per level | 6 | 6 |
 | Session | 3–10 min | 1–4 min per level | 2–8 min | 3–8 min |
 
 ## 4. Skins
@@ -231,6 +237,23 @@ Matching has to feel good or nothing else matters.
 - **The end of a run** waits: the board finishes every animation, holds for half a second, and
   only then does the banner appear. Landing it on top of the last cascade robs the player of
   watching their own final move. This applies to every mode, win or lose.
+
+### Hints are a resource
+
+A hint button that always works is a game that plays itself, and Infinite Hunt in particular
+was far too easy with one. So hints are spent, not pressed:
+
+- Every run starts with **3**.
+- One more is earned per **1,000 points**, several at once if a cascade crosses several
+  milestones. A toast over the board says "+1 hint" as it lands.
+- At zero the button goes inert rather than disappearing, so the player can see what they are
+  out of and what earns more.
+- Both numbers live on `GameMode` (`startingHints`, `pointsPerHint`), so a mode that wants a
+  different economy can just say so.
+
+Internally there are two entry points and the difference matters: `GameEngine.hint()` peeks and
+costs nothing — it is what the level solver and the test suite drive the game with —
+while `useHint()` is the player's and spends from the budget.
 
 ### Picking a run back up
 

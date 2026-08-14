@@ -68,7 +68,7 @@ No Flutter imports anywhere in this milestone. Every task lands with its own tes
 | CT-040 | `GameController`: event playback, `stepDuration`, input lock | input locked while events play; widget-tested | [x] |
 | CT-041 | Run stats: score, moves, best chain, tiles collected | results overlay data complete | [x] |
 | CT-042 | `StorageService` (shared_preferences): bests, skin, settings | survives restart; namespaced keys | [x] |
-| CT-043 | Run duration + longest-line stats on the results screen | shown after every run | [ ] |
+| CT-043 | Run duration + longest-line stats on the results screen | shown after every run | [x] |
 
 ## M5 — UI
 
@@ -80,7 +80,7 @@ No Flutter imports anywhere in this milestone. Every task lands with its own tes
 | CT-053 | Home + mode select with personal bests | navigates to a running game | [x] |
 | CT-054 | Skin switcher with live sample tiles | switching mid-game keeps state | [x] |
 | CT-055 | Result overlay (win/lose variants) | retry and change-mode paths work | [x] |
-| CT-056 | Invalid-swap shake and selection polish | reverted swap reads as a rejection | [ ] |
+| CT-056 | Invalid-swap shake and selection polish | reverted swap reads as a rejection | [x] |
 | CT-057 | Juice: particles and danger pulse | done as CT-116/117 | [x] |
 | CT-058 | Pause overlay + dedicated settings screen | done as CT-118/119 | [x] |
 
@@ -140,10 +140,11 @@ being handled separately — see that milestone before touching `android/`, `ios
 
 | Priority | Item | Notes |
 | --- | --- | --- |
-| 1 | **M10 — Special tiles** | 4- and 5-matches create powers. Rules, art and device checks done; CT-107/CT-108 remain. |
-| 2 | M11 — Feel and feedback | **Done**, sound included. |
-| 3 | M12 — Relic Dig, a fourth mode | **Done.** Escort relic tiles to the bottom row. |
-| 4 | M13 — Content and progression | More level packs and tiers, daily seeded challenge, level-select polish. **Deliberately last** — not yet decided that we want to go there. |
+| 1 | **M14 — Difficulty and pacing** | Hints as a resource and a widening palette are in; the rest of the curve is open. |
+| 2 | M10 — Special tiles | 4- and 5-matches create powers. Only CT-107 (combo art) remains. |
+| 3 | M11 — Feel and feedback | **Done**, sound included. |
+| 4 | M12 — Relic Dig, a fourth mode | **Done.** Escort relic tiles to the bottom row. |
+| 5 | M13 — Content and progression | More level packs and tiers, daily seeded challenge, level-select polish. **Deliberately last** — not yet decided that we want to go there. |
 
 ## M10 — Special tiles
 
@@ -161,7 +162,25 @@ and the solvability guarantee behind the pack.
 | CT-105 | Artwork for every power, shared across skins | reads on all three skins; see docs/images/powers.png | [x] |
 | CT-106 | Board feedback when a power fires | flash on detonation; widget + on-device tests | [x] |
 | CT-107 | Combo art: show what a paired power will do before it fires | player can tell a combo from a plain swap | [ ] |
-| CT-108 | Surface powers on the results screen | "3 powers fired" alongside best chain | [ ] |
+| CT-108 | Surface powers on the results screen | "3 powers fired" alongside best chain | [x] |
+
+---
+
+## M14 — Difficulty and pacing
+
+Infinite Hunt was too easy, and an unlimited hint button was most of the reason: a mode with no
+ending needs something that tightens, and a button that always shows a legal move is a mode that
+plays itself. Both knobs live on `GameMode`, so a mode opts into its own curve.
+
+| ID | Task | Acceptance | Status |
+| --- | --- | --- | --- |
+| CT-130 | Hints are a budget: `startingHints`, `useHint()` spends, peeking stays free | solver and tests still call `hint()` for nothing | [x] |
+| CT-131 | Earn a hint per `pointsPerHint`; several at once on a big cascade | milestone never pays twice, survives resume | [x] |
+| CT-132 | Hint count on the button; spent to zero it goes inert | widget test taps past the budget | [x] |
+| CT-133 | Infinite Hunt widens its palette by one colour per `pointsPerKind`, capped at 7 | new kind reaches the board via refills; survives resume | [x] |
+| CT-134 | Notice toast over the board for earned hints and rule changes | animation-driven, so `pumpAndSettle` settles it | [x] |
+| CT-135 | Tune the two thresholds against real play | a long run tightens without feeling arbitrary | [ ] |
+| CT-136 | Show the countdown to the next hint somewhere in the HUD | `pointsToNextHint` is already on the engine | [ ] |
 
 ---
 

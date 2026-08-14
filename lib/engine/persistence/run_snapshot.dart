@@ -26,6 +26,9 @@ class RunSnapshot {
     required this.bestChain,
     required this.longestLine,
     required this.specialsFired,
+    this.elapsedSeconds = 0,
+    this.hintsRemaining,
+    this.hintsEarned = 0,
     this.modeState = const {},
     this.levelNumber,
     this.packId,
@@ -50,6 +53,9 @@ class RunSnapshot {
     bestChain: json['bestChain']! as int,
     longestLine: json['longestLine']! as int,
     specialsFired: json['specialsFired']! as int,
+    elapsedSeconds: json['elapsed'] as int? ?? 0,
+    hintsRemaining: json['hints'] as int?,
+    hintsEarned: json['hintsEarned'] as int? ?? 0,
     modeState: (json['modeState'] as Map<Object?, Object?>? ?? const {}).map(
       (key, value) => MapEntry(key! as String, value),
     ),
@@ -82,6 +88,18 @@ class RunSnapshot {
   final int bestChain;
   final int longestLine;
   final int specialsFired;
+
+  /// Seconds of play so far. Measured by the controller — the engine never
+  /// reads a clock — and carried here so a resumed run keeps counting.
+  final int elapsedSeconds;
+
+  /// Hints still in hand. Null on a save written before hints were a resource,
+  /// which resumes on the mode's starting allowance rather than on nothing.
+  final int? hintsRemaining;
+
+  /// How many hints the run has earned by scoring, so a resumed run does not
+  /// collect the same milestone twice.
+  final int hintsEarned;
 
   /// Whatever the mode needs to pick up where it left off — Rising Tide keeps
   /// its tide counters here.
@@ -129,6 +147,9 @@ class RunSnapshot {
     'bestChain': bestChain,
     'longestLine': longestLine,
     'specialsFired': specialsFired,
+    'elapsed': elapsedSeconds,
+    if (hintsRemaining != null) 'hints': hintsRemaining,
+    'hintsEarned': hintsEarned,
     'modeState': modeState,
     if (levelNumber != null) 'level': levelNumber,
     if (packId != null) 'pack': packId,

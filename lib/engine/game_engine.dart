@@ -25,6 +25,7 @@ class GameEngine {
     _buildResolver();
     _board = mode.createBoard(_rng, _tiles);
     _undosRemaining = mode.undoBudget;
+    _hintsRemaining = mode.startingHints;
     _applyEvaluation(mode.evaluate(_context));
   }
 
@@ -50,6 +51,8 @@ class GameEngine {
     _longestLine = snapshot.longestLine;
     _specialsFired = snapshot.specialsFired;
     _undosRemaining = mode.undoBudget;
+    _hintsRemaining = snapshot.hintsRemaining ?? mode.startingHints;
+    _hintsEarned = snapshot.hintsEarned;
     mode.restoreState(snapshot.modeState);
     _applyEvaluation(mode.evaluate(_context));
   }
@@ -80,6 +83,8 @@ class GameEngine {
     bestChain: _bestChain,
     longestLine: _longestLine,
     specialsFired: _specialsFired,
+    hintsRemaining: _hintsRemaining,
+    hintsEarned: _hintsEarned,
     modeState: _mode.saveState(),
     levelNumber: levelNumber,
     packId: packId,
@@ -98,6 +103,9 @@ class GameEngine {
   int _longestLine = 0;
   int _specialsFired = 0;
   int _undosRemaining = 0;
+  int _hintsRemaining = 0;
+  int _hintsEarned = 0;
+  int _hintsJustEarned = 0;
   GameStatus _status = GameStatus.playing;
   GameEndReason? _endReason;
 
@@ -120,6 +128,16 @@ class GameEngine {
   GameEndReason? get endReason => _endReason;
   bool get isOver => _status != GameStatus.playing;
   int get undosRemaining => _undosRemaining;
+
+  /// Hints the player can still spend.
+  int get hintsRemaining => _hintsRemaining;
+
+  /// Hints handed out by the last move, for the UI to announce.
+  int get hintsJustEarned => _hintsJustEarned;
+
+  /// Points still to score before the next hint arrives.
+  int get pointsToNextHint =>
+      (_hintsEarned + 1) * _mode.pointsPerHint - _score;
   bool get canUndo =>
       _mode.allowsUndo && _undosRemaining > 0 && _undoStack.isNotEmpty;
 
@@ -132,8 +150,30 @@ class GameEngine {
   List<Move> get legalMoves =>
       MoveFinder.legalMoves(_board, specials: _mode.allowsSpecials);
 
+  /// Peeks at a legal move without spending anything. This is the solver's
+  /// entry point — [useHint] is the player's.
   Move? hint() =>
       MoveFinder.firstLegalMove(_board, specials: _mode.allowsSpecials);
+
+  /// Spends a hint. Returns null — and costs nothing — when the player has
+  /// none left or the board has nothing to show.
+  Move? useHint() {
+    if (_hintsRemaining <= 0) return null;
+    final move = hint();
+    if (move == null) return null;
+    _hintsRemaining--;
+    return move;
+  }
+
+  /// One hint per [GameMode.pointsPerHint], caught up in a loop because a big
+  /// cascade can cross several milestones at once.
+  void _awardHints() {
+    final earned = _score ~/ _mode.pointsPerHint;
+    if (earned <= _hintsEarned) return;
+    _hintsJustEarned = earned - _hintsEarned;
+    _hintsRemaining += _hintsJustEarned;
+    _hintsEarned = earned;
+  }
 
   ModeContext get _context => ModeContext(
     board: _board,
@@ -145,6 +185,7 @@ class GameEngine {
   );
 
   MoveResult applyMove(Pos a, Pos b) {
+    _hintsJustEarned = 0;
     if (isOver) return MoveResult.rejected(MoveRejection.gameOver);
     if (!a.isAdjacentTo(b)) {
       return MoveResult.rejected(MoveRejection.notAdjacent);
@@ -195,6 +236,7 @@ class GameEngine {
       rng: _rng,
       tiles: _tiles,
       origins: {a, b},
+      kindCount: _mode.activeKindCount,
       primed: primed,
       primedKinds: primedKinds,
     );
@@ -214,6 +256,8 @@ class GameEngine {
     _board = step.board;
     _score += step.scoreDelta;
     events.addAll(step.events);
+
+    _awardHints();
 
     final evaluation = _mode.evaluate(_context);
     _applyEvaluation(evaluation);

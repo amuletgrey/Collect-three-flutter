@@ -44,7 +44,7 @@ void main() {
   group('a saved run', () {
     test('round-trips through JSON with tiles, powers and ids intact', () {
       final engine = GameEngine(
-        mode: const InfiniteHuntMode(
+        mode: InfiniteHuntMode(
           grid: GridConfig(rows: 5, cols: 5, kindCount: 5),
         ),
         seed: 99,
@@ -67,7 +67,7 @@ void main() {
 
     test('resumes into an engine that plays on identically', () {
       GameEngine fresh() => GameEngine(
-        mode: const InfiniteHuntMode(
+        mode: InfiniteHuntMode(
           grid: GridConfig(rows: 6, cols: 6, kindCount: 5),
         ),
         seed: 4242,
@@ -80,7 +80,7 @@ void main() {
       }
 
       final resumed = GameEngine.restore(
-        mode: const InfiniteHuntMode(
+        mode: InfiniteHuntMode(
           grid: GridConfig(rows: 6, cols: 6, kindCount: 5),
         ),
         snapshot: original.snapshot(),
@@ -103,7 +103,7 @@ void main() {
     });
 
     test('keeps a power that was on the board', () {
-      final mode = const InfiniteHuntMode(
+      final mode = InfiniteHuntMode(
         grid: GridConfig(rows: 5, cols: 5, kindCount: 5),
       );
       final engine = GameEngine(mode: mode, seed: 3);
@@ -160,7 +160,7 @@ void main() {
     test('a snapshot from a future format is rejected, not misread', () {
       final json = {
         ...GameEngine(
-          mode: const InfiniteHuntMode(),
+          mode: InfiniteHuntMode(),
           seed: 1,
         ).snapshot().toJson(),
         'version': RunSnapshot.currentVersion + 1,

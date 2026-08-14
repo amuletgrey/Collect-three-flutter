@@ -23,7 +23,7 @@ class ModeRegistry {
 
   /// Always returns a fresh instance: modes may carry per-run state.
   static GameMode create(String id) => switch (id) {
-    infiniteHuntId => const InfiniteHuntMode(),
+    infiniteHuntId => InfiniteHuntMode(),
     clearBoardId => const ClearBoardMode(),
     risingTideId => RisingTideMode(),
     relicDigId => RelicDigMode(),
