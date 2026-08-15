@@ -6,8 +6,8 @@ class GridConfig {
     required this.kindCount,
   }) : assert(rows >= 3 && cols >= 3, 'a board smaller than 3x3 cannot match'),
        assert(
-         kindCount >= 3 && kindCount <= 7,
-         'skins ship artwork for 3..7 kinds',
+         kindCount >= 3 && kindCount <= 9,
+         'skins ship artwork for 3..9 kinds',
        );
 
   final int rows;

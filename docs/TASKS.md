@@ -177,8 +177,9 @@ plays itself. Both knobs live on `GameMode`, so a mode opts into its own curve.
 | CT-130 | Hints are a budget: `startingHints`, `useHint()` spends, peeking stays free | solver and tests still call `hint()` for nothing | [x] |
 | CT-131 | Earn a hint per `pointsPerHint`; several at once on a big cascade | milestone never pays twice, survives resume | [x] |
 | CT-132 | Hint count on the button; spent to zero it goes inert | widget test taps past the budget | [x] |
-| CT-133 | Infinite Hunt widens its palette by one colour per `pointsPerKind`, capped at 7 | new kind reaches the board via refills; survives resume | [x] |
+| CT-133 | Infinite Hunt widens its palette by one colour per `pointsPerKind`, capped at 9 | new kind reaches the board via refills; survives resume | [x] |
 | CT-134 | Notice toast over the board for earned hints and rule changes | animation-driven, so `pumpAndSettle` settles it | [x] |
+| CT-137 | Two more colours per skin, unlocked at 24k and 36k | contract test passes at nine kinds; preview rendered | [x] |
 | CT-135 | Tune the two thresholds against real play | a long run tightens without feeling arbitrary | [ ] |
 | CT-136 | Show the countdown to the next hint somewhere in the HUD | `pointsToNextHint` is already on the engine | [ ] |
 
