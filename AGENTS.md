@@ -172,6 +172,14 @@ so existing modes stay unchanged.
   and reinstall both — debug on the Xiaomi, **release** on the S5 (debug builds do not present
   a frame there). A build made here is `versionCode=1` while a CI/release artifact may be
   higher, so the S5 needs `adb install -r -d` to accept it.
+- **Update the phones, do not replace them.** Both phones were carrying CI artifacts at
+  `versionCode=2001`, which refuses a local `versionCode=1` build outright:
+  `INSTALL_FAILED_VERSION_DOWNGRADE`, and `-d` does not help because the installed package is
+  not debuggable. Uninstalling to get around that throws away the user's saved runs and best
+  scores. Build above the installed number instead — `flutter build apk --release
+  --build-number 2002`, checked with `adb shell dumpsys package com.vibebyteforge.tessera |
+  grep versionCode` — and it lands as an ordinary update with the saves intact. One release
+  APK serves both phones; the S5 needs release anyway and the Xiaomi is happy with it.
 - **`flutter test integration_test -d <id>` rebuilds `app-debug.apk` for that device's ABI
   only.** After a run against the 32-bit S5, `build/app/outputs/flutter-apk/app-debug.apk`
   contains just `lib/armeabi-v7a/`, and installing it on the 64-bit phone gives a silent
