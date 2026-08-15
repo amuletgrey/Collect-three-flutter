@@ -101,11 +101,14 @@ This is what makes the engine testable and makes daily/shared challenges possibl
   rescue — that dead board *is* the ending. Final score is banked to the leaderboard.
 - **Tension:** because refills are random, a well-played board stays alive far longer than a
   greedy one. Clearing everything as fast as possible is *not* optimal play.
-- **Rising difficulty:** the palette starts at six colours and gains one every **12,000
-  points**, up to seven — the most any skin draws. The new colour arrives through refills
-  only; tiles already on the board are never recoloured, which would read as a bug. More
-  colours means fewer accidental lines and a board that dies sooner, and it is a difficulty
-  knob the player understands the instant they see it. The HUD announces each unlock.
+- **Rising difficulty:** the palette starts at six colours and gains one at **12,000, 24,000
+  and 36,000 points** — six, then seven, eight, nine. Nine is the ceiling: it is what the
+  skins draw, and about where a colour stops being tellable at a glance on a phone. The new
+  colour arrives through refills only; tiles already on the board are never recoloured, which
+  would read as a bug. More colours means fewer accidental lines and a board that dies sooner,
+  and it is a difficulty knob the player understands the instant they see it. The HUD
+  announces each unlock, and the last two colours of each skin exist only for this — most
+  players will never meet them.
 - **Feedback:** a subtle "moves available" pulse when the count of legal moves drops to 1–2.
 
 ### 3.2 Clear the Board — the thinking mode
@@ -179,7 +182,7 @@ The runtime never has to solve anything — it just loads a level that is known 
 | Lose | no moves | no moves / out of moves | stack overflows top | no moves |
 | Powers | yes | no | yes | yes |
 | Undo | no | yes (3) | no | no |
-| Palette | 6 → 7 with score | fixed per level | 6 | 6 |
+| Palette | 6 → 9 with score | fixed per level | 6 | 6 |
 | Session | 3–10 min | 1–4 min per level | 2–8 min | 3–8 min |
 
 ## 4. Skins

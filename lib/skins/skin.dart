@@ -17,6 +17,8 @@ enum TileShape {
   pear,
   heart,
   kite,
+  cabochon,
+  starCut,
   // Candy Shop
   lollipop,
   wrapped,
@@ -25,10 +27,23 @@ enum TileShape {
   peppermint,
   chocolate,
   liquorice,
+  candyCane,
+  citrusSlice,
 }
 
 /// Optional accessibility stamp, used by skins whose kinds share a silhouette.
-enum TileSymbol { none, dot, cross, triangle, star, square, ring, diamond }
+enum TileSymbol {
+  none,
+  dot,
+  cross,
+  triangle,
+  star,
+  square,
+  ring,
+  diamond,
+  hexagon,
+  chevron,
+}
 
 /// Artwork for one tile kind.
 class TileArt {
@@ -154,7 +169,7 @@ class Skin {
   final String tagline;
   final SkinPalette palette;
 
-  /// Index matches the engine's tile kind. Must cover 7 kinds — the skin
+  /// Index matches the engine's tile kind. Must cover 9 kinds — the skin
   /// contract test enforces it, since a const constructor cannot.
   final List<TileArt> kinds;
 

@@ -31,6 +31,18 @@ class TileShapes {
         return _heart(r);
       case TileShape.kite:
         return _polygon(r, 4, rotation: -math.pi / 2);
+      case TileShape.cabochon:
+        // A polished dome: wider than tall, so it reads as an oval next to the
+        // round brilliant's octagon even at 24 px.
+        return Path()..addOval(
+          Rect.fromCenter(
+            center: r.center,
+            width: r.width,
+            height: r.height * 0.72,
+          ),
+        );
+      case TileShape.starCut:
+        return _star(r);
       case TileShape.lollipop:
         return Path()..addOval(r.deflate(r.width * 0.04));
       case TileShape.wrapped:
@@ -46,6 +58,10 @@ class TileShapes {
             Radius.circular(r.width * 0.14),
           ),
         );
+      case TileShape.candyCane:
+        return _candyCane(r);
+      case TileShape.citrusSlice:
+        return _citrusSlice(r);
     }
   }
 
@@ -243,7 +259,58 @@ class TileShapes {
         return _polygon(box, 4, rotation: -math.pi / 2);
       case TileSymbol.star:
         return _star(box);
+      case TileSymbol.hexagon:
+        return _polygon(box, 6);
+      case TileSymbol.chevron:
+        // Two stacked arrowheads: unmistakable next to the solid triangle.
+        final path = Path();
+        for (final offset in [-0.28, 0.16]) {
+          final y = box.center.dy + box.height * offset;
+          path
+            ..moveTo(box.left, y + box.height * 0.22)
+            ..lineTo(box.center.dx, y)
+            ..lineTo(box.right, y + box.height * 0.22)
+            ..lineTo(box.center.dx, y + box.height * 0.12)
+            ..close();
+        }
+        return path;
     }
+  }
+
+  /// A hooked stick — the only silhouette in the set that is not convex, which
+  /// is exactly what makes it findable in a full board.
+  static Path _candyCane(Rect r) {
+    final width = r.width * 0.26;
+    final hook = r.width * 0.3;
+    return Path()
+      ..moveTo(r.left + r.width * 0.34, r.bottom)
+      ..lineTo(r.left + r.width * 0.34, r.top + hook)
+      ..arcToPoint(
+        Offset(r.left + r.width * 0.34 + hook * 2, r.top + hook),
+        radius: Radius.circular(hook),
+      )
+      ..lineTo(r.left + r.width * 0.34 + hook * 2, r.top + hook * 1.5)
+      ..lineTo(r.left + r.width * 0.34 + hook * 2 - width, r.top + hook * 1.5)
+      ..arcToPoint(
+        Offset(r.left + r.width * 0.34 + width, r.top + hook),
+        radius: Radius.circular(hook - width),
+        clockwise: false,
+      )
+      ..lineTo(r.left + r.width * 0.34 + width, r.bottom)
+      ..close();
+  }
+
+  /// A half disc sitting on its cut edge, the way a slice of fruit lies.
+  static Path _citrusSlice(Rect r) {
+    final box = Rect.fromCenter(
+      center: r.center.translate(0, r.height * 0.12),
+      width: r.width,
+      height: r.height * 1.5,
+    );
+    return Path()
+      ..moveTo(box.left, box.center.dy)
+      ..arcTo(box, math.pi, math.pi, false)
+      ..close();
   }
 
   static Path _star(Rect r) {

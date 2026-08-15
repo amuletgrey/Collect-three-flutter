@@ -29,8 +29,10 @@ void main() {
   group('every registered skin', () {
     for (final skin in SkinRegistry.all) {
       group(skin.name, () {
-        test('covers seven kinds with unique names', () {
-          expect(skin.kinds.length, greaterThanOrEqualTo(7));
+        test('covers nine kinds with unique names', () {
+          // Nine, not six: Infinite Hunt widens its palette as a run goes on
+          // and will ask for every one of them.
+          expect(skin.kinds.length, greaterThanOrEqualTo(9));
           expect(
             skin.kinds.map((k) => k.name).toSet(),
             hasLength(skin.kinds.length),

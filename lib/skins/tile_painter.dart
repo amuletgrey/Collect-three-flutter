@@ -205,6 +205,10 @@ class TilePainter extends CustomPainter {
         _paintChocolateGrid(canvas, rect, opacity);
       case TileShape.wrapped:
         _paintStripes(canvas, rect, opacity);
+      case TileShape.candyCane:
+        _paintStripes(canvas, rect, opacity);
+      case TileShape.citrusSlice:
+        _paintSegments(canvas, rect, opacity);
       default:
         break;
     }
@@ -314,6 +318,37 @@ class TilePainter extends CustomPainter {
         paint,
       );
     }
+  }
+
+  /// Wedges radiating from the flat edge — the inside of a fruit slice.
+  void _paintSegments(Canvas canvas, Rect rect, double opacity) {
+    final origin = rect.center.translate(0, rect.height * 0.12);
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = rect.width * 0.05
+      ..color = art.secondary.withValues(alpha: 0.95 * opacity);
+    for (var i = 1; i < 5; i++) {
+      final angle = math.pi + i * math.pi / 5;
+      canvas.drawLine(
+        origin,
+        origin.translate(
+          math.cos(angle) * rect.width * 0.5,
+          math.sin(angle) * rect.height * 0.7,
+        ),
+        paint,
+      );
+    }
+    canvas.drawArc(
+      Rect.fromCenter(
+        center: origin,
+        width: rect.width * 0.82,
+        height: rect.height * 1.2,
+      ),
+      math.pi,
+      math.pi,
+      false,
+      paint..strokeWidth = rect.width * 0.045,
+    );
   }
 
   /// Markers for the powers. Deliberately drawn in white with a dark rim so

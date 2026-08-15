@@ -15,7 +15,7 @@ class Skin {
   final String name;            // shown in the gallery
   final String tagline;
   final SkinPalette palette;    // background, frame, HUD accents, particles
-  final List<TileArt> kinds;    // >= 7 entries; index == tile kind
+  final List<TileArt> kinds;    // >= 9 entries; index == tile kind
   Widget buildBackground(BuildContext context);
   CustomPainter painterFor(int kind, TileVisualState state);
 }
@@ -53,6 +53,8 @@ Glossy spheres in an arcade cabinet. Nostalgic, high contrast, reads instantly.
 | 4 | Purple | `#A45DFF` | `#D3B0FF` | square |
 | 5 | Teal | `#21E6C1` | `#9BF5E5` | ring |
 | 6 | Orange | `#FF8A3D` | `#FFC49B` | diamond |
+| 7 | Magenta | `#FF5FD0` | `#FFB3EA` | hexagon |
+| 8 | Silver | `#C7D0E0` | `#F2F6FF` | chevron |
 
 Because every tile is a sphere, this skin depends on the **symbols** setting for colour-blind
 players. The setting is off by default and lives in Settings; when on, the glyph is stamped in
@@ -80,13 +82,15 @@ readable without colour at all.
 | 4 | Amethyst | `#9450D8` | `#C99BFF` | pear |
 | 5 | Diamond | `#A8E6F0` | `#EAFBFF` | heart |
 | 6 | Onyx | `#4A4458` | `#8A80A0` | kite |
+| 7 | Peridot | `#9BCB3B` | `#D6F08A` | cabochon (oval dome) |
+| 8 | Rose Quartz | `#F58FB4` | `#FFD1E3` | star cut |
 
 ### 3. Candy Shop — `candy_shop`
 
 Bright, soft, friendly. Distinct silhouettes again; the most "casual" of the three.
 
 - Silhouettes: lollipop swirl, wrapped hard candy (twisted ends), jelly bean, gumdrop,
-  chocolate square, peppermint disc, liquorice wheel.
+  chocolate square, peppermint disc, liquorice wheel, candy cane, citrus slice.
 - Soft outer glow, thick white specular arc, subtle squash on landing.
 - Background: pastel diagonal stripes `#FFF3F8` / `#FFE9F2` with floating bokeh dots; frame is
   a mint-green rounded bar. Clearing sprays sugar-crystal particles.
@@ -101,6 +105,8 @@ Bright, soft, friendly. Distinct silhouettes again; the most "casual" of the thr
 | 4 | Grape | `#B15CFF` | `#FFFFFF` | peppermint disc |
 | 5 | Chocolate | `#8A5A3C` | `#C08A63` | chocolate square |
 | 6 | Liquorice | `#3D3A46` | `#F0EDF5` | liquorice wheel |
+| 7 | Mint | `#2FB98C` | `#EAFFF6` | candy cane |
+| 8 | Tangerine | `#FF6A2C` | `#FFD9B0` | citrus slice |
 
 ## Power markers
 
@@ -140,11 +146,16 @@ Every skin must pass these before it ships:
    so the setting only has to shorten board animations.
 
 `test/skins/skin_contract_test.dart` asserts 1–5 mechanically for every registered skin, and
-paints each kind in every visual state at two sizes to catch painter crashes.
+paints each kind in every visual state at two sizes to catch painter crashes. For a look at
+the result, `test/skins/palette_preview_test.dart` renders all nine kinds of all three skins on
+their own backdrops into docs/images/palette.png.
 
 ## Adding a new skin
 
-1. Add a `Skin` constant to `lib/skins/skin_registry.dart` with seven `TileArt` entries.
+1. Add a `Skin` constant to `lib/skins/skin_registry.dart` with nine `TileArt` entries. Nine,
+   not six: Infinite Hunt widens its palette as a run goes on (docs/CONCEPT.md §3.1) and will
+   ask for every one of them. Kinds 7 and 8 are the hardest to place — everything obvious is
+   taken by then — so check them against the contract rules before anything else.
 2. If it needs a silhouette that does not exist yet, add the `TileShape` value and its path to
    `lib/skins/tile_shapes.dart`, and a decoration branch in `TilePainter` if the family needs
    one. A new skin should not need a new painter class.

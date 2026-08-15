@@ -93,6 +93,25 @@ class SkinRegistry {
         shape: TileShape.sphere,
         symbol: TileSymbol.diamond,
       ),
+      // The last two only appear deep into an Infinite Hunt run — see
+      // docs/CONCEPT.md §3.1. They still have to survive a crowded board, so
+      // both sit well clear of the first seven in hue and in luminance.
+      TileArt(
+        name: 'Magenta',
+        primary: Color(0xFFFF5FD0),
+        secondary: Color(0xFFFFB3EA),
+        family: TileFamily.sphere,
+        shape: TileShape.sphere,
+        symbol: TileSymbol.hexagon,
+      ),
+      TileArt(
+        name: 'Silver',
+        primary: Color(0xFFC7D0E0),
+        secondary: Color(0xFFF2F6FF),
+        family: TileFamily.sphere,
+        shape: TileShape.sphere,
+        symbol: TileSymbol.chevron,
+      ),
     ],
   );
 
@@ -162,6 +181,20 @@ class SkinRegistry {
         secondary: Color(0xFF8A80A0),
         family: TileFamily.gem,
         shape: TileShape.kite,
+      ),
+      TileArt(
+        name: 'Peridot',
+        primary: Color(0xFF9BCB3B),
+        secondary: Color(0xFFD6F08A),
+        family: TileFamily.gem,
+        shape: TileShape.cabochon,
+      ),
+      TileArt(
+        name: 'Rose Quartz',
+        primary: Color(0xFFF58FB4),
+        secondary: Color(0xFFFFD1E3),
+        family: TileFamily.gem,
+        shape: TileShape.starCut,
       ),
     ],
   );
@@ -234,6 +267,22 @@ class SkinRegistry {
         secondary: Color(0xFFF0EDF5),
         family: TileFamily.candy,
         shape: TileShape.liquorice,
+      ),
+      TileArt(
+        name: 'Mint',
+        // Deeper than a sweet-shop mint for the same reason as Lemon: the pale
+        // counter swallows anything lighter.
+        primary: Color(0xFF2FB98C),
+        secondary: Color(0xFFEAFFF6),
+        family: TileFamily.candy,
+        shape: TileShape.candyCane,
+      ),
+      TileArt(
+        name: 'Tangerine',
+        primary: Color(0xFFFF6A2C),
+        secondary: Color(0xFFFFD9B0),
+        family: TileFamily.candy,
+        shape: TileShape.citrusSlice,
       ),
     ],
   );
