@@ -218,7 +218,12 @@ The runtime never has to solve anything — it just loads a level that is known 
   **power's blast destroys any rot it passes through** — both at 60 points a tile. Cargo still
   shrugs a blast off; rot does not, because a bomb that left the rot standing made powers feel
   useless in the one mode built around fighting it.
-- **End condition:** rot covering 40 % of the board ends the run, as does running out of moves.
+- **End condition:** **15 rot tiles** ends the run, as does running out of moves — and those
+  are closer to the same thing than they look. Rot is inert, so every tile it takes is a tile
+  that can never be matched, and a board well short of the cap can strangle itself. The cap
+  used to be 40 % of the board, twenty-five tiles, and half of all runs deadlocked long before
+  reaching it: the meter was counting towards something that rarely happened while the player
+  died of something else. It is a tile count now, because that is what the meter shows.
 - **The curve:** the interval between spreads tightens by one move every ten spreads to a floor
   of two, and a spread takes a second tile from the twelfth.
 - **What the numbers are for:** one tile at a time was no threat at all — a single clear beside

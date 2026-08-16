@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart' hide MatchFinder;
 import 'package:tessera/engine/engine.dart';
 
-GameEngine _engine({int seed = 5, int interval = 3, double limit = 0.4}) =>
+GameEngine _engine({int seed = 5, int interval = 3, int cap = 15}) =>
     GameEngine(
-      mode: CreepingRotMode(baseInterval: interval, rotLimit: limit),
+      mode: CreepingRotMode(baseInterval: interval, rotCapacity: cap),
       seed: seed,
     );
 
@@ -125,8 +125,8 @@ void main() {
   });
 
   test('too much rot ends the run', () {
-    // A limit of one tile: the first spread is fatal.
-    final engine = _engine(interval: 1, limit: 1 / 64);
+    // A cap of one tile: the first spread is fatal.
+    final engine = _engine(interval: 1, cap: 1);
 
     _play(engine, moves: 8);
 
@@ -201,15 +201,24 @@ void main() {
     );
   });
 
-  test('capacity is a fraction of the board, not a magic number', () {
-    expect(CreepingRotMode(rotLimit: 0.5).rotCapacity, 32);
-    expect(CreepingRotMode(rotLimit: 0.25).rotCapacity, 16);
+  test('the cap is a count of tiles, which is what the meter shows', () {
+    // It used to be a share of the board, which read fine in code and lied on
+    // screen: at forty per cent the meter counted to twenty-five while half of
+    // all runs strangled themselves around a dozen.
+    expect(CreepingRotMode().rotCapacity, 15);
+    expect(CreepingRotMode(rotCapacity: 9).rotCapacity, 9);
+  });
+
+  test('a run can end either way, and both are the rot doing it', () {
+    // Rot is inert, so a board short of the cap can still have no move left.
+    // Both endings are real; neither is a bug.
+    final engine = _engine(interval: 1);
+    _play(engine, moves: 400);
+
+    expect(engine.isOver, isTrue);
     expect(
-      CreepingRotMode(
-        grid: const GridConfig(rows: 4, cols: 4, kindCount: 3),
-        rotLimit: 0.5,
-      ).rotCapacity,
-      8,
+      engine.endReason,
+      anyOf(GameEndReason.overrun, GameEndReason.noMovesLeft),
     );
   });
 
