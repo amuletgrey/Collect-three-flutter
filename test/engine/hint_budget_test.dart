@@ -28,10 +28,10 @@ void main() {
   test('spending a hint costs one and returns a real move', () {
     final engine = _engine();
 
-    final move = engine.useHint();
+    final hint = engine.useHint();
 
-    expect(move, isNotNull);
-    expect(engine.board.at(move!.a), isNotNull);
+    expect(hint, isNotNull);
+    expect(engine.board.at(hint!.move.a), isNotNull);
     expect(engine.hintsRemaining, 2);
   });
 

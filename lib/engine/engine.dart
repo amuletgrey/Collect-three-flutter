@@ -15,6 +15,7 @@ export 'matching/match_line.dart';
 export 'matching/move_finder.dart';
 export 'models/board.dart';
 export 'models/grid_config.dart';
+export 'models/hint.dart';
 export 'models/move.dart';
 export 'models/position.dart';
 export 'models/tile.dart';

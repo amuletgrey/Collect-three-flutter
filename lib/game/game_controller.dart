@@ -63,6 +63,7 @@ class GameController extends ChangeNotifier {
 
   Pos? _selected;
   Move? _hint;
+  HintKind? _hintKind;
   Set<Pos> _rejected = const {};
   List<String> _notices = const [];
   int _noticeTick = 0;
@@ -95,6 +96,9 @@ class GameController extends ChangeNotifier {
 
   Pos? get selected => _selected;
   Move? get hint => _hint;
+
+  /// What the mode could promise about the hint on screen, if any.
+  HintKind? get hintKind => _hintKind;
 
   /// Hints in hand, and whether spending one is currently possible.
   int get hintsRemaining => _engine.hintsRemaining;
@@ -202,6 +206,7 @@ class GameController extends ChangeNotifier {
     if (_busy || isOver) return;
     _selected = null;
     _hint = null;
+    _hintKind = null;
 
     _tickClock();
     final result = _engine.applyMove(a, b);
@@ -216,9 +221,17 @@ class GameController extends ChangeNotifier {
 
   void showHint() {
     if (_busy || isOver) return;
-    final move = _engine.useHint();
-    if (move == null) return;
-    _hint = move;
+    final hint = _engine.useHint();
+    if (hint == null) return;
+    _hint = hint.move;
+    _hintKind = hint.kind;
+    // Worth interrupting for: in a mode with no refills, a level that can no
+    // longer be cleared is a level to undo or restart, and the player has no
+    // other way to find that out.
+    if (hint.isDeadEnd) {
+      _notices = const ['No winning path left — undo or restart'];
+      _noticeTick++;
+    }
     notifyListeners();
   }
 
@@ -241,6 +254,7 @@ class GameController extends ChangeNotifier {
     _engine.undo();
     _selected = null;
     _hint = null;
+    _hintKind = null;
     _syncFromBoard(_engine.board);
     notifyListeners();
   }
@@ -252,6 +266,7 @@ class GameController extends ChangeNotifier {
     );
     _selected = null;
     _hint = null;
+    _hintKind = null;
     _busy = false;
     _notices = const [];
     _carriedOver = Duration.zero;
