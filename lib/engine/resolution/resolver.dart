@@ -23,6 +23,7 @@ class ResolutionOutcome {
     this.clearedByKind = const {},
     this.clearedCells = const {},
     this.blastCleared = 0,
+    this.rotCleared = 0,
   });
 
   final Board board;
@@ -47,6 +48,9 @@ class ResolutionOutcome {
 
   /// Tiles taken by a power rather than by being part of a line.
   final int blastCleared;
+
+  /// Rot tiles a blast destroyed outright.
+  final int rotCleared;
 
   bool get clearedAnything => cascadeCount > 0;
 }
@@ -108,6 +112,7 @@ class Resolver {
     var created = 0;
     var fired = 0;
     var blasted = 0;
+    var rotted = 0;
     final byKind = <int, int>{};
     final clearedCells = <Pos>{};
     var step = startStep;
@@ -161,11 +166,16 @@ class Resolver {
       pendingPrimed = const {};
 
       // A power that fired must go with its blast, even if it was protected.
-      // Cargo and rot are never taken by a blast — each has its own way out.
+      //
+      // Cargo survives a blast — the only way to be rid of a relic is to walk
+      // it to the bottom, and a bomb that vaporised the thing you were escorting
+      // would be a bad joke. Rot does not: a power going off is exactly the
+      // moment a player expects the board to be cleaned up, and rot that shrugged
+      // off a bomb made powers feel useless in the one mode built around them.
       final clearCells = {...blast.cells}
         ..removeWhere(
           (cell) =>
-              (current.at(cell)?.isInert ?? false) ||
+              (current.at(cell)?.isRelic ?? false) ||
               (protected.contains(cell) && !blast.detonated.contains(cell)),
         );
 
@@ -175,7 +185,19 @@ class Resolver {
       }
       clearedCells.addAll(clearCells);
 
-      final blastOnly = clearCells.difference(matches.cells).length;
+      // Rot taken by a blast is reported separately and left out of the blast
+      // tally, so the mode that cares about it can pay for it once, at its own
+      // rate, rather than it being scored twice.
+      final rotCells = {
+        for (final cell in clearCells)
+          if (current.at(cell)?.isRot ?? false) cell,
+      };
+      rotted += rotCells.length;
+
+      final blastOnly = clearCells
+          .difference(matches.cells)
+          .difference(rotCells)
+          .length;
       blasted += blastOnly;
       final stepScore = ScoreRules.stepScore(
         matches.lines,
@@ -247,6 +269,7 @@ class Resolver {
       clearedByKind: Map.unmodifiable(byKind),
       clearedCells: Set.unmodifiable(clearedCells),
       blastCleared: blasted,
+      rotCleared: rotted,
     );
   }
 }

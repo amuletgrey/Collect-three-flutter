@@ -135,7 +135,11 @@ void main() {
   });
 
   test('the spread interval tightens as the run goes on', () {
-    final mode = CreepingRotMode(baseInterval: 4, spreadsPerSpeedUp: 5);
+    final mode = CreepingRotMode(
+      baseInterval: 4,
+      minInterval: 2,
+      spreadsPerSpeedUp: 5,
+    );
 
     expect(mode.intervalForSpreads(0), 4);
     expect(mode.intervalForSpreads(4), 4);
@@ -143,6 +147,58 @@ void main() {
     expect(mode.intervalForSpreads(10), 2);
     // And never below the floor, whatever happens.
     expect(mode.intervalForSpreads(500), 2);
+  });
+
+  test('and it starts taking more than one tile at a time', () {
+    final mode = CreepingRotMode(tilesPerSpeedUp: 8, maxSpreadSize: 3);
+
+    expect(mode.spreadSizeForSpreads(0), 1);
+    expect(mode.spreadSizeForSpreads(7), 1);
+    expect(mode.spreadSizeForSpreads(8), 2);
+    expect(mode.spreadSizeForSpreads(16), 3);
+    // Capped, or a late run would turn the board over in one move.
+    expect(mode.spreadSizeForSpreads(400), 3);
+  });
+
+  test('rot a blast destroyed is counted and paid for', () {
+    // The resolver takes it with the blast, so the mode never sees it on the
+    // board — it learns about it from the move summary. See
+    // test/engine/resolution/inert_roles_test.dart for the blast rule itself.
+    final mode = CreepingRotMode();
+    mode.restoreState({'burned': 0});
+
+    final outcome = mode.afterMove(
+      ModeContext(
+        board: Board.parse(_layout),
+        score: 0,
+        movesMade: 1,
+        rng: SeededRandom(1),
+        tiles: TileFactory(50),
+        resolver: const Resolver(
+          gravity: GravityRule.down,
+          refill: RefillRule.fromTop,
+          kindCount: 3,
+          allowsSpecials: true,
+        ),
+        move: const MoveSummary(
+          tilesCleared: 4,
+          clearedByKind: {},
+          clearedCells: {},
+          cascadeCount: 1,
+          longestLine: 3,
+          blastCleared: 4,
+          rotCleared: 2,
+          specialsFired: 1,
+          specialsCreated: 0,
+        ),
+      ),
+    );
+
+    expect(mode.burned, 2);
+    expect(
+      outcome.scoreDelta,
+      greaterThanOrEqualTo(2 * CreepingRotMode.burnBonus),
+    );
   });
 
   test('capacity is a fraction of the board, not a magic number', () {

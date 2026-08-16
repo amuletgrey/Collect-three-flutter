@@ -25,6 +25,7 @@ class MoveSummary {
     required this.cascadeCount,
     required this.longestLine,
     required this.blastCleared,
+    this.rotCleared = 0,
     required this.specialsFired,
     required this.specialsCreated,
   });
@@ -43,6 +44,9 @@ class MoveSummary {
 
   /// Tiles taken by a power rather than by a line.
   final int blastCleared;
+
+  /// Rot a blast destroyed on its way through.
+  final int rotCleared;
 
   final int specialsFired;
   final int specialsCreated;

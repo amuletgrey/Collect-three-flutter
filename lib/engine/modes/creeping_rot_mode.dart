@@ -13,10 +13,14 @@ import 'game_mode.dart';
 
 /// Rot spreads across the board; clearing beside it burns it back.
 ///
-/// Every few moves one tile turns to rot. Rot falls with gravity like cargo,
-/// but it never matches, cannot be swapped, and no blast touches it — so it
-/// silts up at the bottom and the playable board shrinks from underneath. The
-/// only way to be rid of it is to clear tiles *next to* it.
+/// Every few moves a tile turns to rot — two at a time once a run is going.
+/// Rot falls with gravity like cargo and never matches or swaps, so it silts up
+/// at the bottom and the playable board shrinks from underneath.
+///
+/// There are two ways to be rid of it: clear tiles *next to* it, or catch it in
+/// a power's blast. The second matters more than it sounds — a bomb that left
+/// the rot standing made powers feel useless in the one mode built around
+/// fighting it.
 ///
 /// This is Infinite Hunt with the stalling fixed. A careful player can keep an
 /// endless board alive forever by matching in a safe corner; here that corner
@@ -27,7 +31,9 @@ class CreepingRotMode extends GameMode {
     this.grid = const GridConfig(rows: 8, cols: 8, kindCount: 6),
     this.baseInterval = 3,
     this.minInterval = 2,
-    this.spreadsPerSpeedUp = 12,
+    this.spreadsPerSpeedUp = 10,
+    this.tilesPerSpeedUp = 12,
+    this.maxSpreadSize = 2,
 
     /// Fraction of the board that ends the run.
     this.rotLimit = 0.4,
@@ -42,6 +48,23 @@ class CreepingRotMode extends GameMode {
 
   /// The interval tightens by one every this many spreads.
   final int spreadsPerSpeedUp;
+
+  /// Another tile turns per spread every this many spreads.
+  ///
+  /// One tile at a time was never a threat: a single clear beside it burns rot
+  /// off faster than it arrives, so a good player held the board at one rot
+  /// tile indefinitely and the mode was Infinite Hunt with a counter on it.
+  ///
+  /// The numbers here were picked by measurement, not feel. Turning two tiles
+  /// from spread eight and three from sixteen ended every run at about thirty
+  /// moves whoever was playing — which is not difficulty, it is a countdown.
+  /// At twelve and a ceiling of two, a careless player drowns around fifty
+  /// moves and one who actually fights the rot lasts half as long again, which
+  /// is the gap worth having.
+  final int tilesPerSpeedUp;
+
+  /// The most tiles a single spread can take.
+  final int maxSpreadSize;
 
   final double rotLimit;
 
@@ -70,6 +93,12 @@ class CreepingRotMode extends GameMode {
   }
 
   int get currentInterval => intervalForSpreads(_spreads);
+
+  int get currentSpreadSize => spreadSizeForSpreads(_spreads);
+
+  /// Pure form of the other half of the curve.
+  int spreadSizeForSpreads(int spreads) =>
+      (1 + spreads ~/ tilesPerSpeedUp).clamp(1, maxSpreadSize);
 
   /// Pure form of the curve, so it can be reasoned about — and tested —
   /// without driving a whole run.
@@ -108,6 +137,14 @@ class CreepingRotMode extends GameMode {
     final events = <BoardEvent>[];
     var scoreDelta = 0;
 
+    // Rot a power destroyed is already off the board — the resolver took it
+    // with the blast — so it is only counted and paid for here.
+    final blasted = ctx.move?.rotCleared ?? 0;
+    if (blasted > 0) {
+      _burned += blasted;
+      scoreDelta += blasted * burnBonus;
+    }
+
     // Burning comes first: the rot you just cleared beside should not also get
     // a free spread out of the same move.
     final burn = _burnAdjacentTo(board, ctx.move?.clearedCells ?? const {});
@@ -137,12 +174,17 @@ class CreepingRotMode extends GameMode {
 
     _movesSinceSpread++;
     if (_movesSinceSpread >= currentInterval) {
-      final spread = _spread(board, ctx.rng);
-      if (spread != null) {
+      final turned = <UpgradedTile>[];
+      for (var i = 0; i < currentSpreadSize; i++) {
+        final spread = _spread(board, ctx.rng);
+        if (spread == null) break;
+        board = board.withTile(spread.at, spread.tile);
+        turned.add(spread);
+      }
+      if (turned.isNotEmpty) {
         _movesSinceSpread = 0;
         _spreads++;
-        board = board.withTile(spread.at, spread.tile);
-        events.add(TilesTransformed([spread]));
+        events.add(TilesTransformed(turned));
       }
     }
 

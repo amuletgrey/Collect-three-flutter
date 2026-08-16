@@ -184,6 +184,8 @@ mode that scores progress could not work out what the move had done by looking a
 | CT-148 | `OrderBot`: plays an order by cloning the engine, so a level can be judged | fills the shipped seed inside the budget | [x] |
 | CT-149 | `tool/generate_orders.dart` + a 30-level Work Order pack | pack tests pass on the shipped file | [x] |
 | CT-150 | `PackLevel` and a shared `LevelGrid`, so both packs pick the same way | one unlock rule, not two | [x] |
+| CT-151 | Blasts destroy rot; cargo still survives them | measured in the resolver, both roles | [x] |
+| CT-152 | Rot spreads faster and in bigger bites, tuned by measurement | careless play drowns, skilled play lasts | [x] |
 | CT-146 | Tune both modes against real play | budgets and rot rate feel right on a phone | [ ] |
 | CT-147 | Work Order level packs and stars | feeds M13 progression | [x] |
 
