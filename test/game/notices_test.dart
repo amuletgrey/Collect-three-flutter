@@ -25,6 +25,25 @@ class _OneHint extends ClearBoardMode {
   int get pointsPerHint => 30;
 }
 
+/// Seven legal moves and no winning line — the state a careless clear leaves
+/// behind in a mode with no refills.
+class _Wrecked extends ClearBoardMode {
+  const _Wrecked()
+    : super(
+        grid: const GridConfig(rows: 4, cols: 4, kindCount: 3),
+        layoutSketch: '0201\n2122\n0020\n2200',
+      );
+}
+
+/// Known solvable: two moves clear it.
+class _Winnable extends ClearBoardMode {
+  const _Winnable()
+    : super(
+        grid: const GridConfig(rows: 3, cols: 3, kindCount: 3),
+        layoutSketch: '110\n011\n101',
+      );
+}
+
 /// Adds a mode announcement on top, standing in for Infinite Hunt's new
 /// colour — the controller should relay whatever the mode says.
 class _Chatty extends _CheapHints {
@@ -103,6 +122,41 @@ void main() {
 
     expect(controller.hintsRemaining, 0);
     expect(controller.canHint, isFalse);
+  });
+
+  test('a hint on a level that cannot be won says so', () {
+    final controller = _controller(mode: const _Wrecked());
+    addTearDown(controller.dispose);
+
+    controller.showHint();
+
+    expect(controller.hint, isNotNull, reason: 'still shows a legal move');
+    expect(controller.hintKind, HintKind.deadEnd);
+    expect(controller.notices.single, contains('No winning path'));
+    expect(controller.noticeTick, 1);
+  });
+
+  test('a hint on a level that can still be won stays quiet', () {
+    final controller = _controller(mode: const _Winnable());
+    addTearDown(controller.dispose);
+
+    controller.showHint();
+
+    expect(controller.hintKind, HintKind.winningLine);
+    expect(controller.notices, isEmpty);
+    expect(controller.noticeTick, 0);
+  });
+
+  test('playing a move puts the hint away, kind and all', () async {
+    final controller = _controller();
+    addTearDown(controller.dispose);
+    controller.showHint();
+    expect(controller.hintKind, isNotNull);
+
+    await controller.swap(_opening.a, _opening.b);
+
+    expect(controller.hint, isNull);
+    expect(controller.hintKind, isNull);
   });
 
   test('restarting clears the notice board', () async {

@@ -179,6 +179,8 @@ plays itself. Both knobs live on `GameMode`, so a mode opts into its own curve.
 | CT-132 | Hint count on the button; spent to zero it goes inert | widget test taps past the budget | [x] |
 | CT-133 | Infinite Hunt widens its palette by one colour per `pointsPerKind`, capped at 9 | new kind reaches the board via refills; survives resume | [x] |
 | CT-134 | Notice toast over the board for earned hints and rule changes | animation-driven, so `pumpAndSettle` settles it | [x] |
+| CT-138 | Clear the Board hints follow a winning line, and say when there is none | following the hints clears a level end to end | [x] |
+| CT-139 | Every other mode hints at a random legal move, not the top-left one | repeated hints move around the board | [x] |
 | CT-137 | Two more colours per skin, unlocked at 24k and 36k | contract test passes at nine kinds; preview rendered | [x] |
 | CT-135 | Tune the two thresholds against real play | a long run tightens without feeling arbitrary | [ ] |
 | CT-136 | Show the countdown to the next hint somewhere in the HUD | `pointsToNextHint` is already on the engine | [ ] |

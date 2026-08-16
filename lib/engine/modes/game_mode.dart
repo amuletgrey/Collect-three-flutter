@@ -1,7 +1,9 @@
 import '../gravity/gravity_rule.dart';
 import '../gravity/refill_rule.dart';
+import '../matching/move_finder.dart';
 import '../models/board.dart';
 import '../models/grid_config.dart';
+import '../models/hint.dart';
 import '../models/tile.dart';
 import '../random/seeded_random.dart';
 import '../resolution/board_event.dart';
@@ -105,6 +107,20 @@ abstract class GameMode {
   /// Fixed for most modes. Infinite Hunt raises it as the run goes on, which is
   /// what stops a long run from getting easier as the player gets better.
   int get activeKindCount => grid.kindCount;
+
+  /// The move to show when the player spends a hint.
+  ///
+  /// The default is *a* legal move drawn at random, not the first one found:
+  /// scanning order means the first is nearly always in the top-left corner,
+  /// which makes repeated hints look broken and quietly teaches the player to
+  /// only look there. [rng] is the engine's hint generator, deliberately not
+  /// the one the board draws from — a hint must not change what falls next.
+  ///
+  /// A mode that can say more should override this. Clear the Board does.
+  Hint? hintFor(Board board, SeededRandom rng) {
+    final moves = MoveFinder.legalMoves(board, specials: allowsSpecials);
+    return moves.isEmpty ? null : Hint(rng.pick(moves));
+  }
 
   /// A short line for the HUD to flash after a move, when a rule has just
   /// changed under the player. Null for the great majority of moves.

@@ -254,9 +254,24 @@ was far too easy with one. So hints are spent, not pressed:
 - Both numbers live on `GameMode` (`startingHints`, `pointsPerHint`), so a mode that wants a
   different economy can just say so.
 
-Internally there are two entry points and the difference matters: `GameEngine.hint()` peeks and
-costs nothing — it is what the level solver and the test suite drive the game with —
-while `useHint()` is the player's and spends from the budget.
+**What a hint points at** is the mode's decision, through `GameMode.hintFor`:
+
+- Most modes offer **a legal move chosen at random**. Taking the first one the scan finds means
+  nearly always pointing at the top-left corner, which makes repeated hints look broken and
+  quietly teaches the player to only look there.
+- **Clear the Board runs the solver** and offers the first move of a line that actually empties
+  the board. This is the one mode where a hint could otherwise do harm: there are no refills, so
+  a clear that strands a lone tile is unrecoverable, and a hint that pointed at any old legal
+  move would march the player further into a dead level. If the level is *provably* dead the
+  hint says so — "No winning path left" — which is the player's cue to undo or restart. If the
+  search runs out of budget it claims nothing, because not knowing is not the same as knowing
+  it is lost.
+
+Internally there are two entry points and the difference matters: `GameEngine.hint()` peeks,
+costs nothing and stays a cheap scan — it is what the level solver and the test suite drive the
+game with — while `useHint()` is the player's, spends from the budget, and is the only path
+that asks the mode to think hard. Hints draw from a **separate generator** from the board, so
+asking for help never changes which tiles fall next.
 
 ### Picking a run back up
 

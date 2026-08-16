@@ -1,6 +1,7 @@
 import 'matching/match_finder.dart';
 import 'matching/move_finder.dart';
 import 'models/board.dart';
+import 'models/hint.dart';
 import 'models/move.dart';
 import 'models/position.dart';
 import 'models/tile.dart';
@@ -21,6 +22,7 @@ class GameEngine {
   GameEngine({required GameMode mode, required int seed})
     : _mode = mode,
       _rng = SeededRandom(seed),
+      _hintRng = SeededRandom(seed ^ _hintSalt),
       _tiles = TileFactory() {
     _buildResolver();
     _board = mode.createBoard(_rng, _tiles);
@@ -41,6 +43,7 @@ class GameEngine {
         state: snapshot.rngState,
         drawCount: snapshot.rngDraws,
       ),
+      _hintRng = SeededRandom(snapshot.seed ^ _hintSalt),
       _tiles = TileFactory(snapshot.nextTileId) {
     _buildResolver();
     _board = snapshot.toBoard();
@@ -90,8 +93,17 @@ class GameEngine {
     packId: packId,
   );
 
+  /// Keeps the hint generator clear of the board's. Any constant would do.
+  static const int _hintSalt = 0x48494e54; // 'HINT'
+
   final GameMode _mode;
   final SeededRandom _rng;
+
+  /// Hints draw from their own generator, never from [_rng]. Showing a hint
+  /// must not change which tiles fall next — a run has to replay identically
+  /// whether or not the player asked for help, and the level solver and the
+  /// test suite both call [hint] in loops.
+  final SeededRandom _hintRng;
   final TileFactory _tiles;
   late final Resolver _resolver;
 
@@ -150,19 +162,21 @@ class GameEngine {
   List<Move> get legalMoves =>
       MoveFinder.legalMoves(_board, specials: _mode.allowsSpecials);
 
-  /// Peeks at a legal move without spending anything. This is the solver's
-  /// entry point — [useHint] is the player's.
+  /// Peeks at a legal move without spending anything, and without asking the
+  /// mode to think hard about it. This is what the test suite and any
+  /// move-driving loop should use — [useHint] is the player's entry point.
   Move? hint() =>
       MoveFinder.firstLegalMove(_board, specials: _mode.allowsSpecials);
 
-  /// Spends a hint. Returns null — and costs nothing — when the player has
-  /// none left or the board has nothing to show.
-  Move? useHint() {
+  /// Spends a hint and asks the mode for its best suggestion — which in Clear
+  /// the Board means running the solver. Returns null, and costs nothing, when
+  /// the player has none left or the board has nothing to show.
+  Hint? useHint() {
     if (_hintsRemaining <= 0) return null;
-    final move = hint();
-    if (move == null) return null;
+    final hint = _mode.hintFor(_board, _hintRng);
+    if (hint == null) return null;
     _hintsRemaining--;
-    return move;
+    return hint;
   }
 
   /// One hint per [GameMode.pointsPerHint], caught up in a loop because a big
