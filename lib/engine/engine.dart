@@ -8,6 +8,8 @@ export 'game_engine.dart';
 export 'generation/board_generator.dart';
 export 'generation/clear_board_solver.dart';
 export 'generation/level.dart';
+export 'generation/order_bot.dart';
+export 'generation/order_level.dart';
 export 'gravity/gravity_rule.dart';
 export 'gravity/refill_rule.dart';
 export 'matching/match_finder.dart';

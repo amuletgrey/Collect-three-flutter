@@ -142,6 +142,22 @@ void main() {
     expect(_controller(tester).board.toSketch(), tilesBefore);
   });
 
+  testWidgets('the order picker opens a measured level', (tester) async {
+    await _launch(tester);
+    await tester.tap(await _revealMode(tester, 'Work Order'));
+    await tester.pumpAndSettle();
+
+    // Level 1 is unlocked, the rest of the pack is on screen behind it.
+    expect(find.text('Work Order'), findsOneWidget);
+    await tester.tap(find.text('1'));
+    await tester.pumpAndSettle();
+
+    final controller = _controller(tester);
+    final mode = controller.mode as WorkOrderMode;
+    expect(mode.order, hasLength(1), reason: 'level 1 teaches one line');
+    expect(controller.engine.movesRemaining, mode.moveBudget);
+  });
+
   testWidgets('the level picker opens a real, provably solvable level', (
     tester,
   ) async {
@@ -409,7 +425,8 @@ Future<Finder> _revealMode(WidgetTester tester, String mode) async {
 Future<void> _openMode(WidgetTester tester, String mode) async {
   await tester.tap(await _revealMode(tester, mode));
   await tester.pumpAndSettle();
-  if (mode == 'Clear the Board') {
+  // The two modes with shipped packs land on their picker first.
+  if (mode == 'Clear the Board' || mode == 'Work Order') {
     await tester.tap(find.text('1'));
     await tester.pumpAndSettle();
   }

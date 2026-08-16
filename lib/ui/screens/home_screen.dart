@@ -7,6 +7,7 @@ import '../../skins/skin_background.dart';
 import '../widgets/skin_switcher.dart';
 import 'game_screen.dart';
 import 'level_select_screen.dart';
+import 'order_select_screen.dart';
 import 'settings_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -116,14 +117,15 @@ class _ModeCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         child: InkWell(
           borderRadius: BorderRadius.circular(20),
-          // Clear the Board runs on hand-verified levels, so it opens the
-          // picker; the endless modes start straight away, resuming whatever
-          // was left unfinished.
+          // The two modes with shipped packs open their picker; the endless
+          // modes start straight away, resuming whatever was left unfinished.
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute<void>(
-              builder: (_) => mode.id == ModeRegistry.clearBoardId
-                  ? const LevelSelectScreen()
-                  : GameScreen(modeId: mode.id, resume: saved),
+              builder: (_) => switch (mode.id) {
+                ModeRegistry.clearBoardId => const LevelSelectScreen(),
+                ModeRegistry.workOrderId => const OrderSelectScreen(),
+                _ => GameScreen(modeId: mode.id, resume: saved),
+              },
             ),
           ),
           child: Padding(

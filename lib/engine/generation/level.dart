@@ -1,10 +1,23 @@
+/// What every shipped level has in common, whichever pack it came from.
+///
+/// The picker and the game screen work through this, so adding a pack for a
+/// new mode does not mean another branch in either of them.
+abstract interface class PackLevel {
+  int get number;
+
+  /// The move count the generator proved (or measured) as a good line.
+  int get parMoves;
+
+  int starsFor(int movesUsed);
+}
+
 /// One Clear the Board level, as shipped in a pack.
 ///
 /// The layout is stored in the same text form [Board.parse] reads, which keeps
 /// the pack files legible and diffable. [parMoves] is the length of the
 /// solution the generator actually found, so a player matching it has matched a
 /// proven line.
-class Level {
+class Level implements PackLevel {
   const Level({
     required this.number,
     required this.sketch,
@@ -21,9 +34,13 @@ class Level {
     seed: json['seed']! as int,
   );
 
+  @override
   final int number;
+
   final String sketch;
   final int kindCount;
+
+  @override
   final int parMoves;
 
   /// The generator seed that produced this layout — enough to rebuild it.
@@ -34,6 +51,7 @@ class Level {
   int get tileCount => sketch.replaceAll('\n', '').replaceAll('.', '').length;
 
   /// 3 stars for par, 2 for a little over, 1 for finishing at all.
+  @override
   int starsFor(int movesUsed) {
     if (movesUsed <= parMoves) return 3;
     if (movesUsed <= parMoves + 3) return 2;
