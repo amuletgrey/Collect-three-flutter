@@ -22,6 +22,11 @@ import 'game_mode.dart';
 /// the rot standing made powers feel useless in the one mode built around
 /// fighting it.
 ///
+/// A run ends either when the rot reaches [rotCapacity] or when the board has
+/// no legal move left, and those are closer to the same thing than they look:
+/// rot is inert, so every tile it takes is a tile that can never be matched,
+/// and a board well short of the cap can still strangle itself.
+///
 /// This is Infinite Hunt with the stalling fixed. A careful player can keep an
 /// endless board alive forever by matching in a safe corner; here that corner
 /// rots. It answers the question the endless mode never asks — not "can you
@@ -34,9 +39,7 @@ class CreepingRotMode extends GameMode {
     this.spreadsPerSpeedUp = 10,
     this.tilesPerSpeedUp = 12,
     this.maxSpreadSize = 2,
-
-    /// Fraction of the board that ends the run.
-    this.rotLimit = 0.4,
+    this.rotCapacity = 15,
   });
 
   @override
@@ -66,7 +69,17 @@ class CreepingRotMode extends GameMode {
   /// The most tiles a single spread can take.
   final int maxSpreadSize;
 
-  final double rotLimit;
+  /// Rot tiles on the board that end the run.
+  ///
+  /// A count rather than a share of the board, because that is what it is: the
+  /// meter reads "11 / 15" and the player should be able to trust it.
+  ///
+  /// Fifteen is where a board tends to strangle itself anyway. At the original
+  /// forty per cent — twenty-five tiles — half of all runs deadlocked long
+  /// before reaching it, because rot is inert and a board with a dozen dead
+  /// cells can strand itself with no legal move. The meter was counting towards
+  /// something that rarely happened while the player died of something else.
+  final int rotCapacity;
 
   int _movesSinceSpread = 0;
   int _spreads = 0;
@@ -80,9 +93,6 @@ class CreepingRotMode extends GameMode {
   /// Awarded per rot tile burned. Well above a plain tile: cleaning up is the
   /// point, and a player who ignores the rot should lose to one who does not.
   static const int burnBonus = 60;
-
-  /// How many rot tiles end the run.
-  int get rotCapacity => (grid.rows * grid.cols * rotLimit).floor();
 
   int rotOn(Board board) {
     var count = 0;
@@ -272,6 +282,8 @@ class CreepingRotMode extends GameMode {
     baseInterval: baseInterval,
     minInterval: minInterval,
     spreadsPerSpeedUp: spreadsPerSpeedUp,
-    rotLimit: rotLimit,
+    tilesPerSpeedUp: tilesPerSpeedUp,
+    maxSpreadSize: maxSpreadSize,
+    rotCapacity: rotCapacity,
   );
 }
