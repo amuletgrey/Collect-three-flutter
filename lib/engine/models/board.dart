@@ -81,7 +81,7 @@ class Board {
   /// treating one as part of a line.
   int? kindAt(Pos p) {
     final tile = at(p);
-    return tile == null || tile.isRelic ? null : tile.kind;
+    return tile == null || tile.isInert ? null : tile.kind;
   }
 
   bool isEmptyAt(Pos p) => at(p) == null;

@@ -112,6 +112,8 @@ class AudioService {
       case TilesCleared(:final cascadeStep, :final cause):
         if (cause == ClearCause.delivered) {
           _play('relic', volume: 0.9);
+        } else if (cause == ClearCause.burned) {
+          _play('burn', volume: 0.75);
         } else {
           final step = cascadeStep.clamp(1, _chimeSteps);
           _play('collect_$step', volume: 0.55);
@@ -126,10 +128,13 @@ class AudioService {
         _play('special_fire', volume: 0.8);
       case RowInserted():
         _play('tide', volume: 0.6);
+      case TilesTransformed():
+        _play('rot', volume: 0.7);
       case GameEnded(:final reason):
         final won =
             reason == GameEndReason.boardCleared ||
-            reason == GameEndReason.relicsDelivered;
+            reason == GameEndReason.relicsDelivered ||
+            reason == GameEndReason.orderFilled;
         _play(won ? 'level_win' : 'game_over', volume: 0.85);
       case TilesMoved():
       case TilesSpawned():

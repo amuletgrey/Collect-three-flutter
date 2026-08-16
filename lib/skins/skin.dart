@@ -109,6 +109,7 @@ class TileVisualState {
     this.hintPulse = 0,
     this.hintColour,
     this.isRelic = false,
+    this.isRot = false,
   });
 
   final bool selected;
@@ -140,6 +141,10 @@ class TileVisualState {
   /// Cargo in Relic Dig. Drawn as one artefact across every skin, because it is
   /// a game object rather than a colour the player matches.
   final bool isRelic;
+
+  /// Blighted. Drawn over the tile's own artwork rather than instead of it,
+  /// so the player can still see what it used to be — and what they lost.
+  final bool isRot;
 
   /// Swells briefly, then shrinks away — the collect "pop".
   double get scale {

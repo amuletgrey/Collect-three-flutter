@@ -20,6 +20,9 @@ class ResolutionOutcome {
     required this.longestLine,
     required this.specialsCreated,
     required this.specialsFired,
+    this.clearedByKind = const {},
+    this.clearedCells = const {},
+    this.blastCleared = 0,
   });
 
   final Board board;
@@ -32,6 +35,18 @@ class ResolutionOutcome {
   final int longestLine;
   final int specialsCreated;
   final int specialsFired;
+
+  /// How many tiles of each kind went out, across the whole cascade. Modes with
+  /// collection goals count from this rather than re-reading the board, which
+  /// has already refilled by the time they see it.
+  final Map<int, int> clearedByKind;
+
+  /// Every cell emptied during the move. Positions from different cascade
+  /// steps, so this describes where the action was, not a single board state.
+  final Set<Pos> clearedCells;
+
+  /// Tiles taken by a power rather than by being part of a line.
+  final int blastCleared;
 
   bool get clearedAnything => cascadeCount > 0;
 }
@@ -92,6 +107,9 @@ class Resolver {
     var longest = 0;
     var created = 0;
     var fired = 0;
+    var blasted = 0;
+    final byKind = <int, int>{};
+    final clearedCells = <Pos>{};
     var step = startStep;
     var pendingPrimed = primed;
     final kinds = kindCount ?? this.kindCount;
@@ -143,15 +161,22 @@ class Resolver {
       pendingPrimed = const {};
 
       // A power that fired must go with its blast, even if it was protected.
-      // Cargo is never taken by a blast — it only leaves by being delivered.
+      // Cargo and rot are never taken by a blast — each has its own way out.
       final clearCells = {...blast.cells}
         ..removeWhere(
           (cell) =>
-              (current.at(cell)?.isRelic ?? false) ||
+              (current.at(cell)?.isInert ?? false) ||
               (protected.contains(cell) && !blast.detonated.contains(cell)),
         );
 
+      for (final cell in clearCells) {
+        final kind = current.kindAt(cell);
+        if (kind != null) byKind[kind] = (byKind[kind] ?? 0) + 1;
+      }
+      clearedCells.addAll(clearCells);
+
       final blastOnly = clearCells.difference(matches.cells).length;
+      blasted += blastOnly;
       final stepScore = ScoreRules.stepScore(
         matches.lines,
         step,
@@ -219,6 +244,9 @@ class Resolver {
       longestLine: longest,
       specialsCreated: created,
       specialsFired: fired,
+      clearedByKind: Map.unmodifiable(byKind),
+      clearedCells: Set.unmodifiable(clearedCells),
+      blastCleared: blasted,
     );
   }
 }

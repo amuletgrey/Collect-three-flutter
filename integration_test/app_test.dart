@@ -25,10 +25,16 @@ void main() {
   testWidgets('home screen offers every mode and skin', (tester) async {
     await _launch(tester);
 
-    expect(find.text('Infinite Hunt'), findsOneWidget);
-    expect(find.text('Clear the Board'), findsOneWidget);
-    expect(find.text('Rising Tide'), findsOneWidget);
-    expect(find.text('Relic Dig'), findsOneWidget);
+    for (final mode in [
+      'Infinite Hunt',
+      'Clear the Board',
+      'Rising Tide',
+      'Relic Dig',
+      'Work Order',
+      'Creeping Rot',
+    ]) {
+      expect(await _revealMode(tester, mode), findsOneWidget);
+    }
 
     // The skins may be below the fold on a short screen.
     for (final skin in ['Classic Arcade', 'Treasure Hunt', 'Candy Shop']) {
@@ -70,6 +76,8 @@ void main() {
     'Clear the Board',
     'Rising Tide',
     'Relic Dig',
+    'Work Order',
+    'Creeping Rot',
   ]) {
     testWidgets('$mode plays real moves and scores', (tester) async {
       await _launch(tester);
@@ -92,6 +100,26 @@ void main() {
       );
     });
   }
+
+  testWidgets('Work Order shows the job it wants doing', (tester) async {
+    await _launch(tester);
+    await _openMode(tester, 'Work Order');
+
+    final controller = _controller(tester);
+    final goals = controller.mode.goals;
+    expect(goals, isNotEmpty);
+
+    // One chip per line, each with its own counter — or "done" once the line
+    // is filled, which an earlier test in this run may already have managed.
+    for (final goal in goals) {
+      expect(
+        find.text(goal.isDone ? 'done' : '${goal.progress}/${goal.target}'),
+        findsWidgets,
+        reason: 'no readout for "${goal.label}"',
+      );
+    }
+    expect(find.text('MOVES LEFT'), findsOneWidget);
+  });
 
   testWidgets('switching skin mid-game keeps the run going', (tester) async {
     await _launch(tester);
@@ -360,8 +388,26 @@ Future<void> _launch(WidgetTester tester) async {
 
 /// Clear the Board goes through the level picker; the endless modes start
 /// straight from the home card.
+/// Brings a mode card into view before touching it.
+///
+/// The home list is a lazy `ListView`, so a mode below the fold is not in the
+/// widget tree at all — and with six modes on the menu, two of them start there
+/// on a phone-shaped screen.
+Future<Finder> _revealMode(WidgetTester tester, String mode) async {
+  final card = find.text(mode);
+  if (card.evaluate().isEmpty) {
+    await tester.scrollUntilVisible(
+      card,
+      240,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+  }
+  return card;
+}
+
 Future<void> _openMode(WidgetTester tester, String mode) async {
-  await tester.tap(find.text(mode));
+  await tester.tap(await _revealMode(tester, mode));
   await tester.pumpAndSettle();
   if (mode == 'Clear the Board') {
     await tester.tap(find.text('1'));

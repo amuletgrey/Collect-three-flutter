@@ -52,8 +52,8 @@ class MoveFinder {
     final tileA = board.at(a);
     final tileB = board.at(b);
     if (tileA == null || tileB == null) return false;
-    // Cargo is dragged along by gravity, never by the player.
-    if (tileA.isRelic || tileB.isRelic) return false;
+    // Cargo and rot are dragged along by gravity, never by the player.
+    if (tileA.isInert || tileB.isInert) return false;
 
     if (specials && firesOnSwap(tileA, tileB)) return true;
     if (tileA.kind == tileB.kind) return false;

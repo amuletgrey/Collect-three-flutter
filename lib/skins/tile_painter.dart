@@ -50,6 +50,7 @@ class TilePainter extends CustomPainter {
       case TileFamily.candy:
         _paintCandy(canvas, rect, opacity);
     }
+    if (state.isRot) _paintRot(canvas, rect, opacity);
     if (state.power != TilePower.none) {
       _paintPower(canvas, rect, opacity);
     }
@@ -435,6 +436,45 @@ class TilePainter extends CustomPainter {
 
   /// A stone-set artefact: heavy, obviously not one of the colours, and the
   /// same on every skin so a player never has to re-learn what cargo looks like.
+  /// Drawn on top of whatever the tile already was: a grey-green crust with a
+  /// ragged edge, plus a wash that drains the colour out of the artwork
+  /// underneath. Keeping the original visible is deliberate — rot is a tile you
+  /// used to be able to play, and it should look like a loss, not like scenery.
+  void _paintRot(Canvas canvas, Rect rect, double opacity) {
+    const blight = Color(0xFF5A6152);
+    final body = rect.deflate(rect.width * 0.04);
+
+    canvas
+      ..drawOval(
+        body,
+        Paint()..color = blight.withValues(alpha: 0.82 * opacity),
+      )
+      ..drawOval(
+        body,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = rect.width * 0.06
+          ..color = _darken(blight, 0.4).withValues(alpha: 0.9 * opacity),
+      );
+
+    // Blotches, placed off a fixed pattern rather than a random one so a tile
+    // does not shimmer as it is repainted.
+    const spots = [
+      (-0.18, -0.16, 0.17),
+      (0.2, -0.06, 0.12),
+      (-0.04, 0.22, 0.14),
+      (0.16, 0.2, 0.08),
+    ];
+    for (final (dx, dy, size) in spots) {
+      canvas.drawCircle(
+        rect.center.translate(rect.width * dx, rect.height * dy),
+        rect.width * size,
+        Paint()
+          ..color = _darken(blight, 0.55).withValues(alpha: 0.75 * opacity),
+      );
+    }
+  }
+
   void _paintRelic(Canvas canvas, Rect rect, double opacity) {
     const stone = Color(0xFF6B6357);
     const gold = Color(0xFFE8C36B);
@@ -569,6 +609,7 @@ class TilePainter extends CustomPainter {
       old.state.lowSpec != state.lowSpec ||
       old.state.power != state.power ||
       old.state.isRelic != state.isRelic ||
+      old.state.isRot != state.isRot ||
       old.state.firing != state.firing ||
       old.state.clearProgress != state.clearProgress;
 }
