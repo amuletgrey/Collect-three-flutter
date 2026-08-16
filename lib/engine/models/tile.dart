@@ -33,6 +33,11 @@ enum TileRole {
   /// one is to walk it down to the bottom row. See Relic Dig in
   /// docs/CONCEPT.md §3.4.
   relic,
+
+  /// Blight. Like cargo it falls, never matches and cannot be swapped, but it
+  /// spreads on its own and the only way to be rid of it is to clear tiles
+  /// beside it. See Creeping Rot in docs/CONCEPT.md §3.6.
+  rot,
 }
 
 /// A single playing piece.
@@ -56,10 +61,21 @@ class Tile {
 
   bool get isSpecial => power.isSpecial;
   bool get isRelic => role == TileRole.relic;
+  bool get isRot => role == TileRole.rot;
+
+  /// True for anything the matcher must ignore: it has no colour as far as the
+  /// rules go, cannot be swapped, and no blast can take it.
+  bool get isInert => role != TileRole.normal;
 
   Tile withKind(int newKind) => Tile(id, newKind, power: power, role: role);
 
   Tile asRelic() => Tile(id, kind, role: TileRole.relic);
+
+  /// Keeps the id, so the board can show a tile turning rather than a tile
+  /// being replaced.
+  Tile asRot() => Tile(id, kind, role: TileRole.rot);
+
+  Tile asNormal() => Tile(id, kind, power: power);
 
   /// Keeps the id: earning a power upgrades a tile in place rather than
   /// swapping in a new one, so the UI can animate the change.

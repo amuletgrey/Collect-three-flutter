@@ -189,13 +189,16 @@ class GameEngine {
     _hintsEarned = earned;
   }
 
-  ModeContext get _context => ModeContext(
+  ModeContext get _context => _contextWith(null);
+
+  ModeContext _contextWith(MoveSummary? move) => ModeContext(
     board: _board,
     score: _score,
     movesMade: _movesMade,
     rng: _rng,
     tiles: _tiles,
     resolver: _resolver,
+    move: move,
   );
 
   MoveResult applyMove(Pos a, Pos b) {
@@ -266,14 +269,25 @@ class GameEngine {
     }
     _specialsFired += resolution.specialsFired;
 
-    final step = _mode.afterMove(_context);
+    final summary = MoveSummary(
+      tilesCleared: resolution.tilesCleared,
+      clearedByKind: resolution.clearedByKind,
+      clearedCells: resolution.clearedCells,
+      cascadeCount: resolution.cascadeCount,
+      longestLine: resolution.longestLine,
+      blastCleared: resolution.blastCleared,
+      specialsFired: resolution.specialsFired,
+      specialsCreated: resolution.specialsCreated,
+    );
+
+    final step = _mode.afterMove(_contextWith(summary));
     _board = step.board;
     _score += step.scoreDelta;
     events.addAll(step.events);
 
     _awardHints();
 
-    final evaluation = _mode.evaluate(_context);
+    final evaluation = _mode.evaluate(_contextWith(summary));
     _applyEvaluation(evaluation);
     if (evaluation.isOver && evaluation.reason != null) {
       events.add(GameEnded(evaluation.reason!));

@@ -342,6 +342,13 @@ class GameController extends ChangeNotifier {
           await _wait(_motion.blast);
           _firing = const {};
           notifyListeners();
+        case TilesTransformed(:final tiles):
+          for (final changed in tiles) {
+            _tiles[changed.tile.id] = changed.tile;
+          }
+          _stepDuration = _motion.clear;
+          notifyListeners();
+          await _wait(_motion.specialBirth);
         case SpecialsCreated(:final tiles):
           for (final upgraded in tiles) {
             _tiles[upgraded.tile.id] = upgraded.tile;

@@ -226,6 +226,8 @@ void main() {
   test('the mode is registered and reachable by id', () {
     expect(ModeRegistry.ids, contains(ModeRegistry.relicDigId));
     expect(ModeRegistry.create(ModeRegistry.relicDigId), isA<RelicDigMode>());
-    expect(ModeRegistry.createAll(), hasLength(4));
+    // Counted against the registry rather than a literal, so adding a mode is
+    // one edit rather than two.
+    expect(ModeRegistry.createAll(), hasLength(ModeRegistry.ids.length));
   });
 }

@@ -24,6 +24,7 @@ class TileView extends StatelessWidget {
     this.hintPulse = 0,
     this.hintColour,
     this.isRelic = false,
+    this.isRot = false,
     this.showSymbols = false,
     this.lowSpec = false,
     this.clearDuration = const Duration(milliseconds: 240),
@@ -41,6 +42,7 @@ class TileView extends StatelessWidget {
   final double hintPulse;
   final Color? hintColour;
   final bool isRelic;
+  final bool isRot;
   final bool showSymbols;
   final bool lowSpec;
   final Duration clearDuration;
@@ -83,6 +85,7 @@ class TileView extends StatelessWidget {
             hintPulse: hintPulse,
             hintColour: hintColour,
             isRelic: isRelic,
+            isRot: isRot,
           ),
         ),
       ),

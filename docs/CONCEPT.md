@@ -172,18 +172,57 @@ The runtime never has to solve anything — it just loads a level that is known 
   points and achieves nothing; the board just refills. The tiles worth taking are the ones
   under the cargo. The engine tests play the same seed both ways to keep that true.
 
-### 3.5 Mode comparison
+### 3.5 Work Order — fill the list
 
-| | Infinite Hunt | Clear the Board | Rising Tide | Relic Dig |
-| --- | --- | --- | --- | --- |
-| Refill | from top | none | from bottom (row push) | from top |
-| Gravity | down | down, then left | down | down |
-| Win | — | board empty | — | all relics delivered |
-| Lose | no moves | no moves / out of moves | stack overflows top | no moves |
-| Powers | yes | no | yes | yes |
-| Undo | no | yes (3) | no | no |
-| Palette | 6 → 9 with score | fixed per level | 6 | 6 |
-| Session | 3–10 min | 1–4 min per level | 2–8 min | 3–8 min |
+> Fill the order before the moves run out.
+
+- **Board:** 8x8, refilling from the top, exactly like Infinite Hunt. Powers on.
+- **Goal:** a short order — two colours to collect, plus one line asking for something that is
+  not volume (tiles taken with powers, or one chain of a given depth) — inside a **25-move
+  budget**.
+- **End condition:** every line ticked off wins; the budget running out loses.
+- **Scoring:** normal scoring, plus 400 per line filled and **120 per move still in hand**. A
+  fast order is worth far more than a slow one, which is the whole tension: the safe grinding
+  play fills the list and scores badly.
+- **Why it exists:** Infinite Hunt has no shape. This is the mode that can hand a player
+  something specific to do and judge how efficiently they did it, and it is the natural
+  container for the level packs and stars in M13.
+- The order is drawn from the run's seed, so a seed sets a job — which is most of a daily
+  challenge already.
+- No undo: progress would have to roll back with it, and a budget you can take back is not a
+  budget.
+
+### 3.6 Creeping Rot — hold the board
+
+> Match beside it, or lose the board to it.
+
+- **Board:** 8x8, refilling from the top. Powers on.
+- **The rot:** every few moves one tile turns. Rot falls with gravity like cargo but never
+  matches, cannot be swapped and survives every blast, so it silts up at the bottom and the
+  playable board shrinks from underneath. It grows from existing rot where it can, so it reads
+  as spreading rather than as tiles randomly dying.
+- **Fighting back:** clearing tiles **orthogonally next to** rot burns it off, at 60 points a
+  tile. That is the only way to remove it.
+- **End condition:** rot covering 40 % of the board ends the run, as does running out of moves.
+- **The curve:** the interval between spreads tightens by one move every twelve spreads, down
+  to a floor of two.
+- **Why it exists:** it fixes Infinite Hunt's one real weakness. A careful player can keep an
+  endless board alive indefinitely by matching in a quiet corner; here that corner rots. The
+  question stops being "can you find a move" and becomes "can you find a move *where it is
+  needed*".
+
+### 3.7 Mode comparison
+
+| | Infinite Hunt | Clear the Board | Rising Tide | Relic Dig | Work Order | Creeping Rot |
+| --- | --- | --- | --- | --- | --- | --- |
+| Refill | from top | none | from bottom (row push) | from top | from top | from top |
+| Gravity | down | down, then left | down | down | down | down |
+| Win | — | board empty | — | all relics delivered | order filled | — |
+| Lose | no moves | no moves / out of moves | stack overflows top | no moves | out of moves | rot at 40 % / no moves |
+| Powers | yes | no | yes | yes | yes | yes |
+| Undo | no | yes (3) | no | no | no | no |
+| Palette | 6 → 9 with score | fixed per level | 6 | 6 | 6 | 6 |
+| Session | 3–10 min | 1–4 min per level | 2–8 min | 3–8 min | 2–5 min | 4–10 min |
 
 ## 4. Skins
 

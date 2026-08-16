@@ -140,11 +140,12 @@ being handled separately — see that milestone before touching `android/`, `ios
 
 | Priority | Item | Notes |
 | --- | --- | --- |
-| 1 | **M14 — Difficulty and pacing** | Hints as a resource and a widening palette are in; the rest of the curve is open. |
-| 2 | M10 — Special tiles | 4- and 5-matches create powers. Only CT-107 (combo art) remains. |
-| 3 | M11 — Feel and feedback | **Done**, sound included. |
-| 4 | M12 — Relic Dig, a fourth mode | **Done.** Escort relic tiles to the bottom row. |
-| 5 | M13 — Content and progression | More level packs and tiers, daily seeded challenge, level-select polish. **Deliberately last** — not yet decided that we want to go there. |
+| 1 | **M15 — Two more modes** | Work Order and Creeping Rot are in; CT-146/147 remain. |
+| 2 | M14 — Difficulty and pacing | Hints as a resource and a widening palette are in; the rest of the curve is open. |
+| 3 | M10 — Special tiles | 4- and 5-matches create powers. Only CT-107 (combo art) remains. |
+| 4 | M11 — Feel and feedback | **Done**, sound included. |
+| 5 | M12 — Relic Dig, a fourth mode | **Done.** Escort relic tiles to the bottom row. |
+| 6 | M13 — Content and progression | More level packs and tiers, daily seeded challenge, level-select polish. **Deliberately last** — not yet decided that we want to go there. |
 
 ## M10 — Special tiles
 
@@ -163,6 +164,25 @@ and the solvability guarantee behind the pack.
 | CT-106 | Board feedback when a power fires | flash on detonation; widget + on-device tests | [x] |
 | CT-107 | Combo art: show what a paired power will do before it fires | player can tell a combo from a plain swap | [ ] |
 | CT-108 | Surface powers on the results screen | "3 powers fired" alongside best chain | [x] |
+
+---
+
+## M15 — Two more modes
+
+Both plug into seams that already existed. The one genuinely new piece of engine is
+`MoveSummary`: the board has settled and refilled by the time a mode is asked anything, so a
+mode that scores progress could not work out what the move had done by looking at it.
+
+| ID | Task | Acceptance | Status |
+| --- | --- | --- | --- |
+| CT-140 | `MoveSummary` on `ModeContext`; resolver reports cleared kinds and cells | modes count without re-reading the board | [x] |
+| CT-141 | `GameMode.goals` + a generic `GoalStrip`, so a mode's goals draw themselves | no mode type-checking in the HUD | [x] |
+| CT-142 | **Work Order**: seeded order, move budget, efficiency bonus | order and progress survive a resume | [x] |
+| CT-143 | `TileRole.rot` and the inert-role generalisation | rot never matches, swaps or blasts | [x] |
+| CT-144 | **Creeping Rot**: spread, burn-by-adjacency, overrun | a clear beside rot burns it; a clear away from it does not | [x] |
+| CT-145 | Rot artwork, `TilesTransformed` event, two new sounds | a tile turning is visible and audible | [x] |
+| CT-146 | Tune both modes against real play | budgets and rot rate feel right on a phone | [ ] |
+| CT-147 | Work Order level packs and stars | feeds M13 progression | [ ] |
 
 ---
 

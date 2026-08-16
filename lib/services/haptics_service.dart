@@ -26,6 +26,8 @@ class HapticsService {
         HapticFeedback.lightImpact();
       case RowInserted():
         HapticFeedback.mediumImpact();
+      case TilesTransformed():
+        HapticFeedback.mediumImpact();
       case GameEnded():
         HapticFeedback.heavyImpact();
       case SpecialsFired():

@@ -36,6 +36,10 @@ void main(List<String> args) {
   _write(outDir, 'special_fire', _burst(seconds: 0.32));
   _write(outDir, 'relic', _thud(freq: 98, seconds: 0.55, harmonics: 4));
   _write(outDir, 'tide', _sweep(from: 110, to: 320, seconds: 0.5));
+  // Something going wrong: a short fall, low and dull.
+  _write(outDir, 'rot', _sweep(from: 240, to: 90, seconds: 0.34));
+  // And something being cleaned up: a filtered hiss, brighter than a power.
+  _write(outDir, 'burn', _burst(seconds: 0.26));
   _write(
     outDir,
     'level_win',

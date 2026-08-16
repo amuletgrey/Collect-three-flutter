@@ -226,6 +226,7 @@ class _GameScreenState extends State<GameScreen> {
                           best: settings.bestFor(widget.modeId),
                           par: widget.level?.parMoves,
                         ),
+                        GoalStrip(controller: _controller, skin: skin),
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -267,6 +268,11 @@ class _GameScreenState extends State<GameScreen> {
                               skin: skin,
                               best: settings.bestFor(widget.modeId),
                               par: widget.level?.parMoves,
+                              axis: Axis.vertical,
+                            ),
+                            GoalStrip(
+                              controller: _controller,
+                              skin: skin,
                               axis: Axis.vertical,
                             ),
                           ],
@@ -979,6 +985,8 @@ class _ResultOverlay extends StatelessWidget {
     GameEndReason.outOfMoves => 'The move budget ran out.',
     GameEndReason.overflow => 'The stack was pushed past the top row.',
     GameEndReason.relicsDelivered => 'Every relic is out of the ground.',
+    GameEndReason.orderFilled => 'The whole order, filled.',
+    GameEndReason.overrun => 'The rot took the board.',
     null => '',
   };
 }

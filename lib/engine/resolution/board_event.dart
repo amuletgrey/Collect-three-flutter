@@ -18,6 +18,12 @@ enum GameEndReason {
 
   /// Relic Dig: every relic reached the bottom.
   relicsDelivered,
+
+  /// Work Order: every goal on the list met.
+  orderFilled,
+
+  /// Creeping Rot: the rot took more of the board than the mode allows.
+  overrun,
 }
 
 /// An ordered, replayable description of everything that happened.
@@ -58,7 +64,26 @@ class SwapReverted extends BoardEvent {
 
 /// Why a batch of tiles left the board. Everything looks the same to the
 /// animation, but they do not sound the same, and a delivery is not a match.
-enum ClearCause { matched, delivered }
+enum ClearCause {
+  matched,
+  delivered,
+
+  /// Creeping Rot: burned off by a clear next to it.
+  burned,
+}
+
+/// Tiles that changed what they are without moving — a tile turning to rot.
+///
+/// Ids are kept, so the board cross-fades the tile in place rather than
+/// swapping one out for another.
+class TilesTransformed extends BoardEvent {
+  const TilesTransformed(this.tiles);
+
+  final List<UpgradedTile> tiles;
+
+  @override
+  String toString() => 'TilesTransformed(${tiles.length})';
+}
 
 /// One resolution step's worth of collected tiles.
 class TilesCleared extends BoardEvent {
