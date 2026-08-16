@@ -18,6 +18,10 @@ class _FakePlayer implements SoundPlayer {
   List<String> get assets => [for (final p in played) p.asset];
 }
 
+/// Where the default voice lives. Spelled once so a rename does not mean
+/// rewriting every expectation in the file.
+const _set = 'audio/${AudioService.defaultSkinId}';
+
 TilesCleared _cleared({int step = 1, ClearCause cause = ClearCause.matched}) =>
     TilesCleared(
       cells: const [Pos(0, 0)],
@@ -29,6 +33,37 @@ TilesCleared _cleared({int step = 1, ClearCause cause = ClearCause.matched}) =>
     );
 
 void main() {
+  test('each skin plays out of its own set', () {
+    for (final skin in ['classic_arcade', 'treasure_hunt', 'candy_shop']) {
+      final player = _FakePlayer();
+      AudioService(player: player, skinId: skin).forEvent(_cleared());
+
+      expect(player.assets.single, 'audio/$skin/collect_1.wav');
+    }
+  });
+
+  test('the file names are the same whichever skin is on', () {
+    // The mapping from event to sound is the service's job; which set it comes
+    // out of is the skin's. Keeping the names fixed is what lets a new skin
+    // bring a voice without touching this file.
+    final arcade = _FakePlayer();
+    final candy = _FakePlayer();
+    for (final (player, skin) in [
+      (arcade, 'classic_arcade'),
+      (candy, 'candy_shop'),
+    ]) {
+      final service = AudioService(player: player, skinId: skin);
+      service
+        ..forEvent(_cleared(step: 3))
+        ..forEvent(const SwapPerformed(Pos(0, 0), Pos(0, 1)));
+    }
+
+    expect(
+      [for (final a in arcade.assets) a.split('/').last],
+      [for (final a in candy.assets) a.split('/').last],
+    );
+  });
+
   test('the chime climbs with the chain', () {
     final player = _FakePlayer();
     final service = AudioService(player: player);
@@ -39,10 +74,10 @@ void main() {
     }
 
     expect(player.assets, [
-      'audio/collect_1.wav',
-      'audio/collect_2.wav',
-      'audio/collect_3.wav',
-      'audio/collect_4.wav',
+      '$_set/collect_1.wav',
+      '$_set/collect_2.wav',
+      '$_set/collect_3.wav',
+      '$_set/collect_4.wav',
     ]);
   });
 
@@ -50,7 +85,7 @@ void main() {
     final player = _FakePlayer();
     AudioService(player: player).forEvent(_cleared(step: 12));
 
-    expect(player.assets.single, 'audio/collect_6.wav');
+    expect(player.assets.single, '$_set/collect_6.wav');
   });
 
   test('a delivered relic sounds different from a match', () {
@@ -59,16 +94,16 @@ void main() {
       ..forEvent(_cleared())
       ..forEvent(_cleared(cause: ClearCause.delivered));
 
-    expect(player.assets, ['audio/collect_1.wav', 'audio/relic.wav']);
+    expect(player.assets, ['$_set/collect_1.wav', '$_set/relic.wav']);
   });
 
   test('winning and losing are told apart', () {
     for (final entry in {
-      GameEndReason.boardCleared: 'audio/level_win.wav',
-      GameEndReason.relicsDelivered: 'audio/level_win.wav',
-      GameEndReason.noMovesLeft: 'audio/game_over.wav',
-      GameEndReason.overflow: 'audio/game_over.wav',
-      GameEndReason.outOfMoves: 'audio/game_over.wav',
+      GameEndReason.boardCleared: '$_set/level_win.wav',
+      GameEndReason.relicsDelivered: '$_set/level_win.wav',
+      GameEndReason.noMovesLeft: '$_set/game_over.wav',
+      GameEndReason.overflow: '$_set/game_over.wav',
+      GameEndReason.outOfMoves: '$_set/game_over.wav',
     }.entries) {
       final player = _FakePlayer();
       AudioService(player: player).forEvent(GameEnded(entry.key));
@@ -86,11 +121,11 @@ void main() {
       ..forEvent(const RowInserted(pushed: [], spawned: []));
 
     expect(player.assets, [
-      'audio/swap.wav',
-      'audio/reject.wav',
-      'audio/special_create.wav',
-      'audio/special_fire.wav',
-      'audio/tide.wav',
+      '$_set/swap.wav',
+      '$_set/reject.wav',
+      '$_set/special_create.wav',
+      '$_set/special_fire.wav',
+      '$_set/tide.wav',
     ]);
   });
 
@@ -124,12 +159,12 @@ void main() {
     }
     final byAsset = {for (final s in player.played) s.asset: s.volume};
     expect(
-      byAsset['audio/swap.wav'],
-      lessThan(byAsset['audio/collect_1.wav']!),
+      byAsset['$_set/swap.wav'],
+      lessThan(byAsset['$_set/collect_1.wav']!),
     );
     expect(
-      byAsset['audio/collect_1.wav'],
-      lessThan(byAsset['audio/special_fire.wav']!),
+      byAsset['$_set/collect_1.wav'],
+      lessThan(byAsset['$_set/special_fire.wav']!),
     );
   });
 

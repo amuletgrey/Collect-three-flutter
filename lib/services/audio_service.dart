@@ -97,13 +97,27 @@ class PooledSoundPlayer implements SoundPlayer {
 /// The cascade chime climbs a pentatonic scale with the chain, which is the
 /// whole reward for setting one up — the sound tells you how well it went
 /// before the score has finished counting.
+///
+/// Every skin brings its own set. A cabinet full of glossy balls, a torchlit
+/// cave and a sweet shop do not sound alike, and the chime is as much a part of
+/// a skin as its artwork — so the file names are fixed and the folder is the
+/// skin. See `tool/generate_sounds.dart` for what each voice is made of.
 class AudioService {
-  const AudioService({required this.player, this.enabled = true});
+  const AudioService({
+    required this.player,
+    this.enabled = true,
+    this.skinId = defaultSkinId,
+  });
 
   final SoundPlayer player;
   final bool enabled;
 
-  static const String _dir = 'audio';
+  /// Which set to play from — a skin id, and a folder under assets/audio/.
+  final String skinId;
+
+  /// Used when nobody said. Every shipped skin has a set of its own; this only
+  /// matters for a caller that has not been told which skin is on.
+  static const String defaultSkinId = 'classic_arcade';
   static const int _chimeSteps = 6;
 
   void forEvent(BoardEvent event) {
@@ -144,6 +158,6 @@ class AudioService {
 
   void _play(String name, {required double volume}) {
     // Deliberately not awaited: the board must not wait on the speaker.
-    player.play('$_dir/$name.wav', volume: volume);
+    player.play('audio/$skinId/$name.wav', volume: volume);
   }
 }
