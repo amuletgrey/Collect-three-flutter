@@ -276,6 +276,7 @@ class GameEngine {
       cascadeCount: resolution.cascadeCount,
       longestLine: resolution.longestLine,
       blastCleared: resolution.blastCleared,
+      rotCleared: resolution.rotCleared,
       specialsFired: resolution.specialsFired,
       specialsCreated: resolution.specialsCreated,
     );

@@ -210,15 +210,24 @@ The runtime never has to solve anything — it just loads a level that is known 
 > Match beside it, or lose the board to it.
 
 - **Board:** 8x8, refilling from the top. Powers on.
-- **The rot:** every few moves one tile turns. Rot falls with gravity like cargo but never
-  matches, cannot be swapped and survives every blast, so it silts up at the bottom and the
-  playable board shrinks from underneath. It grows from existing rot where it can, so it reads
-  as spreading rather than as tiles randomly dying.
-- **Fighting back:** clearing tiles **orthogonally next to** rot burns it off, at 60 points a
-  tile. That is the only way to remove it.
+- **The rot:** every three moves a tile turns, and **two at a time** once a run is going. Rot
+  falls with gravity like cargo but never matches and cannot be swapped, so it silts up at the
+  bottom and the playable board shrinks from underneath. It grows from existing rot where it
+  can, so it reads as spreading rather than as tiles randomly dying.
+- **Fighting back:** two ways. Clearing tiles **orthogonally next to** rot burns it off, and a
+  **power's blast destroys any rot it passes through** — both at 60 points a tile. Cargo still
+  shrugs a blast off; rot does not, because a bomb that left the rot standing made powers feel
+  useless in the one mode built around fighting it.
 - **End condition:** rot covering 40 % of the board ends the run, as does running out of moves.
-- **The curve:** the interval between spreads tightens by one move every twelve spreads, down
-  to a floor of two.
+- **The curve:** the interval between spreads tightens by one move every ten spreads to a floor
+  of two, and a spread takes a second tile from the twelfth.
+- **What the numbers are for:** one tile at a time was no threat at all — a single clear beside
+  it burns rot off faster than it arrives, so a good player held the board at one rot tile
+  indefinitely and this was Infinite Hunt with a counter on it. Overcorrecting was worse: two
+  tiles from the eighth spread and three from the sixteenth ended every run at about thirty
+  moves whoever was playing, which is a countdown rather than a difficulty. The shipped numbers
+  drown a careless player at around fifty moves and let one who fights the rot last half as
+  long again.
 - **Why it exists:** it fixes Infinite Hunt's one real weakness. A careful player can keep an
   endless board alive indefinitely by matching in a quiet corner; here that corner rots. The
   question stops being "can you find a move" and becomes "can you find a move *where it is
