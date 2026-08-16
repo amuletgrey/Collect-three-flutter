@@ -1,0 +1,678 @@
+{
+  "id": "orders_01",
+  "version": 1,
+  "levels": [
+    {
+      "number": 1,
+      "lines": [
+        {
+          "kind": 0,
+          "target": 14,
+          "tile": 3,
+          "progress": 0
+        }
+      ],
+      "budget": 9,
+      "kinds": 5,
+      "par": 5,
+      "seed": 5001,
+      "fill": 1.0
+    },
+    {
+      "number": 2,
+      "lines": [
+        {
+          "kind": 0,
+          "target": 14,
+          "tile": 0,
+          "progress": 0
+        }
+      ],
+      "budget": 6,
+      "kinds": 5,
+      "par": 3,
+      "seed": 6011,
+      "fill": 1.0
+    },
+    {
+      "number": 3,
+      "lines": [
+        {
+          "kind": 0,
+          "target": 15,
+          "tile": 0,
+          "progress": 0
+        }
+      ],
+      "budget": 7,
+      "kinds": 5,
+      "par": 4,
+      "seed": 7004,
+      "fill": 1.0
+    },
+    {
+      "number": 4,
+      "lines": [
+        {
+          "kind": 0,
+          "target": 15,
+          "tile": 1,
+          "progress": 0
+        }
+      ],
+      "budget": 7,
+      "kinds": 5,
+      "par": 4,
+      "seed": 8007,
+      "fill": 1.0
+    },
+    {
+      "number": 5,
+      "lines": [
+        {
+          "kind": 0,
+          "target": 15,
+          "tile": 3,
+          "progress": 0
+        }
+      ],
+      "budget": 7,
+      "kinds": 5,
+      "par": 4,
+      "seed": 9005,
+      "fill": 1.0
+    },
+    {
+      "number": 6,
+      "lines": [
+        {
+          "kind": 0,
+          "target": 16,
+          "tile": 3,
+          "progress": 0
+        },
+        {
+          "kind": 0,
+          "target": 16,
+          "tile": 2,
+          "progress": 0
+        }
+      ],
+      "budget": 10,
+      "kinds": 5,
+      "par": 6,
+      "seed": 10000,
+      "fill": 1.0
+    },
+    {
+      "number": 7,
+      "lines": [
+        {
+          "kind": 0,
+          "target": 16,
+          "tile": 2,
+          "progress": 0
+        },
+        {
+          "kind": 0,
+          "target": 16,
+          "tile": 4,
+          "progress": 0
+        }
+      ],
+      "budget": 10,
+      "kinds": 5,
+      "par": 6,
+      "seed": 11007,
+      "fill": 1.0
+    },
+    {
+      "number": 8,
+      "lines": [
+        {
+          "kind": 0,
+          "target": 16,
+          "tile": 1,
+          "progress": 0
+        },
+        {
+          "kind": 0,
+          "target": 16,
+          "tile": 3,
+          "progress": 0
+        }
+      ],
+      "budget": 8,
+      "kinds": 5,
+      "par": 5,
+      "seed": 12007,
+      "fill": 0.92
+    },
+    {
+      "number": 9,
+      "lines": [
+        {
+          "kind": 0,
+          "target": 17,
+          "tile": 0,
+          "progress": 0
+        },
+        {
+          "kind": 0,
+          "target": 17,
+          "tile": 4,
+          "progress": 0
+        }
+      ],
+      "budget": 8,
+      "kinds": 5,
+      "par": 5,
+      "seed": 13007,
+      "fill": 1.0
+    },
+    {
+      "number": 10,
+      "lines": [
+        {
+          "kind": 0,
+          "target": 17,
+          "tile": 2,
+          "progress": 0
+        },
+        {
+          "kind": 2,
+          "target": 3,
+          "tile": 0,
+          "progress": 0
+        }
+      ],
+      "budget": 13,
+      "kinds": 6,
+      "par": 9,
+      "seed": 14000,
+      "fill": 0.92
+    },
+    {
+      "number": 11,
+      "lines": [
+        {
+          "kind": 0,
+          "target": 18,
+          "tile": 4,
+          "progress": 0
+        },
+        {
+          "kind": 1,
+          "target": 11,
+          "tile": 0,
+          "progress": 0
+        }
+      ],
+      "budget": 17,
+      "kinds": 6,
+      "par": 12,
+      "seed": 15003,
+      "fill": 0.92
+    },
+    {
+      "number": 12,
+      "lines": [
+        {
+          "kind": 0,
+          "target": 18,
+          "tile": 2,
+          "progress": 0
+        },
+        {
+          "kind": 2,
+          "target": 3,
+          "tile": 0,
+          "progress": 0
+        }
+      ],
+      "budget": 16,
+      "kinds": 6,
+      "par": 11,
+      "seed": 16001,
+      "fill": 1.0
+    },
+    {
+      "number": 13,
+      "lines": [
+        {
+          "kind": 0,
+          "target": 18,
+          "tile": 0,
+          "progress": 0
+        },
+        {
+          "kind": 1,
+          "target": 11,
+          "tile": 0,
+          "progress": 0
+        }
+      ],
+      "budget": 16,
+      "kinds": 6,
+      "par": 11,
+      "seed": 17011,
+      "fill": 1.0
+    },
+    {
+      "number": 14,
+      "lines": [
+        {
+          "kind": 0,
+          "target": 19,
+          "tile": 3,
+          "progress": 0
+        },
+        {
+          "kind": 2,
+          "target": 3,
+          "tile": 0,
+          "progress": 0
+        }
+      ],
+      "budget": 12,
+      "kinds": 6,
+      "par": 8,
+      "seed": 18011,
+      "fill": 0.83
+    },
+    {
+      "number": 15,
+      "lines": [
+        {
+          "kind": 0,
+          "target": 19,
+          "tile": 1,
+          "progress": 0
+        },
+        {
+          "kind": 0,
+          "target": 19,
+          "tile": 3,
+          "progress": 0
+        },
+        {
+          "kind": 1,
+          "target": 12,
+          "tile": 0,
+          "progress": 0
+        }
+      ],
+      "budget": 21,
+      "kinds": 6,
+      "par": 15,
+      "seed": 19000,
+      "fill": 0.92
+    },
+    {
+      "number": 16,
+      "lines": [
+        {
+          "kind": 0,
+          "target": 20,
+          "tile": 2,
+          "progress": 0
+        },
+        {
+          "kind": 0,
+          "target": 20,
+          "tile": 4,
+          "progress": 0
+        },
+        {
+          "kind": 2,
+          "target": 3,
+          "tile": 0,
+          "progress": 0
+        }
+      ],
+      "budget": 19,
+      "kinds": 6,
+      "par": 14,
+      "seed": 20010,
+      "fill": 0.92
+    },
+    {
+      "number": 17,
+      "lines": [
+        {
+          "kind": 0,
+          "target": 20,
+          "tile": 0,
+          "progress": 0
+        },
+        {
+          "kind": 0,
+          "target": 20,
+          "tile": 3,
+          "progress": 0
+        },
+        {
+          "kind": 1,
+          "target": 12,
+          "tile": 0,
+          "progress": 0
+        }
+      ],
+      "budget": 19,
+      "kinds": 6,
+      "par": 14,
+      "seed": 21000,
+      "fill": 0.92
+    },
+    {
+      "number": 18,
+      "lines": [
+        {
+          "kind": 0,
+          "target": 20,
+          "tile": 0,
+          "progress": 0
+        },
+        {
+          "kind": 0,
+          "target": 20,
+          "tile": 4,
+          "progress": 0
+        },
+        {
+          "kind": 2,
+          "target": 3,
+          "tile": 0,
+          "progress": 0
+        }
+      ],
+      "budget": 19,
+      "kinds": 6,
+      "par": 14,
+      "seed": 22008,
+      "fill": 0.83
+    },
+    {
+      "number": 19,
+      "lines": [
+        {
+          "kind": 0,
+          "target": 21,
+          "tile": 3,
+          "progress": 0
+        },
+        {
+          "kind": 0,
+          "target": 21,
+          "tile": 0,
+          "progress": 0
+        },
+        {
+          "kind": 1,
+          "target": 13,
+          "tile": 0,
+          "progress": 0
+        }
+      ],
+      "budget": 21,
+      "kinds": 6,
+      "par": 16,
+      "seed": 23007,
+      "fill": 0.83
+    },
+    {
+      "number": 20,
+      "lines": [
+        {
+          "kind": 0,
+          "target": 21,
+          "tile": 4,
+          "progress": 0
+        },
+        {
+          "kind": 0,
+          "target": 21,
+          "tile": 3,
+          "progress": 0
+        },
+        {
+          "kind": 2,
+          "target": 3,
+          "tile": 0,
+          "progress": 0
+        }
+      ],
+      "budget": 21,
+      "kinds": 6,
+      "par": 13,
+      "seed": 24001,
+      "fill": 0.83
+    },
+    {
+      "number": 21,
+      "lines": [
+        {
+          "kind": 0,
+          "target": 22,
+          "tile": 2,
+          "progress": 0
+        },
+        {
+          "kind": 0,
+          "target": 22,
+          "tile": 3,
+          "progress": 0
+        },
+        {
+          "kind": 1,
+          "target": 14,
+          "tile": 0,
+          "progress": 0
+        }
+      ],
+      "budget": 24,
+      "kinds": 6,
+      "par": 16,
+      "seed": 25011,
+      "fill": 0.83
+    },
+    {
+      "number": 22,
+      "lines": [
+        {
+          "kind": 0,
+          "target": 16,
+          "tile": 5,
+          "progress": 0
+        },
+        {
+          "kind": 2,
+          "target": 3,
+          "tile": 0,
+          "progress": 0
+        }
+      ],
+      "budget": 19,
+      "kinds": 7,
+      "par": 15,
+      "seed": 26001,
+      "fill": 0.92
+    },
+    {
+      "number": 23,
+      "lines": [
+        {
+          "kind": 0,
+          "target": 12,
+          "tile": 6,
+          "progress": 0
+        },
+        {
+          "kind": 0,
+          "target": 12,
+          "tile": 4,
+          "progress": 0
+        }
+      ],
+      "budget": 14,
+      "kinds": 7,
+      "par": 11,
+      "seed": 27003,
+      "fill": 0.75
+    },
+    {
+      "number": 24,
+      "lines": [
+        {
+          "kind": 0,
+          "target": 17,
+          "tile": 2,
+          "progress": 0
+        },
+        {
+          "kind": 2,
+          "target": 3,
+          "tile": 0,
+          "progress": 0
+        }
+      ],
+      "budget": 23,
+      "kinds": 7,
+      "par": 19,
+      "seed": 28003,
+      "fill": 0.75
+    },
+    {
+      "number": 25,
+      "lines": [
+        {
+          "kind": 0,
+          "target": 17,
+          "tile": 0,
+          "progress": 0
+        },
+        {
+          "kind": 0,
+          "target": 17,
+          "tile": 6,
+          "progress": 0
+        }
+      ],
+      "budget": 25,
+      "kinds": 7,
+      "par": 18,
+      "seed": 29001,
+      "fill": 0.83
+    },
+    {
+      "number": 26,
+      "lines": [
+        {
+          "kind": 0,
+          "target": 18,
+          "tile": 4,
+          "progress": 0
+        },
+        {
+          "kind": 2,
+          "target": 3,
+          "tile": 0,
+          "progress": 0
+        }
+      ],
+      "budget": 27,
+      "kinds": 7,
+      "par": 16,
+      "seed": 30000,
+      "fill": 0.75
+    },
+    {
+      "number": 27,
+      "lines": [
+        {
+          "kind": 0,
+          "target": 18,
+          "tile": 5,
+          "progress": 0
+        },
+        {
+          "kind": 0,
+          "target": 18,
+          "tile": 4,
+          "progress": 0
+        }
+      ],
+      "budget": 24,
+      "kinds": 7,
+      "par": 21,
+      "seed": 31000,
+      "fill": 0.83
+    },
+    {
+      "number": 28,
+      "lines": [
+        {
+          "kind": 0,
+          "target": 18,
+          "tile": 3,
+          "progress": 0
+        },
+        {
+          "kind": 2,
+          "target": 3,
+          "tile": 0,
+          "progress": 0
+        }
+      ],
+      "budget": 28,
+      "kinds": 7,
+      "par": 21,
+      "seed": 32006,
+      "fill": 0.75
+    },
+    {
+      "number": 29,
+      "lines": [
+        {
+          "kind": 0,
+          "target": 16,
+          "tile": 3,
+          "progress": 0
+        },
+        {
+          "kind": 0,
+          "target": 16,
+          "tile": 6,
+          "progress": 0
+        }
+      ],
+      "budget": 25,
+      "kinds": 7,
+      "par": 21,
+      "seed": 33000,
+      "fill": 0.75
+    },
+    {
+      "number": 30,
+      "lines": [
+        {
+          "kind": 0,
+          "target": 19,
+          "tile": 6,
+          "progress": 0
+        },
+        {
+          "kind": 2,
+          "target": 3,
+          "tile": 0,
+          "progress": 0
+        }
+      ],
+      "budget": 25,
+      "kinds": 7,
+      "par": 19,
+      "seed": 34003,
+      "fill": 0.75
+    }
+  ]
+}

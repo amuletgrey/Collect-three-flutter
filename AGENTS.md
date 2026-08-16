@@ -167,6 +167,13 @@ so existing modes stay unchanged.
   but **not** a reboot, which needs the USB step again. MIUI still gates installs: an
   `INSTALL_FAILED_USER_RESTRICTED` on the first try often succeeds on a retry once the on-device
   prompt is cleared.
+- **A shipped level is one something actually beat.** Clear the Board layouts come from
+  `tool/generate_levels.dart`, which ships only what `ClearBoardSolver` solved. Work Order
+  levels come from `tool/generate_orders.dart`, which ships only orders `OrderBot` filled —
+  there is nothing to prove there, because the board refills at random, so the bot plays each
+  candidate across a cohort of seeds instead. Both write their evidence into the pack file
+  (`par`, and for orders `fill`). Regenerating a pack changes what players get, so do not do it
+  casually: the pack tests read the shipped file.
 - **Put the game back on the phones after a device test run.** `flutter test integration_test`
   uninstalls the app when it finishes, which leaves the user's phones empty. Rebuild a fat APK
   and reinstall both — debug on the Xiaomi, **release** on the S5 (debug builds do not present

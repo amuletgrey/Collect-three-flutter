@@ -8,6 +8,7 @@ import '../../game/game_controller.dart';
 import '../../services/audio_service.dart';
 import '../../services/haptics_service.dart';
 import '../../services/level_repository.dart';
+import '../../services/order_repository.dart';
 import '../../skins/skin.dart';
 import '../../skins/skin_background.dart';
 import '../widgets/board_view.dart';
@@ -29,9 +30,9 @@ class GameScreen extends StatefulWidget {
   /// A run to pick up instead of dealing a new board.
   final RunSnapshot? resume;
 
-  /// Set for Clear the Board: the shipped level being played, which decides
+  /// Set when a shipped level is being played, which decides
   /// the board, the par, and where stars are recorded.
-  final Level? level;
+  final PackLevel? level;
   final String? packId;
 
   @override
@@ -50,7 +51,7 @@ class _GameScreenState extends State<GameScreen> {
   bool _showResult = false;
 
   /// Resolved after a win so the overlay can offer to carry straight on.
-  Level? _nextLevel;
+  PackLevel? _nextLevel;
 
   bool _paused = false;
 
@@ -62,10 +63,7 @@ class _GameScreenState extends State<GameScreen> {
     super.initState();
     final resume = widget.resume;
     _controller = resume == null
-        ? GameController(
-            mode: _buildMode(),
-            seed: DateTime.now().millisecondsSinceEpoch,
-          )
+        ? GameController(mode: _buildMode(), seed: _seed())
         : GameController.resume(mode: _buildMode(), snapshot: resume);
     _controller.addListener(_onChanged);
   }
@@ -80,12 +78,18 @@ class _GameScreenState extends State<GameScreen> {
     super.dispose();
   }
 
-  GameMode _buildMode() {
-    final level = widget.level;
-    return level == null
-        ? ModeRegistry.create(widget.modeId)
-        : ClearBoardMode.fromLevel(level);
-  }
+  GameMode _buildMode() => switch (widget.level) {
+    final Level level => ClearBoardMode.fromLevel(level),
+    final OrderLevel level => WorkOrderMode.fromLevel(level),
+    _ => ModeRegistry.create(widget.modeId),
+  };
+
+  /// A shipped Work Order plays the exact board the generator measured, so par
+  /// means the same thing for everybody. Free play takes the clock.
+  int _seed() => switch (widget.level) {
+    final OrderLevel level => level.seed,
+    _ => DateTime.now().millisecondsSinceEpoch,
+  };
 
   void _onChanged() {
     // Hold the banner until the run is over *and* the board has stopped moving.
@@ -120,10 +124,15 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Future<void> _findNextLevel(int justCleared) async {
-    final pack = await LevelRepository().load();
-    final next = pack.levels
-        .where((level) => level.number == justCleared + 1)
-        .firstOrNull;
+    final next = switch (widget.level) {
+      Level() => (await LevelRepository().load()).levels
+          .where((level) => level.number == justCleared + 1)
+          .firstOrNull,
+      OrderLevel() => (await OrderRepository().load()).levels
+          .where((level) => level.number == justCleared + 1)
+          .firstOrNull,
+      _ => null,
+    };
     if (next != null && mounted) setState(() => _nextLevel = next);
   }
 
@@ -173,7 +182,7 @@ class _GameScreenState extends State<GameScreen> {
       _showResult = false;
       _scoreRecorded = false;
       _nextLevel = null;
-      _controller.restart(seed: DateTime.now().millisecondsSinceEpoch);
+      _controller.restart(seed: _seed());
     });
   }
 
@@ -881,7 +890,7 @@ class _ResultOverlay extends StatelessWidget {
 
   final GameController controller;
   final Skin skin;
-  final Level? level;
+  final PackLevel? level;
   final VoidCallback onRestart;
   final VoidCallback onExit;
 

@@ -185,10 +185,23 @@ The runtime never has to solve anything — it just loads a level that is known 
   fast order is worth far more than a slow one, which is the whole tension: the safe grinding
   play fills the list and scores badly.
 - **Why it exists:** Infinite Hunt has no shape. This is the mode that can hand a player
-  something specific to do and judge how efficiently they did it, and it is the natural
-  container for the level packs and stars in M13.
-- The order is drawn from the run's seed, so a seed sets a job — which is most of a daily
-  challenge already.
+  something specific to do and judge how efficiently they did it.
+- **It ships as a 30-level pack**, the same as Clear the Board, unlocking in order. Each level
+  names its own seed, so everybody plays the identical board and par means the same thing for
+  everyone. Free play — an order drawn from the run's seed — remains available in code and is
+  what the generator uses.
+- **The ramp runs in three bands**, each changing one thing: five colours and one line, then
+  six colours with up to three lines and the first line that is not about volume, then seven
+  colours with a *line taken away* and the tightest budgets. That last trade is not decorative:
+  a seventh colour slows every line down, and the generator showed that keeping three lines as
+  well produced pars in the mid-thirties — a grind rather than a challenge.
+- **How a level earns its place:** an order cannot be *proved* fillable the way a layout can,
+  because the board refills at random and there is no tree to search. So `OrderBot` plays each
+  candidate across a cohort of seeds — cloning the engine to try each move, so it plays the real
+  game rather than a second implementation of it — and only orders it finished are shipped. A
+  level's par is what the bot needed on the seed being shipped; its budget is that plus room to
+  be human, narrowing as the pack goes on; and `fill` records how much of the cohort the bot
+  managed inside that budget, as the evidence the level is not a knife edge.
 - No undo: progress would have to roll back with it, and a budget you can take back is not a
   budget.
 

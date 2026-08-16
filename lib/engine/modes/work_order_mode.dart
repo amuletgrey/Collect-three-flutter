@@ -1,4 +1,5 @@
 import '../generation/board_generator.dart';
+import '../generation/order_level.dart';
 import '../gravity/gravity_rule.dart';
 import '../gravity/refill_rule.dart';
 import '../matching/move_finder.dart';
@@ -92,7 +93,17 @@ class WorkOrderMode extends GameMode {
     this.grid = const GridConfig(rows: 8, cols: 8, kindCount: 6),
     this.moveBudget = 25,
     this.lineCount = 3,
+    this.fixedOrder,
   });
+
+  /// Builds the mode for a shipped level: the order and the budget are the
+  /// ones the generator measured, not ones drawn from this run's seed.
+  factory WorkOrderMode.fromLevel(OrderLevel level) => WorkOrderMode(
+    grid: GridConfig(rows: 8, cols: 8, kindCount: level.kindCount),
+    moveBudget: level.moveBudget,
+    lineCount: level.lines.length,
+    fixedOrder: level.freshLines(),
+  );
 
   @override
   final GridConfig grid;
@@ -100,8 +111,11 @@ class WorkOrderMode extends GameMode {
   /// Moves the player gets for the whole order.
   final int moveBudget;
 
-  /// How many lines the order runs to.
+  /// How many lines the order runs to. Ignored when [fixedOrder] is set.
   final int lineCount;
+
+  /// The shipped order, when this run is a level rather than free play.
+  final List<OrderLine>? fixedOrder;
 
   /// Paid per finished line, and per move still in hand at the end — a fast
   /// order is worth far more than a slow one, which is the whole tension.
@@ -148,7 +162,7 @@ class WorkOrderMode extends GameMode {
 
   @override
   Board createBoard(SeededRandom rng, TileFactory tiles) {
-    _order = _drawOrder(rng);
+    _order = fixedOrder ?? _drawOrder(rng);
     return BoardGenerator.generate(grid: grid, rng: rng, tiles: tiles);
   }
 
@@ -231,5 +245,16 @@ class WorkOrderMode extends GameMode {
     grid: grid,
     moveBudget: moveBudget,
     lineCount: lineCount,
+    // Copies, or a restart would carry the finished progress back in.
+    fixedOrder: fixedOrder == null
+        ? null
+        : [
+            for (final line in fixedOrder!)
+              OrderLine(
+                kind: line.kind,
+                target: line.target,
+                tileKind: line.tileKind,
+              ),
+          ],
   );
 }
