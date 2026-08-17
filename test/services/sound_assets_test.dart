@@ -86,7 +86,11 @@ void main() {
         final sample = header.getInt16(i, Endian.little).abs();
         if (sample > peak) peak = sample;
       }
-      expect(peak, inInclusiveRange(25000, 28000), reason: '$skin is off level');
+      expect(
+        peak,
+        inInclusiveRange(25000, 28000),
+        reason: '$skin is off level',
+      );
     }
   });
 }

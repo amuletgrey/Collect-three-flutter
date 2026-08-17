@@ -166,10 +166,7 @@ class GoalStrip extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               for (final chip in chips)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: chip,
-                ),
+                Padding(padding: const EdgeInsets.only(bottom: 8), child: chip),
             ],
           );
         }

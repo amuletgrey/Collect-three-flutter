@@ -21,8 +21,7 @@ void main() {
     await tester.pumpWidget(await _app(ModeRegistry.workOrderId));
     await tester.pumpAndSettle();
 
-    final mode =
-        ModeRegistry.create(ModeRegistry.workOrderId) as WorkOrderMode;
+    final mode = ModeRegistry.create(ModeRegistry.workOrderId) as WorkOrderMode;
     // Every order is the same shape, whatever the seed rolled.
     expect(find.textContaining('/'), findsWidgets);
     expect(find.text('MOVES LEFT'), findsOneWidget);

@@ -56,9 +56,11 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(
       find.byType(TileView),
-      findsNWidgets([
-        for (final skin in SkinRegistry.all) skin.kinds.length,
-      ].reduce((a, b) => a + b)),
+      findsNWidgets(
+        [
+          for (final skin in SkinRegistry.all) skin.kinds.length,
+        ].reduce((a, b) => a + b),
+      ),
     );
 
     if (_writeReference) {

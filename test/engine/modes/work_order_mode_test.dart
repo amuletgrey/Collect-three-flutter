@@ -33,7 +33,10 @@ void main() {
     final b = _mode(_engine(seed: 42)).order;
 
     expect(a.map((line) => line.kind).toList(), b.map((l) => l.kind).toList());
-    expect(a.map((line) => line.target).toList(), b.map((l) => l.target).toList());
+    expect(
+      a.map((line) => line.target).toList(),
+      b.map((l) => l.target).toList(),
+    );
     expect(
       a.map((line) => line.tileKind).toList(),
       b.map((line) => line.tileKind).toList(),
@@ -42,8 +45,7 @@ void main() {
 
   test('no two collection lines ask for the same colour', () {
     for (var seed = 0; seed < 40; seed++) {
-      final collects = _mode(_engine(seed: seed))
-          .order
+      final collects = _mode(_engine(seed: seed)).order
           .where((line) => line.kind == OrderKind.collect)
           .map((line) => line.tileKind)
           .toList();
@@ -181,10 +183,9 @@ void main() {
       snapshot: RunSnapshot.fromJson(engine.snapshot().toJson()),
     );
 
-    expect(
-      [for (final line in _mode(resumed).order) (line.kind, line.progress)],
-      before,
-    );
+    expect([
+      for (final line in _mode(resumed).order) (line.kind, line.progress),
+    ], before);
   });
 
   test('a fresh copy has no order until it deals a board', () {
@@ -196,9 +197,6 @@ void main() {
 
   test('the mode is registered and reachable by id', () {
     expect(ModeRegistry.ids, contains(ModeRegistry.workOrderId));
-    expect(
-      ModeRegistry.create(ModeRegistry.workOrderId),
-      isA<WorkOrderMode>(),
-    );
+    expect(ModeRegistry.create(ModeRegistry.workOrderId), isA<WorkOrderMode>());
   });
 }
