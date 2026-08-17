@@ -296,10 +296,23 @@ Matching has to feel good or nothing else matters.
 - **Reduced motion** setting collapses all of the above to quick cross-fades.
 - **Sound:** the collect chime climbs a pentatonic scale with the chain — first clear is the
   root, a x4 chain is four notes up. The sound tells you how good the chain was before the
-  score has finished counting. Powers get a noise burst, a delivered relic a low struck tone,
-  the tide a rising sweep. Everything is synthesised by `tool/generate_sounds.dart` rather than
+  score has finished counting. Powers get a burst, a delivered relic a low struck tone, the
+  tide a rising sweep. Everything is synthesised by `tool/generate_sounds.dart` rather than
   recorded: a match-3's sounds are tones and envelopes, so they belong in code where they can
   be retuned by editing numbers.
+- **Every skin has its own voice.** A cabinet full of glossy balls, a torchlit cave and a sweet
+  shop do not sound alike, and the chime is as much a part of a skin as its artwork. The event
+  names are fixed and the folder is the skin id, so a new skin brings a voice without anything
+  in `AudioService` changing:
+  - **Classic Arcade** — chiptune. Square waves, bit-crushed to eight-bit grit, with the
+    two-note coin blip and the descending fail glissando every cabinet had.
+  - **Treasure Hunt** — struck metal and stone in a big room. Inharmonic bell partials (the
+    ratios a cast bell actually rings at), long decays, and a feedback delay so everything
+    echoes off the walls. A delivered relic is a gong.
+  - **Candy Shop** — soft mallets and bubbles. Triangles and sines with gentle vibrato, a swap
+    that bends upwards like a bubble, fizz instead of a bang. Nothing with a hard edge.
+  - Every file is normalised to the same peak on the way out, so changing skin changes what the
+    game sounds like and not how loud it is.
 - **Hint:** a ring in the skin's own hint colour, breathing in and out. It is bracketed by a
   light and a dark edge, because no single colour contrasts with both the lightest and the
   darkest tile in a skin.

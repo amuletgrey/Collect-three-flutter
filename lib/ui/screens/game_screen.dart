@@ -193,7 +193,11 @@ class _GameScreenState extends State<GameScreen> {
     _controller
       ..motion = settings.motion
       ..haptics = HapticsService(enabled: settings.haptics)
-      ..audio = AudioService(player: _sound, enabled: settings.sound);
+      ..audio = AudioService(
+        player: _sound,
+        enabled: settings.sound,
+        skinId: skin.id,
+      );
 
     return SkinBackground(
       skin: skin,
