@@ -148,8 +148,7 @@ class GameEngine {
   int get hintsJustEarned => _hintsJustEarned;
 
   /// Points still to score before the next hint arrives.
-  int get pointsToNextHint =>
-      (_hintsEarned + 1) * _mode.pointsPerHint - _score;
+  int get pointsToNextHint => (_hintsEarned + 1) * _mode.pointsPerHint - _score;
   bool get canUndo =>
       _mode.allowsUndo && _undosRemaining > 0 && _undoStack.isNotEmpty;
 

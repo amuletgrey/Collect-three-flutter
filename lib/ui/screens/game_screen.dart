@@ -125,12 +125,14 @@ class _GameScreenState extends State<GameScreen> {
 
   Future<void> _findNextLevel(int justCleared) async {
     final next = switch (widget.level) {
-      Level() => (await LevelRepository().load()).levels
-          .where((level) => level.number == justCleared + 1)
-          .firstOrNull,
-      OrderLevel() => (await OrderRepository().load()).levels
-          .where((level) => level.number == justCleared + 1)
-          .firstOrNull,
+      Level() =>
+        (await LevelRepository().load()).levels
+            .where((level) => level.number == justCleared + 1)
+            .firstOrNull,
+      OrderLevel() =>
+        (await OrderRepository().load()).levels
+            .where((level) => level.number == justCleared + 1)
+            .firstOrNull,
       _ => null,
     };
     if (next != null && mounted) setState(() => _nextLevel = next);

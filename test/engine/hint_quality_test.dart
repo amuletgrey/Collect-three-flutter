@@ -106,7 +106,8 @@ void main() {
       expect(
         seen.length,
         greaterThan(1),
-        reason: 'a hint that never moves teaches the player to stare at one '
+        reason:
+            'a hint that never moves teaches the player to stare at one '
             'corner',
       );
     });

@@ -32,10 +32,7 @@ class OrderRun {
 class OrderBot {
   const OrderBot();
 
-  OrderRun play({
-    required WorkOrderMode Function() mode,
-    required int seed,
-  }) {
+  OrderRun play({required WorkOrderMode Function() mode, required int seed}) {
     final engine = GameEngine(mode: mode(), seed: seed);
     // The move budget ends the run, so this only guards against a rule bug
     // leaving the game unable to finish.
@@ -63,7 +60,10 @@ class OrderBot {
     var bestScore = -1;
 
     for (final move in engine.legalMoves) {
-      final clone = GameEngine.restore(mode: mode(), snapshot: engine.snapshot());
+      final clone = GameEngine.restore(
+        mode: mode(),
+        snapshot: engine.snapshot(),
+      );
       final result = clone.applyMove(move.a, move.b);
       if (!result.accepted) continue;
 

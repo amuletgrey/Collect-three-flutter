@@ -245,10 +245,19 @@ final _Voice _arcade = _Voice(
       // A blip that starts a fifth high and snaps down: the classic pickup.
       out['collect_${step + 1}'] = _crush(
         _sequence([
-          (0.0, _tone(from: freq * 1.5, seconds: 0.03, wave: _square, gain: 0.4)),
+          (
+            0.0,
+            _tone(from: freq * 1.5, seconds: 0.03, wave: _square, gain: 0.4),
+          ),
           (
             0.03,
-            _tone(from: freq, seconds: 0.13, wave: _square, gain: 0.45, curve: 3),
+            _tone(
+              from: freq,
+              seconds: 0.13,
+              wave: _square,
+              gain: 0.45,
+              curve: 3,
+            ),
           ),
         ]),
       );
@@ -288,7 +297,13 @@ final _Voice _arcade = _Voice(
         (0.0, _tone(from: 987.77, seconds: 0.07, wave: _square, gain: 0.4)),
         (
           0.07,
-          _tone(from: 1318.51, seconds: 0.34, wave: _square, gain: 0.4, curve: 3),
+          _tone(
+            from: 1318.51,
+            seconds: 0.34,
+            wave: _square,
+            gain: 0.4,
+            curve: 3,
+          ),
         ),
       ]),
     );

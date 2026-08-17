@@ -64,9 +64,7 @@ void main() {
     // A cramped board runs out of moves quickly, which is the whole point of
     // the mode; a full-size one can survive for thousands of moves.
     final engine = GameEngine(
-      mode: InfiniteHuntMode(
-        grid: GridConfig(rows: 4, cols: 4, kindCount: 6),
-      ),
+      mode: InfiniteHuntMode(grid: GridConfig(rows: 4, cols: 4, kindCount: 6)),
       seed: 0,
     );
 

@@ -92,10 +92,7 @@ void main() {
 
   test('an old save without a time reads as zero, not as a crash', () {
     final json = {
-      ...GameEngine(
-        mode: InfiniteHuntMode(),
-        seed: 1,
-      ).snapshot().toJson(),
+      ...GameEngine(mode: InfiniteHuntMode(), seed: 1).snapshot().toJson(),
     }..remove('elapsed');
 
     expect(RunSnapshot.fromJson(json).elapsedSeconds, 0);

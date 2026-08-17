@@ -159,10 +159,7 @@ void main() {
 
     test('a snapshot from a future format is rejected, not misread', () {
       final json = {
-        ...GameEngine(
-          mode: InfiniteHuntMode(),
-          seed: 1,
-        ).snapshot().toJson(),
+        ...GameEngine(mode: InfiniteHuntMode(), seed: 1).snapshot().toJson(),
         'version': RunSnapshot.currentVersion + 1,
       };
 

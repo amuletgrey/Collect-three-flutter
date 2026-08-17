@@ -74,7 +74,11 @@ void main() {
     expect(controller.notices, hasLength(1));
     expect(controller.notices.single, matches(RegExp(r'^\+\d+ hints?$')));
     expect(controller.noticeTick, 1);
-    expect(controller.busy, isFalse, reason: 'raised after playback, not during');
+    expect(
+      controller.busy,
+      isFalse,
+      reason: 'raised after playback, not during',
+    );
   });
 
   test('one earned hint is not pluralised', () async {

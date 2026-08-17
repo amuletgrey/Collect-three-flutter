@@ -105,7 +105,10 @@ void main() {
       expect(copy.parMoves, level.parMoves);
       expect(copy.seed, level.seed);
       expect(
-        [for (final line in copy.lines) (line.kind, line.target, line.tileKind)],
+        [
+          for (final line in copy.lines)
+            (line.kind, line.target, line.tileKind),
+        ],
         [
           for (final line in level.lines)
             (line.kind, line.target, line.tileKind),
