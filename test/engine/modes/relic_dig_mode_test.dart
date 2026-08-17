@@ -37,7 +37,76 @@ int _playUntilDelivered(GameEngine engine, RelicDigMode mode, {int cap = 300}) {
   return moves;
 }
 
+/// Two relics stacked in column 0, with a match waiting on the bottom row
+/// underneath them. Clearing it drops the lower relic onto the delivery row and
+/// leaves the second one directly above.
+const _stacked = '1201\n2012\n0120\n0201\n0012';
+
+class _Stacked extends RelicDigMode {
+  _Stacked()
+    : super(
+        grid: const GridConfig(rows: 5, cols: 4, kindCount: 3),
+        relicCount: 2,
+      );
+
+  @override
+  Board createBoard(SeededRandom rng, TileFactory tiles) {
+    var board = Board.parse(_stacked, tiles: tiles);
+    for (final at in const [Pos(2, 0), Pos(3, 0)]) {
+      board = board.withTile(at, board.at(at)!.asRelic());
+    }
+    return board;
+  }
+}
+
 void main() {
+  group('a stack of cargo', () {
+    test('delivers every relic that reaches the floor, not just the first', () {
+      final mode = _Stacked();
+      final engine = GameEngine(mode: mode, seed: 1);
+      expect(_relicsOn(engine.board), hasLength(2));
+
+      // Clears the bottom row under the stack.
+      final result = engine.applyMove(const Pos(4, 2), const Pos(3, 2));
+
+      expect(result.accepted, isTrue);
+      expect(
+        mode.delivered,
+        2,
+        reason: 'the second relic landed on the floor in the same move',
+      );
+      expect(_relicsOn(engine.board), isEmpty);
+    });
+
+    test('and pays for both, in two announced deliveries', () {
+      final mode = _Stacked();
+      final engine = GameEngine(mode: mode, seed: 1);
+
+      final result = engine.applyMove(const Pos(4, 2), const Pos(3, 2));
+
+      final deliveries = result.events
+          .whereType<TilesCleared>()
+          .where((event) => event.cause == ClearCause.delivered)
+          .toList();
+      expect(deliveries, hasLength(2), reason: 'each arrival is its own event');
+      expect(
+        engine.score,
+        greaterThanOrEqualTo(2 * RelicDigMode.deliveryBonus),
+      );
+    });
+
+    test('the run is won as soon as the last one is out', () {
+      final mode = _Stacked();
+      final engine = GameEngine(mode: mode, seed: 1);
+
+      engine.applyMove(const Pos(4, 2), const Pos(3, 2));
+
+      expect(mode.remaining, 0);
+      expect(engine.status, GameStatus.won);
+      expect(engine.endReason, GameEndReason.relicsDelivered);
+    });
+  });
+
   group('the dig starts', () {
     test('with the relics buried near the top, in separate columns', () {
       final mode = _mode();
@@ -221,6 +290,14 @@ void main() {
       _relicsOn(engine.board),
       reason: 'cargo must survive the round trip',
     );
+  });
+
+  test('a finished dig invites another one', () {
+    // The results screen asks the mode what to call the go-again button, so a
+    // dig offers more digging rather than a "replay" of a run that has no
+    // levels to replay.
+    expect(RelicDigMode().replayLabel, 'Dig more');
+    expect(InfiniteHuntMode().replayLabel, 'Replay');
   });
 
   test('the mode is registered and reachable by id', () {

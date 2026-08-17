@@ -172,6 +172,11 @@ The runtime never has to solve anything — it just loads a level that is known 
   points and achieves nothing; the board just refills. The tiles worth taking are the ones
   under the cargo. The engine tests play the same seed both ways to keep that true.
 
+**Stacked cargo all lands together.** Taking the bottom relic off the delivery row drops the
+one above it straight onto that row, and it has arrived too — the mode keeps collecting until
+the row is clear rather than making the player spend another move on a relic already at the
+bottom.
+
 ### 3.5 Work Order — fill the list
 
 > Fill the order before the moves run out.

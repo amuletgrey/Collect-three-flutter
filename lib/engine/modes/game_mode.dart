@@ -201,6 +201,11 @@ abstract class GameMode {
   /// modes whose only goal is to keep going.
   List<ModeGoal> get goals => const [];
 
+  /// What the results screen calls the go-again button after a win. A mode
+  /// that can be finished and then simply played again says so in its own
+  /// words — "Replay" is right for a level, and wrong for a dig.
+  String get replayLabel => 'Replay';
+
   /// A short line for the HUD to flash after a move, when a rule has just
   /// changed under the player. Null for the great majority of moves.
   String? get announcement => null;
