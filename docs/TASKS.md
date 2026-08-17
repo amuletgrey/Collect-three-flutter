@@ -188,6 +188,8 @@ mode that scores progress could not work out what the move had done by looking a
 | CT-152 | Rot spreads faster and in bigger bites, tuned by measurement | careless play drowns, skilled play lasts | [x] |
 | CT-153 | Rot cap becomes a tile count of 15, so the meter tells the truth | both endings tested | [x] |
 | CT-154 | A sound set per skin: arcade chiptune, cave bells, sweet-shop mallets | every skin ships a full set; sets differ; levels match | [x] |
+| CT-155 | Relic Dig delivers every stacked relic in the same move | two stacked relics land together | [x] |
+| CT-156 | A finished dig offers "Dig more" as the primary action | mode names its own go-again button | [x] |
 | CT-146 | Tune both modes against real play | budgets and rot rate feel right on a phone | [ ] |
 | CT-147 | Work Order level packs and stars | feeds M13 progression | [x] |
 

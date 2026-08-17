@@ -960,10 +960,14 @@ class _ResultOverlay extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _ActionButton(
-                    icon: Icons.replay_rounded,
-                    label: won ? 'Replay' : 'Play again',
+                    icon: won ? Icons.play_arrow_rounded : Icons.replay_rounded,
+                    label: won ? controller.mode.replayLabel : 'Play again',
                     skin: skin,
                     onPressed: onRestart,
+                    // After a win this is the thing to do next, so it gets the
+                    // accent — unless there is a next level, which wants it
+                    // more. A run that was lost gets no encouragement.
+                    emphasised: won && onNextLevel == null,
                   ),
                   _ActionButton(
                     icon: Icons.grid_view_rounded,

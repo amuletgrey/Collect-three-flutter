@@ -55,6 +55,9 @@ class RelicDigMode extends GameMode {
   String get tagline => 'Dig the relics out. Matching is just the shovel.';
 
   @override
+  String get replayLabel => 'Dig more';
+
+  @override
   GravityRule get gravity => GravityRule.down;
 
   @override
@@ -81,40 +84,56 @@ class RelicDigMode extends GameMode {
 
   @override
   ModeStepOutcome afterMove(ModeContext ctx) {
-    final landed = [
-      for (var col = 0; col < ctx.board.cols; col++)
-        if (ctx.board.atRc(ctx.board.rows - 1, col)?.isRelic ?? false)
-          Pos(ctx.board.rows - 1, col),
-    ];
-    if (landed.isEmpty) return ModeStepOutcome(board: ctx.board);
+    var board = ctx.board;
+    final events = <BoardEvent>[];
+    var scoreDelta = 0;
 
-    _delivered += landed.length;
-    final bonus = landed.length * deliveryBonus;
+    // Relics stack. Taking the bottom one off drops the one above it straight
+    // onto the delivery row, and that one has arrived too — it should not have
+    // to wait for another move to be noticed. Keep collecting until the row is
+    // clear of cargo.
+    //
+    // The guard is the relic count: every pass through here delivers at least
+    // one, so it cannot run longer than there is cargo.
+    for (var guard = 0; guard <= relicCount; guard++) {
+      final landed = [
+        for (var col = 0; col < board.cols; col++)
+          if (board.atRc(board.rows - 1, col)?.isRelic ?? false)
+            Pos(board.rows - 1, col),
+      ];
+      if (landed.isEmpty) break;
 
-    final events = <BoardEvent>[
-      TilesCleared(
-        cells: landed,
-        lines: const [],
-        scoreDelta: bonus,
-        cascadeStep: 1,
-        multiplier: 1,
-        cause: ClearCause.delivered,
-      ),
-    ];
+      _delivered += landed.length;
+      final bonus = landed.length * deliveryBonus;
+      scoreDelta += bonus;
+      events.add(
+        TilesCleared(
+          cells: landed,
+          lines: const [],
+          scoreDelta: bonus,
+          cascadeStep: 1,
+          multiplier: 1,
+          cause: ClearCause.delivered,
+        ),
+      );
 
-    // Take the cargo off the board, then let everything fall into the gap and
-    // resolve whatever that starts.
-    final settled = ctx.resolver.resolve(
-      board: ctx.board.withCleared(landed),
-      rng: ctx.rng,
-      tiles: ctx.tiles,
-      settleFirst: true,
-    );
+      // Take the cargo off the board, then let everything fall into the gap and
+      // resolve whatever that starts.
+      final settled = ctx.resolver.resolve(
+        board: board.withCleared(landed),
+        rng: ctx.rng,
+        tiles: ctx.tiles,
+        settleFirst: true,
+      );
+      board = settled.board;
+      events.addAll(settled.events);
+      scoreDelta += settled.score;
+    }
 
     return ModeStepOutcome(
-      board: settled.board,
-      events: [...events, ...settled.events],
-      scoreDelta: bonus + settled.score,
+      board: board,
+      events: events,
+      scoreDelta: scoreDelta,
     );
   }
 
