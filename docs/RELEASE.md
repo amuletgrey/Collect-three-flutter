@@ -10,18 +10,25 @@ Identity, artifacts, signing and CI. Read this before touching `android/`, `ios/
 | App name | **Tessera** |
 | Tagline | Line up the mosaic. |
 | Dart package | `tessera` |
-| Android `applicationId` / namespace | `com.vibebyteforge.tessera` |
-| iOS bundle id | `com.vibebyteforge.tessera` |
+| Android `applicationId` / namespace | `com.maxcavrilon.tessera` |
+| iOS bundle id | `com.maxcavrilon.tessera` |
 | Windows binary | `tessera.exe` |
-| Publisher | VibeByteForge |
-| Play developer id | `4878428078632637194` |
-| Account owner | byteforge1248@gmail.com |
+| Publisher | Max Cavrilon |
+| Play developer id | `6443798296026319607` |
 
 The Play developer page is
-`https://play.google.com/store/apps/dev?id=4878428078632637194`. There is no Play
+`https://play.google.com/store/apps/dev?id=6443798296026319607`. There is no Play
 *application* id yet — Play assigns nothing extra; the listing is keyed on
-`com.vibebyteforge.tessera`, which is fixed forever once the first upload lands.
+`com.maxcavrilon.tessera`, which is fixed forever once the first upload lands.
 **Get it right before the first upload.**
+
+The id changed once already, from `com.vibebyteforge.tessera` on 2026-08-18, before
+anything was ever uploaded to Play. That was the last moment it could be changed
+for free. Note what it costs on a device: an `applicationId` is the package
+identity, so a build under the new id installs *alongside* the old one rather than
+over it, with its own storage — every saved run and best score under the old id
+stays with the old app. On the test phones that means uninstalling the old package
+by hand once the new one is confirmed working.
 
 ## Artifacts
 
@@ -47,6 +54,24 @@ is no Apple account, no signing material and no macOS runner in the matrix. Addi
 it is a job in itself — see the M9 notes in `docs/TASKS.md`.
 
 ## Signing
+
+### Certificate fingerprints
+
+| Key | SHA-256 |
+| --- | --- |
+| App signing certificate | `C8:BD:81:CB:1D:BE:D2:7B:32:2D:60:9B:1E:18:FD:E7:43:BA:0B:63:78:E7:6E:43:E7:BE:8F:B0:FE:80:9C:00` |
+
+A fingerprint is a public value — it identifies a certificate without being one,
+so it belongs in the repository and the keystore behind it never does. It is what
+to check an artifact against (`apksigner verify --print-certs <apk>`) to know
+whether a build is really signed for this listing or is a debug build wearing the
+right version number.
+
+Nothing in the app needs it at runtime today. It becomes load-bearing the moment
+there are deep links (Digital Asset Links `assetlinks.json`), Google sign-in, or
+Play Integrity — all of which key off this exact string.
+
+### The keystore
 
 The keystore never enters the repository. `android/app/build.gradle.kts` looks for
 it in two places, in order:

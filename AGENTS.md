@@ -4,12 +4,12 @@ Instructions for AI agents (and humans) working in this repository.
 
 ## What this is
 
-`tessera` — a Flutter match-3 game shipped as **Tessera** by VibeByteForge. Swap adjacent
+`tessera` — a Flutter match-3 game shipped as **Tessera** by Max Cavrilon. Swap adjacent
 tiles, line up three or more, collect them. Three game modes, three procedurally-drawn skins,
 no backend.
 
 The Dart package, the Android `applicationId`, the iOS bundle id and the Windows binary are all
-`tessera` / `com.vibebyteforge.tessera`. Anything still saying `collect_three` is stale.
+`tessera` / `com.maxcavrilon.tessera`. Anything still saying `collect_three` is stale.
 
 Read before touching code:
 
@@ -184,7 +184,7 @@ so existing modes stay unchanged.
   `INSTALL_FAILED_VERSION_DOWNGRADE`, and `-d` does not help because the installed package is
   not debuggable. Uninstalling to get around that throws away the user's saved runs and best
   scores. Build above the installed number instead — `flutter build apk --release
-  --build-number 2002`, checked with `adb shell dumpsys package com.vibebyteforge.tessera |
+  --build-number 2002`, checked with `adb shell dumpsys package com.maxcavrilon.tessera |
   grep versionCode` — and it lands as an ordinary update with the saves intact. One release
   APK serves both phones; the S5 needs release anyway and the Xiaomi is happy with it.
 - **`flutter test integration_test -d <id>` rebuilds `app-debug.apk` for that device's ABI

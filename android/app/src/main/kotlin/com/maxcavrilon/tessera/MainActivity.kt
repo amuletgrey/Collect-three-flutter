@@ -1,4 +1,4 @@
-package com.vibebyteforge.tessera
+package com.maxcavrilon.tessera
 
 import io.flutter.embedding.android.FlutterActivity
 

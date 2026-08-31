@@ -27,7 +27,7 @@ val storeFilePath = signingValue("storeFile", "TESSERA_KEYSTORE_PATH")
 val hasReleaseSigning = storeFilePath != null && file(storeFilePath).exists()
 
 android {
-    namespace = "com.vibebyteforge.tessera"
+    namespace = "com.maxcavrilon.tessera"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -37,7 +37,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.vibebyteforge.tessera"
+        applicationId = "com.maxcavrilon.tessera"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
