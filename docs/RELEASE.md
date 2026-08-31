@@ -15,6 +15,7 @@ Identity, artifacts, signing and CI. Read this before touching `android/`, `ios/
 | Windows binary | `tessera.exe` |
 | Publisher | Max Cavrilon |
 | Play developer id | `6443798296026319607` |
+| Account owner | maxcavrilon@gmail.com |
 
 The Play developer page is
 `https://play.google.com/store/apps/dev?id=6443798296026319607`. There is no Play
