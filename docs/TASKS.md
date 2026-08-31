@@ -8,7 +8,7 @@ Status legend: `[ ]` todo · `[~]` in progress · `[x]` done
 Current state: **M0–M6 and M9 are done, M7 is in progress.** The game is playable in all three
 modes with all three skins, and Clear the Board now runs on a 30-level pack where every level
 was solved by the generator before shipping. It ships as **Tessera** under
-`com.vibebyteforge.tessera` with icons and CI-built artifacts for Android, web and Windows.
+`com.maxcavrilon.tessera` with icons and CI-built artifacts for Android, web and Windows.
 What remains in M7 is audio, particles, the invalid-swap shake, and a dedicated pause/settings
 screen.
 
